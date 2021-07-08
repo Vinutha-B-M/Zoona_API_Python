@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 # Create your views here.
 import json
-
+import datetime
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -20,12 +20,25 @@ class Customer_List(APIView):
         return Response(serializer1.data)
 
     def post(self, request):
-        serializer = CustomerInfoSerializer(data=request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data = request.data
+        company_name = data['company_name']
+        full_name = data['full_name']
+        email_id = data['email_id']
+        address = data['address']
+        phone_number = data['phone_number']
+        postal_code = data['postal_code']
+        selected_date = data['selected_date']
+        if CustomerInfo.objects.filter(email_id=email_id).exists():
+            return JsonResponse({'status': 'email_id is Exits'})
+        else:
+            if CustomerInfo.objects.filter(phone_number=phone_number).exists():
+                return JsonResponse({'status': 'Phone Number Exits'})
+            else:
+                create = CustomerInfo.objects.create(company_name=company_name, full_name=full_name, email_id=email_id,
+                                                    address=address,postal_code=postal_code, selected_date=selected_date,
+                                                    phone_number=phone_number)
+                serializer3 = CustomerInfoSerializer(create)
+                return Response(serializer3.data)
 
 
 class Vehicle_List(APIView):
@@ -47,10 +60,11 @@ class Vehicle_List(APIView):
         engine = data['engine']
         cylinder = data['cylinder']
         customer_id = data['customer_id']
+        Transmission = data['Transmission']
         customer_obj = CustomerInfo.objects.get(id=customer_id)
         create = VehicleInfo.objects.create(customer_id=customer_obj, year=year, brand=brand, brand_model=brand_model,
                                             odo_meter=odo_meter, lic_plate=lic_plate, gvwr=gvwr, vin=vin, engine=engine,
-                                            cylinder=cylinder)
+                                            cylinder=cylinder,Transmission=Transmission)
         serializer3 = VehicleInfoSerializer(create)
         return Response(serializer3.data)
 
@@ -74,3 +88,13 @@ class Test_List(APIView):
 
 def home(request):
     return JsonResponse("WELCOME",safe=False)
+
+
+class month_count(APIView):
+
+    def get(self, request):
+        today = datetime.datetime.now()
+        cust2 = CustomerInfo.objects.filter(created_date__year=today.year,created_date__month=today.month)
+        total_number = cust2.count()
+
+        return JsonResponse(total_number,safe=False)
