@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 # Create your views here.
-import json
+
 import datetime
+import requests
+import json
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -98,3 +100,13 @@ class month_count(APIView):
         total_number = cust2.count()
 
         return JsonResponse(total_number,safe=False)
+
+
+class vehicle_info(APIView):
+
+    def post(self, request):
+        data = request.data
+        vinField = data['vinField']
+        response = requests.get('https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/'+vinField+'?format=json')
+        json_response = response.json()
+        return JsonResponse(json_response, safe=False)
