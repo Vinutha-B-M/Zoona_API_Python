@@ -31,10 +31,12 @@ class Customer_List(APIView):
         postal_code = data['postal_code']
         selected_date = data['selected_date']
         if CustomerInfo.objects.filter(email_id=email_id).exists():
-            return JsonResponse({'status': 'email_id is Exits'})
+            myJson = {"status": "0", "message": "Email_id Exits"}
+            return JsonResponse(myJson)
         else:
             if CustomerInfo.objects.filter(phone_number=phone_number).exists():
-                return JsonResponse({'status': 'Phone Number Exits'})
+                myJson = {"status": "0", "message": "Phone Number Exits"}
+                return JsonResponse(myJson)
             else:
                 create = CustomerInfo.objects.create(company_name=company_name, full_name=full_name, email_id=email_id,
                                                     address=address,postal_code=postal_code, selected_date=selected_date,

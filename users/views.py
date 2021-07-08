@@ -19,7 +19,8 @@ class signup(APIView):
         username = data['username']
         password = data['password']
         if UserInfo.objects.filter(username=username).exists():
-            return JsonResponse({'status': 'UserName is Already Exits'})
+            myJson = {"status": "0", "message": "Username Exits"}
+            return JsonResponse(myJson)
         else:
             create = UserInfo.objects.create(full_name=full_name, username=username, password=password)
             serializer = UserInfoSerializer(create)
@@ -35,11 +36,14 @@ class login(APIView):
         if UserInfo.objects.filter(username=username).exists():
                 if UserInfo.objects.get(username=username).password == password:
                     request.session['user_id'] = UserInfo.objects.get(username=username).id
-                    return JsonResponse({'status': 'success'})
+                    myJson = {"status": "1", "message": "Success"}
+                    return JsonResponse(myJson)
                 else:
-                    return JsonResponse({'status': 'Password is not Correct'})
+                    myJson = {"status": "0", "message": "Password is not Correct"}
+                    return JsonResponse(myJson)
         else:
-            return JsonResponse({'status': 'UserName Doesnot Exits'})
+            myJson = {"status": "0", "message": "UserName Doesnot Exits"}
+            return JsonResponse(myJson)
 
 
 class forgot(APIView):
@@ -48,9 +52,11 @@ class forgot(APIView):
         data = request.data
         username = data['username']
         if UserInfo.objects.filter(username=username).exists():
-            return JsonResponse({'status': 'User Exits'})
+            myJson = {"status": "1", "message": "Success"}
+            return JsonResponse(myJson)
         else:
-            return JsonResponse({'status': 'UserName is Doesnot Exits'})
+            myJson = {"status": "0", "message": "UserName Doesnot Exits"}
+            return JsonResponse(myJson)
 
 
 class update(APIView):
@@ -61,9 +67,10 @@ class update(APIView):
         password = data['password']
         if UserInfo.objects.filter(username=username).exists():
             cust_obj = UserInfo.objects.filter(username=username).update(password=password)
-            return JsonResponse({'status': 'password Updated'})
+            myJson = {"status": "1", "message": "Success"}
         else:
-            return JsonResponse({'status': 'UserName is Doesnot Exits'})
+            myJson = {"status": "0", "message": "UserName Doesnot Exits"}
+            return JsonResponse(myJson)
 
 
 class user_info(APIView):
@@ -76,4 +83,5 @@ class user_info(APIView):
             serializer = UserInfoSerializer(user_obj)
             return Response(serializer.data)
         else:
-            return JsonResponse({'status': 'UserName is Doesnot Exits'})
+            myJson = {"status": "0", "message": "UserName Doesnot Exits"}
+            return JsonResponse(myJson)
