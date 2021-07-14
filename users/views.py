@@ -2,14 +2,15 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 # Create your views here.
 import json
-
+import random,string
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import UserInfoSerializer
 from .models import UserInfo
 from rest_framework import viewsets, status
-
+from django.conf import settings
+from django.core.mail import send_mail
 
 class signup(APIView):
 
@@ -66,6 +67,7 @@ class update(APIView):
         username = data['username']
         password = data['password']
         if UserInfo.objects.filter(username=username).exists():
+
             cust_obj = UserInfo.objects.filter(username=username).update(password=password)
             myJson = {"status": "1", "message": "Success"}
         else:

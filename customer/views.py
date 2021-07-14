@@ -18,8 +18,13 @@ class Customer_List(APIView):
 
     def get(self, request):
         cust1 = CustomerInfo.objects.all()
-        serializer1 = CustomerInfoSerializer(cust1, many=True)
-        return Response(serializer1.data)
+        today = datetime.datetime.now()
+        cust2 = CustomerInfo.objects.filter(created_date__year=today.year, created_date__month=today.month)
+        total_number = cust1.count()
+        new_number = cust2.count()
+        customer_count= {"total_count":total_number, "new_count":new_number}
+        # serializer1 = CustomerInfoSerializer(cust1, many=True)
+        return JsonResponse(customer_count,safe=False)
 
     def post(self, request):
         data = request.data
@@ -27,20 +32,19 @@ class Customer_List(APIView):
         full_name = data['full_name']
         email_id = data['email_id']
         address = data['address']
+        address_2 = data['address_2']
+        city = data['city']
+        state = data['state']
         phone_number = data['phone_number']
         postal_code = data['postal_code']
         selected_date = data['selected_date']
-        if CustomerInfo.objects.filter(email_id=email_id).exists():
-            myJson = {"status": "0", "message": "Email_id Exits"}
-            return JsonResponse(myJson)
-        else:
-            if CustomerInfo.objects.filter(phone_number=phone_number).exists():
+        if CustomerInfo.objects.filter(phone_number=phone_number).exists():
                 myJson = {"status": "0", "message": "Phone Number Exits"}
                 return JsonResponse(myJson)
-            else:
+        else:
                 create = CustomerInfo.objects.create(company_name=company_name, full_name=full_name, email_id=email_id,
                                                     address=address,postal_code=postal_code, selected_date=selected_date,
-                                                    phone_number=phone_number)
+                                                    phone_number=phone_number,address_2=address_2,city=city,state=state)
                 serializer3 = CustomerInfoSerializer(create)
                 return Response(serializer3.data)
 
