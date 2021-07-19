@@ -132,17 +132,20 @@ class add_user(APIView):
             username = data['username']
             company_name = user_obj.company_name
             allowed_chars = ''.join((string.ascii_letters, string.digits))
-            unique_id = ''.join(random.choice(allowed_chars) for _ in range(32))
-            user_obj=UserType.objects.create(username=username,is_admin=False,company_name=company_name,
-                                             password=unique_id,userinfo=user_obj)
-            email_subject = f'Your Sales Account  For {company_name}'
-            message = f"Your Username is<b> {username}</b> with Password :<b> {unique_id} </b>\n" \
-                      f"Don't share your details with others"
-            from_mail = settings.EMAIL_HOST_USER
-            to_list = [username]
-            send_mail(email_subject, message, from_mail, to_list, fail_silently=False)
-            myJson = {"status": "1", "message": "User Created"}
-            return JsonResponse(myJson)
+            unique_id = ''.join(random.choice(allowed_chars) for _ in range(12))
+            if UserType.objects.filter(username=username).exists():
+                myJson = {"status": "0", "message": "Username Exits"}
+                return JsonResponse(myJson)
+            else:
+                user_obj=UserType.objects.create(username=username,is_admin=False,password=unique_id,userinfo=user_obj)
+                email_subject = f'Your Sales Account  For {company_name}'
+                message = f"Your Username is {username} with Password : {unique_id} \n\n" \
+                          f"Don't share your details with others"
+                from_mail = settings.EMAIL_HOST_USER
+                to_list = [username]
+                send_mail(email_subject, message, from_mail, to_list, fail_silently=False)
+                myJson = {"status": "1", "message": "success"}
+                return JsonResponse(myJson)
         else:
             myJson = {"status": "0", "message": "Login expired"}
             return JsonResponse(myJson)
