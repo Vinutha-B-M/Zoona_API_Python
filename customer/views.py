@@ -11,50 +11,75 @@ from rest_framework.views import APIView
 
 from .serializers import CustomerInfoSerializer, VehicleInfoSerializer, TestDetailsSerializer
 from .models import CustomerInfo, VehicleInfo, TestDetails
+from users.models import UserInfo,UserType
 from rest_framework import viewsets, status
 
 
 class Customer_List(APIView):
-
-    def get(self, request):
-        cust1 = CustomerInfo.objects.all()
-        today = datetime.datetime.now()
-        cust2 = CustomerInfo.objects.filter(created_date__year=today.year, created_date__month=today.month)
-        total_number = cust1.count()
-        new_number = cust2.count()
-        customer_count= {"total_count":total_number, "new_count":new_number}
-        # serializer1 = CustomerInfoSerializer(cust1, many=True)
-        return JsonResponse(customer_count,safe=False)
+    def get(self,request):
+        session = request.session.get("user_id")
+        if session:
+            user_id=session
+            user_info_obj = UserType.objects.get(id=user_id)
+            user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+            cust1 = CustomerInfo.objects.filter(user_id=user_obj)
+            today = datetime.datetime.now()
+            cust2 = CustomerInfo.objects.filter(created_date__year=today.year, created_date__month=today.month,
+                                                user_id=user_obj)
+            total_number = cust1.count()
+            new_number = cust2.count()
+            customer_count = {"total_count": total_number, "new_count": new_number}
+            # serializer1 = CustomerInfoSerializer(cust1, many=True)
+            return JsonResponse(customer_count, safe=False)
+        else:
+            myJson = {"status": "0", "message": "Login expired"}
+            return JsonResponse(myJson)
 
     def post(self, request):
-        data = request.data
-        company_name = data['company_name']
-        full_name = data['full_name']
-        email_id = data['email_id']
-        address = data['address']
-        address_2 = data['address_2']
-        city = data['city']
-        state = data['state']
-        phone_number = data['phone_number']
-        postal_code = data['postal_code']
-        selected_date = data['selected_date']
-        if CustomerInfo.objects.filter(phone_number=phone_number).exists():
-                myJson = {"status": "0", "message": "Phone Number Exits"}
-                return JsonResponse(myJson)
+        session = request.session.get("user_id")
+        if session:
+            data = request.data
+            company_name = data['company_name']
+            full_name = data['full_name']
+            email_id = data['email_id']
+            address = data['address']
+            address_2 = data['address_2']
+            city = data['city']
+            state = data['state']
+            phone_number = data['phone_number']
+            postal_code = data['postal_code']
+            selected_date = data['selected_date']
+            user_info_obj= UserType.objects.get(id=session)
+            user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+            if CustomerInfo.objects.filter(phone_number=phone_number).exists():
+                    myJson = {"status": "0", "message": "Phone Number Exits"}
+                    return JsonResponse(myJson)
+            else:
+                    create = CustomerInfo.objects.create(company_name=company_name, full_name=full_name, email_id=email_id,
+                                                        address=address,postal_code=postal_code, selected_date=selected_date,
+                                                        phone_number=phone_number,address_2=address_2,city=city,state=state,
+                                                        user_id=user_obj)
+                    serializer3 = CustomerInfoSerializer(create)
+                    return Response(serializer3.data)
         else:
-                create = CustomerInfo.objects.create(company_name=company_name, full_name=full_name, email_id=email_id,
-                                                    address=address,postal_code=postal_code, selected_date=selected_date,
-                                                    phone_number=phone_number,address_2=address_2,city=city,state=state)
-                serializer3 = CustomerInfoSerializer(create)
-                return Response(serializer3.data)
+            myJson = {"status": "0", "message": "Login expired"}
+            return JsonResponse(myJson)
 
 
 class Vehicle_List(APIView):
 
     def get(self, request):
-        cust2 = VehicleInfo.objects.all()
-        serializer = VehicleInfoSerializer(cust2, many=True)
-        return Response(serializer.data)
+        session = request.session.get("user_id")
+        if session:
+            user_info_obj = UserType.objects.get(id=session)
+            user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+            customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+            cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
+            serializer = VehicleInfoSerializer(cust2, many=True)
+            return Response(serializer.data)
+        else:
+            myJson = {"status": "0", "message": "Login expired"}
+            return JsonResponse(myJson)
 
     def post(self, request):
         data = request.data
@@ -96,16 +121,6 @@ class Test_List(APIView):
 
 def home(request):
     return JsonResponse("WELCOME",safe=False)
-
-
-class month_count(APIView):
-
-    def get(self, request):
-        today = datetime.datetime.now()
-        cust2 = CustomerInfo.objects.filter(created_date__year=today.year,created_date__month=today.month)
-        total_number = cust2.count()
-
-        return JsonResponse(total_number,safe=False)
 
 
 class vehicle_info(APIView):

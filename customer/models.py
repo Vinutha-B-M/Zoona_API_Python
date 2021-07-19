@@ -1,4 +1,5 @@
 from django.db import models
+from users.models import UserInfo
 
 
 class CustomerInfo(models.Model):
@@ -13,6 +14,7 @@ class CustomerInfo(models.Model):
     phone_number = models.CharField(db_column='phone_number', max_length=200, blank=True)
     postal_code = models.CharField(db_column='postal_code', max_length=200, blank=True)
     created_date = models.DateField(db_column='created_date', blank=True, null=True, auto_now_add=True)
+    user_id = models.ForeignKey(UserInfo, db_column='user_id', null=True, on_delete=models.PROTECT)
 
 class VehicleInfo(models.Model):
     Auto = 'Auto'
@@ -38,3 +40,4 @@ class VehicleInfo(models.Model):
 class TestDetails(models.Model):
     selected_date = models.DateField(db_column='selected_date', blank=True,null=True, auto_now_add=False)
     vehicle_id = models.ForeignKey(VehicleInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
+

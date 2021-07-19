@@ -1,4 +1,47 @@
 from django.db import models
+from users.models import UserInfo
+
 
 # Create your models here.
 
+class ReceiptContent(models.Model):
+    company_name = models.CharField(db_column='company_name', max_length=200, blank=True)
+    address = models.CharField(db_column='address', max_length=200, blank=True)
+    phone_number = models.CharField(db_column='phone_number', max_length=200, blank=True)
+    website_url = models.CharField(db_column='website_url', max_length=200, blank=True)
+    footer_note = models.CharField(db_column='footer_note', max_length=200, blank=True)
+    client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
+
+
+class Taxes(models.Model):
+    tax_value = models.CharField(db_column='tax_value', max_length=20, blank=True)
+    client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
+
+
+class Discounts(models.Model):
+    discount_value = models.CharField(db_column='discount_value', max_length=20, blank=True)
+    offer_name = models.CharField(db_column='offer_name', max_length=50, blank=True)
+    client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
+
+
+class ServicesList(models.Model):
+    service_name = models.CharField(db_column='service_name', max_length=200, blank=True)
+    input_mode = models.CharField(db_column='input_mode', max_length=200, blank=True)
+    amount = models.CharField(db_column='amount', max_length=30, blank=True)
+    client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
+
+
+class Default(models.Model):
+    currency = models.CharField(db_column='currency', max_length=200, blank=True)
+    langaugge = models.CharField(db_column='langaugge', max_length=200, blank=True)
+    time_zone = models.CharField(db_column='time_zone', max_length=400, blank=True)
+    display_time = models.CharField(db_column='display_time', max_length=200, blank=True)
+    date_format = models.CharField(db_column='date_format', max_length=200, blank=True)
+    client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
+
+
+# class Invoices(models.Model):
+#     time_zone = models.CharField(db_column='time_zone', max_length=400, blank=True)
+#     display_time = models.CharField(db_column='display_time', max_length=200, blank=True)
+#     date_format = models.CharField(db_column='date_format', max_length=200, blank=True)
+#     client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)

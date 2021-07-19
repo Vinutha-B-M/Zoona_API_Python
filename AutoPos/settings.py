@@ -92,7 +92,7 @@ WSGI_APPLICATION = 'AutoPos.wsgi.application'
 DATABASES = {
     'default': {
          'ENGINE': 'django.db.backends.postgresql_psycopg2',
-         'NAME': 'AutoPos-db',
+         'NAME': 'newautoposdb',
          'PASSWORD': 'postgres',
          'USER': 'postgres',
          'HOST': 'localhost',
