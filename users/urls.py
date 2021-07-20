@@ -8,5 +8,6 @@ urlpatterns = [
     path('forgot/', views.forgot.as_view(), name="forgot"),
     path('update/', views.update.as_view(), name="update"),
     path('user_info/', views.user_info.as_view(), name="user_info"),
+    path('update_user_info/', views.update_user_info.as_view(), name="update_user_info"),
     path('add_user/', views.add_user.as_view(), name="add_user"),
 ]

@@ -16,10 +16,13 @@ from rest_framework import viewsets, status
 
 
 class Customer_List(APIView):
-    def get(self,request):
-        session = request.session.get("user_id")
-        if session:
+    def post(self,request):
+        # session = request.session.get("user_id")
+        # if session:
+            data = request.data
+            session = data['id']
             user_id=session
+            print(session)
             user_info_obj = UserType.objects.get(id=user_id)
             user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
             cust1 = CustomerInfo.objects.filter(user_id=user_obj)
@@ -31,14 +34,15 @@ class Customer_List(APIView):
             customer_count = {"total_count": total_number, "new_count": new_number}
             # serializer1 = CustomerInfoSerializer(cust1, many=True)
             return JsonResponse(customer_count, safe=False)
-        else:
-            myJson = {"status": "0", "message": "Login expired"}
-            return JsonResponse(myJson)
-
+        # else:
+        #     myJson = {"status": "0", "message": "Login expired"}
+        #     return JsonResponse(myJson)
+class add_Customer_List(APIView):
     def post(self, request):
-        session = request.session.get("user_id")
-        if session:
+        # session = request.session.get("user_id")
+        # if session:
             data = request.data
+            session = data['id']
             company_name = data['company_name']
             full_name = data['full_name']
             email_id = data['email_id']
@@ -61,26 +65,29 @@ class Customer_List(APIView):
                                                         user_id=user_obj)
                     serializer3 = CustomerInfoSerializer(create)
                     return Response(serializer3.data)
-        else:
-            myJson = {"status": "0", "message": "Login expired"}
-            return JsonResponse(myJson)
+        # else:
+        #     myJson = {"status": "0", "message": "Login expired"}
+        #     return JsonResponse(myJson)
 
 
 class Vehicle_List(APIView):
 
-    def get(self, request):
-        session = request.session.get("user_id")
-        if session:
+    def post(self, request):
+        # session = request.session.get("user_id")
+        # if session:
+            data = request.data
+            session = data['id']
             user_info_obj = UserType.objects.get(id=session)
             user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
             customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
             cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
             serializer = VehicleInfoSerializer(cust2, many=True)
             return Response(serializer.data)
-        else:
-            myJson = {"status": "0", "message": "Login expired"}
-            return JsonResponse(myJson)
+        # else:
+        #     myJson = {"status": "0", "message": "Login expired"}
+        #     return JsonResponse(myJson)
 
+class add_Vehicle_List(APIView):
     def post(self, request):
         data = request.data
         year = data['year']
