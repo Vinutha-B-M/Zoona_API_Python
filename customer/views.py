@@ -56,15 +56,16 @@ class add_Customer_List(APIView):
             user_info_obj= UserType.objects.get(id=session)
             user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
             if CustomerInfo.objects.filter(phone_number=phone_number).exists():
-                    myJson = {"status": "0", "message": "Phone Number Exits"}
+                    myJson = {"status": "0", "data": "Phone Number Exits"}
                     return JsonResponse(myJson)
             else:
                     create = CustomerInfo.objects.create(company_name=company_name, full_name=full_name, email_id=email_id,
                                                         address=address,postal_code=postal_code, selected_date=selected_date,
                                                         phone_number=phone_number,address_2=address_2,city=city,state=state,
                                                         user_id=user_obj)
-                    serializer3 = CustomerInfoSerializer(create)
-                    return Response(serializer3.data)
+                    serializer = CustomerInfoSerializer(create)
+                    myJson = {"status": "1", "data": serializer.data}
+                    return JsonResponse(myJson)
         # else:
         #     myJson = {"status": "0", "message": "Login expired"}
         #     return JsonResponse(myJson)
@@ -82,7 +83,8 @@ class Vehicle_List(APIView):
             customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
             cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
             serializer = VehicleInfoSerializer(cust2, many=True)
-            return Response(serializer.data)
+            myJson = {"status": "1", "data": serializer.data}
+            return JsonResponse(myJson)
         # else:
         #     myJson = {"status": "0", "message": "Login expired"}
         #     return JsonResponse(myJson)
@@ -105,8 +107,9 @@ class add_Vehicle_List(APIView):
         create = VehicleInfo.objects.create(customer_id=customer_obj, year=year, brand=brand, brand_model=brand_model,
                                             odo_meter=odo_meter, lic_plate=lic_plate, gvwr=gvwr, vin=vin, engine=engine,
                                             cylinder=cylinder,Transmission=Transmission)
-        serializer3 = VehicleInfoSerializer(create)
-        return Response(serializer3.data)
+        serializer = VehicleInfoSerializer(create)
+        myJson = {"status": "1", "data": serializer.data}
+        return JsonResponse(myJson)
 
 
 class Test_List(APIView):
