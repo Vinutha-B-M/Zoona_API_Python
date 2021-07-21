@@ -20,4 +20,6 @@ urlpatterns = [
     path('update_taxes/', views.update_taxes.as_view(), name="update_taxes"),
     path('update_discounts/', views.update_discounts.as_view(), name="update_discounts"),
     path('update_services/', views.update_services.as_view(), name="update_services"),
+    path('update_defaults/', views.update_defaults.as_view(), name="update_defaults"),
+    path('update_receipt_content/', views.update_receipt_content.as_view(), name="update_receipt_content"),
 ]
