@@ -46,7 +46,7 @@ class login(APIView):
                 user_id = UserType.objects.get(username=username).id
                 user_obj = UserType.objects.get(id=user_id)
                 serializer = UserTypeSerializer(user_obj)
-                myJson = {"status": "1", "data":serializer.data }
+                myJson = {"status": "1", "data": serializer.data}
                 return JsonResponse(myJson)
             else:
                 myJson = {"status": "0", "data": "Password is not Correct"}
@@ -136,29 +136,49 @@ class add_user(APIView):
     def post(self, request):
         # session = request.session.get("user_id")
         # if session:
-            data = request.data
-            session = data['id']
+        data = request.data
+        session = data['id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        username = data['username']
+        is_admin = data['is_admin']
+        company_name = user_obj.company_name
+        allowed_chars = ''.join((string.ascii_letters, string.digits))
+        unique_id = ''.join(random.choice(allowed_chars) for _ in range(12))
+        if UserType.objects.filter(username=username).exists():
+            myJson = {"status": "0", "data": "Username Exits"}
+            return JsonResponse(myJson)
+        else:
+            user_obj = UserType.objects.create(username=username, is_admin=is_admin, password=unique_id,
+                                               userinfo=user_obj)
+            email_subject = f'Your Sales Account  For {company_name}'
+            message = f"Your Username is {username} with Password : {unique_id} \n\n" \
+                      f"Don't share your details with others"
+            from_mail = settings.EMAIL_HOST_USER
+            to_list = [username]
+            send_mail(email_subject, message, from_mail, to_list, fail_silently=False)
+            myJson = {"status": "1", "data": "success"}
+            return JsonResponse(myJson)
+    # else:
+    #     myJson = {"status": "0", "message": "Login expired"}
+    #     return JsonResponse(myJson)
+
+
+class users_data(APIView):
+
+    def post(self, request):
+        # session = request.session.get("user_id")
+        # if session:
+        data = request.data
+        session = data['id']
+
+        if UserType.objects.filter(id=session,is_admin=True).exists():
             user_info_obj = UserType.objects.get(id=session)
             user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-            username = data['username']
-            company_name = user_obj.company_name
-            allowed_chars = ''.join((string.ascii_letters, string.digits))
-            unique_id = ''.join(random.choice(allowed_chars) for _ in range(12))
-            if UserType.objects.filter(username=username).exists():
-                myJson = {"status": "0", "data": "Username Exits"}
-                return JsonResponse(myJson)
-            else:
-                user_obj = UserType.objects.create(username=username, is_admin=False, password=unique_id,
-                                                   userinfo=user_obj)
-                email_subject = f'Your Sales Account  For {company_name}'
-                message = f"Your Username is {username} with Password : {unique_id} \n\n" \
-                          f"Don't share your details with others"
-                from_mail = settings.EMAIL_HOST_USER
-                to_list = [username]
-                send_mail(email_subject, message, from_mail, to_list, fail_silently=False)
-                myJson = {"status": "1", "data": "success"}
-                return JsonResponse(myJson)
-        # else:
-        #     myJson = {"status": "0", "message": "Login expired"}
-        #     return JsonResponse(myJson)
-
+            user_data = UserType.objects.filter(userinfo=user_obj)
+            serializer = UserTypeSerializer(user_data,many=True)
+            myJson = {"status": "1", "data": serializer.data}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "0", "data": "error"}
+            return JsonResponse(myJson)
