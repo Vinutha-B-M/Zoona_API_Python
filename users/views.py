@@ -172,12 +172,49 @@ class users_data(APIView):
         data = request.data
         session = data['id']
 
-        if UserType.objects.filter(id=session,is_admin=True).exists():
+        if UserType.objects.filter(id=session, is_admin=True).exists():
             user_info_obj = UserType.objects.get(id=session)
             user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
             user_data = UserType.objects.filter(userinfo=user_obj)
-            serializer = UserTypeSerializer(user_data,many=True)
+            serializer = UserTypeSerializer(user_data, many=True)
             myJson = {"status": "1", "data": serializer.data}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "0", "data": "error"}
+            return JsonResponse(myJson)
+
+
+class update_users(APIView):
+    def post(self, request):
+        # session = request.session.get("user_id")
+        # if session:
+        data = request.data
+        session = data['user_id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        username = data['username']
+        is_admin = data['is_admin']
+        company_name = user_obj.company_name
+        allowed_chars = ''.join((string.ascii_letters, string.digits))
+        unique_id = ''.join(random.choice(allowed_chars) for _ in range(12))
+        user_obj = UserType.objects.filter(id=session).update(username=username, is_admin=is_admin, password=unique_id)
+        email_subject = f'Your Sales Account  For {company_name}'
+        message = f"Your Username is {username} with Password : {unique_id} \n\n" \
+                  f"Don't share your details with others"
+        from_mail = settings.EMAIL_HOST_USER
+        to_list = [username]
+        send_mail(email_subject, message, from_mail, to_list, fail_silently=False)
+        myJson = {"status": "1", "data": "success"}
+        return JsonResponse(myJson)
+
+
+class delete_users(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['user_id']
+        if UserType.objects.filter(id=session).exists():
+            user_obj = UserType.objects.get(id=session).delete()
+            myJson = {"status": "1", "data": "success"}
             return JsonResponse(myJson)
         else:
             myJson = {"status": "0", "data": "error"}
