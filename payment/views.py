@@ -29,10 +29,12 @@ class payment_entry(APIView):
         discount_offered = data['discount_offered']
         status = data['status']
         vehicle = data['Vehicle_id']
+        payment_mode = 'Cash'
         vehicle_obj=VehicleInfo.objects.get(id=vehicle)
         service_item = data['service_item']
         payment_obj = PaymentEntry.objects.create(final_amount=final_amount, tax_offered=tax_offered,
-                                                  discount_offered=discount_offered, status=status, Vehicle=vehicle_obj)
+                                                  discount_offered=discount_offered,payment_mode=payment_mode,
+                                                  status=status, Vehicle=vehicle_obj)
         for i in service_item:
             service_id = i['id']
             service_obj = ServicesList.objects.get(id=service_id)

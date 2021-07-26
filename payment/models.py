@@ -24,6 +24,7 @@ class PaymentEntry(models.Model):
         (Other, 'Other')
     )
     final_amount = models.CharField(db_column='final_amount', max_length=200, blank=True)
+    # invoice_no = models.CharField(db_column='invoice_no', max_length=200, blank=True)
     tax_offered = models.CharField(db_column='tax_offered', max_length=200, blank=True)
     discount_offered = models.CharField(db_column='discount_offered', max_length=200, blank=True)
     payment_mode = models.CharField(db_column='payment_mode', max_length=10, choices=MODE, blank=True)

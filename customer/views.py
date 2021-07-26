@@ -13,7 +13,7 @@ from .serializers import CustomerInfoSerializer, VehicleInfoSerializer, TestDeta
 from .models import CustomerInfo, VehicleInfo, TestDetails
 from users.models import UserInfo,UserType
 from rest_framework import viewsets, status
-
+from payment.models import PaymentEntry,InvoiceItem
 
 class Customer_List(APIView):
     def post(self,request):
@@ -22,13 +22,16 @@ class Customer_List(APIView):
             data = request.data
             session = data['id']
             user_id=session
-            print(session)
             user_info_obj = UserType.objects.get(id=user_id)
             user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
             cust1 = CustomerInfo.objects.filter(user_id=user_obj)
             today = datetime.datetime.now()
             cust2 = CustomerInfo.objects.filter(created_date__year=today.year, created_date__month=today.month,
                                                 user_id=user_obj)
+
+            cust3 = VehicleInfo.objects.filter(customer_id__in=cust1)
+            payment= PaymentEntry.objects.filter(Vehicle__in=cust3)
+            print(payment)
             total_number = cust1.count()
             new_number = cust2.count()
             customer_count = {"total_count": total_number, "new_count": new_number}
