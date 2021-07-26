@@ -22,4 +22,8 @@ urlpatterns = [
     path('update_services/', views.update_services.as_view(), name="update_services"),
     path('update_defaults/', views.update_defaults.as_view(), name="update_defaults"),
     path('update_receipt_content/', views.update_receipt_content.as_view(), name="update_receipt_content"),
+    path('fees/', views.fees.as_view(), name="fees"),
+    path('add_fees/', views.add_fees.as_view(), name="add_fees"),
+    path('delete_fees/', views.delete_fees.as_view(), name="delete_fees"),
+    path('update_fees/', views.update_fees.as_view(), name="update_fees"),
 ]

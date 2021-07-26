@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ReceiptContent, Taxes, Discounts, ServicesList, Default
+from .models import ReceiptContent, Taxes, Discounts, ServicesList, Default, Fees
 
 
 class ReceiptContentSerializer(serializers.ModelSerializer):
@@ -11,6 +11,12 @@ class ReceiptContentSerializer(serializers.ModelSerializer):
 class TaxesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Taxes
+        fields = '__all__'
+
+
+class FeesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Fees
         fields = '__all__'
 
 

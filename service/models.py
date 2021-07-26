@@ -15,8 +15,15 @@ class ReceiptContent(models.Model):
 
 class Taxes(models.Model):
     tax_value = models.CharField(db_column='tax_value', max_length=20, blank=True)
+    tax_name = models.CharField(db_column='tax_name', max_length=200, blank=True)
+    visible = models.BooleanField(db_column='visible', default=False)
     client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
 
+class Fees(models.Model):
+    fees_value = models.CharField(db_column='fees_value', max_length=20, blank=True)
+    fees_name = models.CharField(db_column='fees_name', max_length=200, blank=True)
+    visible = models.BooleanField(db_column='visible', default=False)
+    client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
 
 class Discounts(models.Model):
     discount_value = models.CharField(db_column='discount_value', max_length=20, blank=True)
@@ -27,7 +34,7 @@ class Discounts(models.Model):
 class ServicesList(models.Model):
     service_name = models.CharField(db_column='service_name', max_length=200, blank=True)
     input_mode = models.CharField(db_column='input_mode', max_length=200, blank=True)
-    amount = models.CharField(db_column='amount', max_length=30, blank=True)
+    amount = models.FloatField(db_column='amount', max_length=30, blank=True,null=True)
     client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
 
 
@@ -39,9 +46,3 @@ class Default(models.Model):
     date_format = models.CharField(db_column='date_format', max_length=200, blank=True)
     client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
 
-
-# class Invoices(models.Model):
-#     time_zone = models.CharField(db_column='time_zone', max_length=400, blank=True)
-#     display_time = models.CharField(db_column='display_time', max_length=200, blank=True)
-#     date_format = models.CharField(db_column='date_format', max_length=200, blank=True)
-#     client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)

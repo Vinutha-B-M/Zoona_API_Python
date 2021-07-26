@@ -5,9 +5,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 import requests
 from customer.models import CustomerInfo, VehicleInfo, TestDetails
+from users.models import UserType, UserInfo
 from .models import PaymentEntry, InvoiceItem
 from service.models import ServicesList
-from .serializers import PaymentEntrySerializer,InvoiceItemSerializer
+from .serializers import PaymentEntrySerializer, InvoiceItemSerializer
+from customer.serializers import CustomerInfoSerializer, VehicleInfoSerializer
+
 
 # class device_list(APIView):
 #
@@ -29,12 +32,15 @@ class payment_entry(APIView):
         discount_offered = data['discount_offered']
         status = data['status']
         vehicle = data['Vehicle_id']
-        payment_mode = 'Cash'
-        vehicle_obj=VehicleInfo.objects.get(id=vehicle)
+        payment_mode = 'Other'
+        amount_tendered = 0
+        changed_given = 0
+        vehicle_obj = VehicleInfo.objects.get(id=vehicle)
         service_item = data['service_item']
         payment_obj = PaymentEntry.objects.create(final_amount=final_amount, tax_offered=tax_offered,
-                                                  discount_offered=discount_offered,payment_mode=payment_mode,
-                                                  status=status, Vehicle=vehicle_obj)
+                                                  discount_offered=discount_offered, payment_mode=payment_mode,
+                                                  status=status, Vehicle=vehicle_obj, amount_tendered=amount_tendered,
+                                                  changed_given=changed_given)
         for i in service_item:
             service_id = i['id']
             service_obj = ServicesList.objects.get(id=service_id)
@@ -48,11 +54,47 @@ class payment_entry(APIView):
 
 
 class payment_validate(APIView):
-    def post(self,request):
+    def post(self, request):
         data = request.data
         id = data['id']
-        status= data['status']
+        status = data['status']
         payment_mode = data['mode']
-        payment_obj = PaymentEntry.objects.filter(id=id).update(status=status,payment_mode=payment_mode)
+        amount_tendered = data['amount_tendered']
+        changed_given = data['changed_given']
+        payment_obj = PaymentEntry.objects.filter(id=id).update(status=status, payment_mode=payment_mode,
+                                                                changed_given=changed_given,
+                                                                amount_tendered=amount_tendered)
         myJson = {"status": "1", "data": "Success"}
+        return JsonResponse(myJson)
+
+
+class order_list(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+        cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
+        cust3 = PaymentEntry.objects.filter(Vehicle__in=cust2)
+        serializer = PaymentEntrySerializer(cust3, many=True)
+        myJson = {"status": "1", "data": serializer.data}
+        return JsonResponse(myJson)
+
+
+class total_sales(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+        cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
+        cust3 = PaymentEntry.objects.filter(Vehicle__in=cust2)
+        total=0
+        count = cust3.count()
+        for i in cust3:
+            total=total+i.final_amount
+        sales = {"sales_count": count, "total_sales": total}
+        myJson = {"status": "1", "data": sales }
         return JsonResponse(myJson)

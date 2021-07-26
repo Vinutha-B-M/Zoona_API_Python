@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 import requests
 from .serializers import ReceiptContentSerializer, TaxesSerializer, DiscountsSerializer, ServiceListSerializer, \
-    DefaultListSerializer
-from .models import ReceiptContent, Taxes, Discounts, ServicesList, Default
+    DefaultListSerializer, FeesSerializer
+from .models import ReceiptContent, Taxes, Discounts, ServicesList, Default, Fees
 from django.http import HttpResponse, JsonResponse
 from users.models import UserInfo, UserType
 
@@ -216,8 +216,10 @@ class update_taxes(APIView):
         data = request.data
         id = data['id']
         tax_value = data['tax_value']
+        tax_name = data['tax_name']
+        visible = data['visible']
         if Taxes.objects.filter(id=id).exists():
-            content = Taxes.objects.filter(id=id).update(tax_value=tax_value)
+            content = Taxes.objects.filter(id=id).update(tax_value=tax_value,tax_name=tax_name,visible=visible)
             myJson = {"status": "1", "data": "updated"}
             return JsonResponse(myJson)
         else:
@@ -235,10 +237,12 @@ class add_taxes(APIView):
         data = request.data
         session = data['id']
         tax_value = data['tax_value']
+        tax_name = data['tax_name']
+        visible = data['visible']
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         if UserType.objects.filter(id=session, is_admin=True).exists():
-            create = Taxes.objects.create(tax_value=tax_value, client=user_obj)
+            create = Taxes.objects.create(tax_value=tax_value,tax_name=tax_name,visible=visible, client=user_obj)
             serializer = TaxesSerializer(create)
             myJson = {"status": "1", "data": serializer.data}
             return JsonResponse(myJson)
@@ -401,6 +405,90 @@ class add_defaults(APIView):
             myJson = {"status": "1", "data":serializer.data}
             return JsonResponse(myJson)
 
+        else:
+            myJson = {"status": "0", "data": "error"}
+            return JsonResponse(myJson)
+    # else:
+    #     myJson = {"status": "0", "message": "Login expired"}
+    #     return JsonResponse(myJson)
+
+
+class fees(APIView):
+    def post(self, request):
+        # session = request.session.get("user_id")
+        # if session:
+        data = request.data
+        session = data['id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        if Fees.objects.filter(client=user_obj).exists():
+            content = Fees.objects.filter(client=user_obj)
+            serializer = FeesSerializer(content, many=True)
+            myJson = {"status": "1", "data": serializer.data}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "1", "data": ""}
+            return JsonResponse(myJson)
+    # else:
+    #     myJson = {"status": "0", "message": "Login expired"}
+    #     return JsonResponse(myJson)
+
+
+class delete_fees(APIView):
+    def post(self, request):
+        # session = request.session.get("user_id")
+        # if session:
+        data = request.data
+        id = data['id']
+        if Fees.objects.filter(id=id).exists():
+            content = Fees.objects.filter(id=id).delete()
+            myJson = {"status": "1", "data": "Success"}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "0", "data": "error"}
+            return JsonResponse(myJson)
+    # else:
+    #     myJson = {"status": "0", "message": "Login expired"}
+    #     return JsonResponse(myJson)
+
+
+class update_fees(APIView):
+    def post(self, request):
+        # session = request.session.get("user_id")
+        # if session:
+        data = request.data
+        id = data['id']
+        fees_value = data['fees_value']
+        fees_name = data['fees_name']
+        visible = data['visible']
+        if Fees.objects.filter(id=id).exists():
+            content = Fees.objects.filter(id=id).update(fees_value=fees_value,fees_name=fees_name,visible=visible)
+            myJson = {"status": "1", "data": "updated"}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "0", "data": "error"}
+            return JsonResponse(myJson)
+    # else:
+    #     myJson = {"status": "0", "message": "Login expired"}
+    #     return JsonResponse(myJson)
+
+
+class add_fees(APIView):
+    def post(self, request):
+        # session = request.session.get("user_id")
+        # if session:
+        data = request.data
+        session = data['id']
+        fees_value = data['fees_value']
+        fees_name = data['fees_name']
+        visible = data['visible']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        if UserType.objects.filter(id=session, is_admin=True).exists():
+            create = Fees.objects.create(fees_value=fees_value, fees_name=fees_name, visible=visible, client=user_obj)
+            serializer = FeesSerializer(create)
+            myJson = {"status": "1", "data": serializer.data}
+            return JsonResponse(myJson)
         else:
             myJson = {"status": "0", "data": "error"}
             return JsonResponse(myJson)

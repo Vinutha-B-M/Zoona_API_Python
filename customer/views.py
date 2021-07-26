@@ -106,10 +106,11 @@ class add_Vehicle_List(APIView):
         cylinder = data['cylinder']
         customer_id = data['customer_id']
         Transmission = data['Transmission']
+        engine_group = data['engine_group']
         customer_obj = CustomerInfo.objects.get(id=customer_id)
         create = VehicleInfo.objects.create(customer_id=customer_obj, year=year, brand=brand, brand_model=brand_model,
                                             odo_meter=odo_meter, lic_plate=lic_plate, gvwr=gvwr, vin=vin, engine=engine,
-                                            cylinder=cylinder,Transmission=Transmission)
+                                            cylinder=cylinder,Transmission=Transmission,engine_group=engine_group)
         serializer = VehicleInfoSerializer(create)
         myJson = {"status": "1", "data": serializer.data}
         return JsonResponse(myJson)

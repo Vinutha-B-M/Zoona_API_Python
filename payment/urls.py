@@ -8,5 +8,6 @@ urlpatterns = [
     # path('get_device_code/', views.get_device_code.as_view(), name="get_device_code"),
     path('invoice_entry/', views.payment_entry.as_view(), name="invoice_entry"),
     path('payment_validate/', views.payment_validate.as_view(), name="payment_validate"),
-
+    path('order_list/', views.order_list.as_view(), name="order_list"),
+    path('sales/', views.total_sales.as_view(), name="sales"),
 ]
