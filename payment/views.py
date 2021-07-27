@@ -54,6 +54,49 @@ class payment_entry(APIView):
         myJson = {"status": "1", "data": serializer.data}
         return JsonResponse(myJson)
 
+class update_payment_entry(APIView):
+    def post(self, request):
+        data = request.data
+        payment_id = data['id']
+        final_amount = data['final_amount']
+        tax_offered = data['tax_offered']
+        discount_offered = data['discount_offered']
+        status = data['status']
+        payment_mode = 'Other'
+        amount_tendered = 0
+        changed_given = 0
+        service_item = data['service_item']
+        payment_exist = PaymentEntry.objects.get(id=payment_id)
+        payment_obj = PaymentEntry.objects.filter(id=payment_id).update(final_amount=final_amount, tax_offered=tax_offered,
+                                                  discount_offered=discount_offered, payment_mode=payment_mode,
+                                                  status=status, amount_tendered=amount_tendered,
+                                                  changed_given=changed_given)
+        for i in service_item:
+            service_id = i['id']
+            service_obj = ServicesList.objects.get(id=service_id)
+            service_name = ServicesList.objects.get(id=service_id).service_name
+            amount = ServicesList.objects.get(id=service_id).amount
+            if InvoiceItem.objects.filter(service_item=service_id,Payment=payment_exist):
+                invoice_obj = InvoiceItem.objects.filter(service_item=service_id).update(service_name=service_name,
+                                                         amount=amount)
+            else:
+                invoice_obj = InvoiceItem.objects.create(service_item=service_obj, service_name=service_name,
+                                                         amount=amount, Payment=payment_exist)
+
+        updated_list= InvoiceItem.objects.filter(Payment=payment_exist).values_list('service_item', flat=True)
+        for i in updated_list:
+            dt = 0
+            for j in service_item:
+                  if j['id'] == i:
+                      dt=dt+1
+            if dt == 0:
+                InvoiceItem.objects.filter(service_item=i).delete()
+        payment_exist = PaymentEntry.objects.get(id=payment_id)
+        serializer = PaymentEntrySerializer(payment_exist)
+        myJson = {"status": "1", "data": serializer.data}
+        return JsonResponse(myJson)
+
+
 
 class payment_validate(APIView):
     def post(self, request):
