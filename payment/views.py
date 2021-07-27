@@ -153,7 +153,7 @@ class order_invoice(APIView):
         serializer2 = PaymentEntrySerializer(cust2)
         cust3 = InvoiceItem.objects.filter(Payment=cust2)
         serializer = InvoiceItemSerializer(cust3, many=True)
-        myJson = {"status": "1", "Invoice_Data": serializer2.data, "Service_List" : serializer.data}
+        myJson = {"status": "1", "Invoice": serializer2.data, "Service" : serializer.data}
         return JsonResponse(myJson)
 
 
