@@ -7,9 +7,9 @@ import requests
 import uuid
 from customer.models import CustomerInfo, VehicleInfo, TestDetails
 from users.models import UserType, UserInfo
-from .models import PaymentEntry, InvoiceItem
-from service.models import ServicesList
-from .serializers import PaymentEntrySerializer, InvoiceItemSerializer
+from .models import PaymentEntry, InvoiceItem,TaxItem,FeesItem,DiscountItem
+from service.models import ServicesList,Taxes,Discounts,Fees
+from .serializers import PaymentEntrySerializer, InvoiceItemSerializer,FeesItemSerializer,TaxItemSerializer,DiscountItemSerializer
 from customer.serializers import CustomerInfoSerializer, VehicleInfoSerializer
 from .square_api import base_url, client_id, client_secret, grant_type, Content_Type, scope
 
@@ -39,6 +39,10 @@ class payment_entry(APIView):
         changed_given = 0
         vehicle_obj = VehicleInfo.objects.get(id=vehicle)
         service_item = data['service_item']
+        discounts = data['discounts']
+        taxes = data['taxes']
+        fees = data['fees']
+        additional_comments = data['additional_comments']
         payment_obj = PaymentEntry.objects.create(final_amount=final_amount, tax_offered=tax_offered,
                                                   discount_offered=discount_offered, payment_mode=payment_mode,
                                                   status=status, Vehicle=vehicle_obj, amount_tendered=amount_tendered,
@@ -50,9 +54,114 @@ class payment_entry(APIView):
             amount = ServicesList.objects.get(id=service_id).amount
             invoice_obj = InvoiceItem.objects.create(service_item=service_obj, service_name=service_name,
                                                      amount=amount, Payment=payment_obj)
+        for i in taxes:
+            tax_id = i['id']
+            tax_obj = Taxes.objects.get(id=tax_id)
+            tax_name = Taxes.objects.get(id=tax_id).tax_name
+            amount = Taxes.objects.get(id=tax_id).tax_value
+            TaxItem.objects.create(tax_item=tax_obj,tax_name=tax_name,amount=amount,Payment=payment_obj)
+        for i in fees:
+            fees_id = i['id']
+            fees_obj = Fees.objects.get(id=fees_id)
+            fees_name = Fees.objects.get(id=fees_id).fees_name
+            amount = Fees.objects.get(id=fees_id).fees_value
+            FeesItem.objects.create(fees_item=fees_obj,fees_name=fees_name,amount=amount,Payment=payment_obj)
+        for i in discounts:
+            discount_id = i['id']
+            discount_obj = Discounts.objects.get(id=discount_id)
+            discount_name = Discounts.objects.get(id=discount_id).offer_name
+            amount = Discounts.objects.get(id=discount_id).discount_value
+            DiscountItem.objects.create(discount_item=discount_obj,discount_name=discount_name,amount=amount,Payment=payment_obj)
         serializer = PaymentEntrySerializer(payment_obj)
         myJson = {"status": "1", "data": serializer.data}
         return JsonResponse(myJson)
+
+
+def service_updation(service_item, payment_exist):
+    for i in service_item:
+        service_id = i['id']
+        service_obj = ServicesList.objects.get(id=service_id)
+        service_name = ServicesList.objects.get(id=service_id).service_name
+        amount = ServicesList.objects.get(id=service_id).amount
+        if InvoiceItem.objects.filter(service_item=service_id, Payment=payment_exist):
+            invoice_obj = InvoiceItem.objects.filter(service_item=service_id).update(service_name=service_name,
+                                                                                     amount=amount)
+        else:
+            invoice_obj = InvoiceItem.objects.create(service_item=service_obj, service_name=service_name,
+                                                     amount=amount, Payment=payment_exist)
+
+    updated_list = InvoiceItem.objects.filter(Payment=payment_exist).values_list('service_item', flat=True)
+    for i in updated_list:
+        dt = 0
+        for j in service_item:
+            if j['id'] == i:
+                dt = dt + 1
+        if dt == 0:
+            InvoiceItem.objects.filter(service_item=i).delete()
+
+
+def tax_updation(taxes, payment_exist):
+    for i in taxes:
+        tax_id = i['id']
+        tax_obj = Taxes.objects.get(id=tax_id)
+        tax_name = Taxes.objects.get(id=tax_id).tax_name
+        amount = Taxes.objects.get(id=tax_id).tax_value
+        if TaxItem.objects.filter(tax_item=tax_id, Payment=payment_exist):
+            TaxItem.objects.filter(tax_item=tax_id).update(tax_name=tax_name,amount=amount)
+        else:
+            TaxItem.objects.create(tax_item=tax_obj, tax_name=tax_name,amount=amount, Payment=payment_exist)
+
+    updated_list = TaxItem.objects.filter(Payment=payment_exist).values_list('tax_item', flat=True)
+    for i in updated_list:
+        dt = 0
+        for j in taxes:
+            if j['id'] == i:
+                dt = dt + 1
+        if dt == 0:
+            TaxItem.objects.filter(tax_item=i).delete()
+
+
+def fees_updation(fees, payment_exist):
+    for i in fees:
+        fees_id = i['id']
+        fees_obj = Fees.objects.get(id=fees_id)
+        fees_name = Fees.objects.get(id=fees_id).fees_name
+        amount = Fees.objects.get(id=fees_id).fees_value
+        if FeesItem.objects.filter(fees_item=fees_id, Payment=payment_exist):
+            FeesItem.objects.filter(fees_item=fees_id).update(fees_name=fees_name,amount=amount)
+        else:
+            FeesItem.objects.create(fees_item=fees_obj, fees_name=fees_name,amount=amount, Payment=payment_exist)
+
+    updated_list = FeesItem.objects.filter(Payment=payment_exist).values_list('fees_item', flat=True)
+    for i in updated_list:
+        dt = 0
+        for j in fees:
+            if j['id'] == i:
+                dt = dt + 1
+        if dt == 0:
+            FeesItem.objects.filter(fees_item=i).delete()
+
+
+def discount_updation(discounts, payment_exist):
+    for i in discounts:
+        discount_id = i['id']
+        discount_obj = Discounts.objects.get(id=discount_id)
+        discount_name = Discounts.objects.get(id=discount_id).offer_name
+        amount = Discounts.objects.get(id=discount_id).discount_value
+        if DiscountItem.objects.filter(discount_item=discount_id, Payment=payment_exist):
+            DiscountItem.objects.filter(discount_item=discount_id).update(discount_name=discount_name,amount=amount)
+        else:
+            DiscountItem.objects.create(discount_item=discount_obj, discount_name=discount_name,amount=amount, Payment=payment_exist)
+
+    updated_list = DiscountItem.objects.filter(Payment=payment_exist).values_list('discount_item', flat=True)
+    for i in updated_list:
+        dt = 0
+        for j in discounts:
+            if j['id'] == i:
+                dt = dt + 1
+        if dt == 0:
+            DiscountItem.objects.filter(discount_item=i).delete()
+
 
 class update_payment_entry(APIView):
     def post(self, request):
@@ -66,31 +175,18 @@ class update_payment_entry(APIView):
         amount_tendered = 0
         changed_given = 0
         service_item = data['service_item']
+        discounts = data['discounts']
+        taxes = data['taxes']
+        fees = data['fees']
         payment_exist = PaymentEntry.objects.get(id=payment_id)
         payment_obj = PaymentEntry.objects.filter(id=payment_id).update(final_amount=final_amount, tax_offered=tax_offered,
                                                   discount_offered=discount_offered, payment_mode=payment_mode,
                                                   status=status, amount_tendered=amount_tendered,
                                                   changed_given=changed_given)
-        for i in service_item:
-            service_id = i['id']
-            service_obj = ServicesList.objects.get(id=service_id)
-            service_name = ServicesList.objects.get(id=service_id).service_name
-            amount = ServicesList.objects.get(id=service_id).amount
-            if InvoiceItem.objects.filter(service_item=service_id,Payment=payment_exist):
-                invoice_obj = InvoiceItem.objects.filter(service_item=service_id).update(service_name=service_name,
-                                                         amount=amount)
-            else:
-                invoice_obj = InvoiceItem.objects.create(service_item=service_obj, service_name=service_name,
-                                                         amount=amount, Payment=payment_exist)
-
-        updated_list= InvoiceItem.objects.filter(Payment=payment_exist).values_list('service_item', flat=True)
-        for i in updated_list:
-            dt = 0
-            for j in service_item:
-                  if j['id'] == i:
-                      dt=dt+1
-            if dt == 0:
-                InvoiceItem.objects.filter(service_item=i).delete()
+        none_response=service_updation(service_item,payment_exist)
+        none_response =tax_updation(taxes,payment_exist)
+        none_response = fees_updation(fees, payment_exist)
+        none_response = discount_updation(discounts, payment_exist)
         payment_exist = PaymentEntry.objects.get(id=payment_id)
         serializer = PaymentEntrySerializer(payment_exist)
         myJson = {"status": "1", "data": serializer.data}
@@ -153,7 +249,14 @@ class order_invoice(APIView):
         serializer2 = PaymentEntrySerializer(cust2)
         cust3 = InvoiceItem.objects.filter(Payment=cust2)
         serializer = InvoiceItemSerializer(cust3, many=True)
-        myJson = {"status": "1", "Invoice": serializer2.data, "Service" : serializer.data}
+        cust4 = FeesItem.objects.filter(Payment=cust2)
+        serializer3 = FeesItemSerializer(cust4, many=True)
+        cust5 = TaxItem.objects.filter(Payment=cust2)
+        serializer4 = TaxItemSerializer(cust5, many=True)
+        cust6 = DiscountItem.objects.filter(Payment=cust2)
+        serializer5 = DiscountItemSerializer(cust6, many=True)
+        myJson = {"status": "1", "Invoice": serializer2.data, "Service" : serializer.data, "Fees":serializer3.data,
+                  "Taxes": serializer4.data, "Discounts" : serializer5.data}
         return JsonResponse(myJson)
 
 

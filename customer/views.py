@@ -41,7 +41,18 @@ class Customer_List(APIView):
     # else:
     #     myJson = {"status": "0", "message": "Login expired"}
     #     return JsonResponse(myJson)
-
+class fetch_customer_info(APIView):
+    def post(self,request):
+        data = request.data
+        session = data['phone_number']
+        if CustomerInfo.objects.get(phone_number=session).exists():
+            obj=CustomerInfo.objects.get(phone_number=session)
+            serializer = CustomerInfoSerializer(obj)
+            myJson = {"status": "1", "data": serializer.data}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "0", "data": ''}
+            return JsonResponse(myJson)
 
 class add_Customer_List(APIView):
     def post(self, request):
@@ -88,13 +99,12 @@ class update_customer_list(APIView):
         phone_number = data['phone_number']
         postal_code = data['postal_code']
         selected_date = data['selected_date']
-        user_info_obj = UserType.objects.get(id=session)
-        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         CustomerInfo.objects.filter(id=session).update(company_name=company_name, full_name=full_name,
                                                              email_id=email_id,address=address, postal_code=postal_code,
                                                              selected_date=selected_date,
                                                              phone_number=phone_number, address_2=address_2, city=city,
                                                              state=state)
+
         create=CustomerInfo.objects.get(id=session)
         serializer = CustomerInfoSerializer(create)
         myJson = {"status": "1", "data": serializer.data}

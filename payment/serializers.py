@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import PaymentEntry, InvoiceItem
+from .models import PaymentEntry, InvoiceItem,FeesItem,DiscountItem,TaxItem
 from customer.models import VehicleInfo,CustomerInfo
 from customer.serializers import CustomerInfoSerializer,VehicleInfoSerializer
 from service.serializers import ServiceListSerializer
@@ -29,3 +29,20 @@ class InvoiceItemSerializer(serializers.ModelSerializer):
         model = InvoiceItem
         fields = '__all__'
 
+class TaxItemSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TaxItem
+        fields = '__all__'
+
+class FeesItemSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FeesItem
+        fields = '__all__'
+
+class DiscountItemSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = DiscountItem
+        fields = '__all__'

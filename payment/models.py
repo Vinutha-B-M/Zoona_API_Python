@@ -1,5 +1,5 @@
 from django.db import models
-from service.models import ServicesList
+from service.models import ServicesList,Taxes,Fees,Discounts
 from customer.models import VehicleInfo
 from users.models import UserType, UserInfo
 
@@ -41,6 +41,24 @@ class InvoiceItem(models.Model):
     service_item = models.ForeignKey(ServicesList, db_column='service_item', null=True, on_delete=models.PROTECT)
     service_name = models.CharField(db_column='service_name', blank=True, max_length=100)
     amount = models.FloatField(db_column='amount', blank=True, max_length=100, null=True)
+    Payment = models.ForeignKey(PaymentEntry, db_column='payment', null=True, on_delete=models.PROTECT)
+
+class TaxItem(models.Model):
+    tax_item = models.ForeignKey(Taxes, db_column='tax_item', null=True, on_delete=models.PROTECT)
+    tax_name = models.CharField(db_column='tax_name', blank=True, max_length=100)
+    amount = models.CharField(db_column='amount', blank=True, max_length=100, null=True)
+    Payment = models.ForeignKey(PaymentEntry, db_column='payment', null=True, on_delete=models.PROTECT)
+
+class FeesItem(models.Model):
+    fees_item = models.ForeignKey(Fees, db_column='fees_item', null=True, on_delete=models.PROTECT)
+    fees_name = models.CharField(db_column='fees_name', blank=True, max_length=100)
+    amount = models.CharField(db_column='amount', blank=True, max_length=100, null=True)
+    Payment = models.ForeignKey(PaymentEntry, db_column='payment', null=True, on_delete=models.PROTECT)
+
+class DiscountItem(models.Model):
+    discount_item = models.ForeignKey(Discounts, db_column='discount_item', null=True, on_delete=models.PROTECT)
+    discount_name = models.CharField(db_column='discount_name', blank=True, max_length=100)
+    amount = models.CharField(db_column='amount', blank=True, max_length=100, null=True)
     Payment = models.ForeignKey(PaymentEntry, db_column='payment', null=True, on_delete=models.PROTECT)
 
 #
