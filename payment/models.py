@@ -1,5 +1,5 @@
 from django.db import models
-from service.models import ServicesList,Taxes,Fees,Discounts
+from service.models import ServicesList,Taxes,Fees,Discounts,TestType,MustHave
 from customer.models import VehicleInfo
 from users.models import UserType, UserInfo
 
@@ -57,10 +57,19 @@ class FeesItem(models.Model):
 
 class DiscountItem(models.Model):
     discount_item = models.ForeignKey(Discounts, db_column='discount_item', null=True, on_delete=models.PROTECT)
-    discount_name = models.CharField(db_column='discount_name', blank=True, max_length=100)
+    offer_name = models.CharField(db_column='discount_name', blank=True, max_length=100)
     amount = models.CharField(db_column='amount', blank=True, max_length=100, null=True)
     Payment = models.ForeignKey(PaymentEntry, db_column='payment', null=True, on_delete=models.PROTECT)
 
+class TestTypeItem(models.Model):
+    test_item = models.ForeignKey(TestType, db_column='test_item', null=True, on_delete=models.PROTECT)
+    test_type_name = models.CharField(db_column="test_type_name", max_length=100,blank=True)
+    Payment = models.ForeignKey(PaymentEntry, db_column='payment', null=True, on_delete=models.PROTECT)
+
+class MustHaveItem(models.Model):
+    must_have_item = models.ForeignKey(MustHave, db_column='must_have_item', null=True, on_delete=models.PROTECT)
+    must_have_name = models.CharField(db_column="must_have_name", max_length=100,blank=True)
+    Payment = models.ForeignKey(PaymentEntry, db_column='payment', null=True, on_delete=models.PROTECT)
 #
 # class SquareTerminal(models.Model):
 #     square_token = models.CharField(db_column="token", max_length=200, blank=True)
@@ -77,3 +86,7 @@ class DiscountItem(models.Model):
 #     location = models.CharField(db_column="location", max_length=100, blank=True)
 #     status = models.CharField(db_column="status", max_length=100, blank=True)
 #     client = models.ForeignKey(UserInfo, db_column='client', null=True, on_delete=models.PROTECT)
+
+# class SquareCredentials(models.Model):
+#     client_id = models.CharField(db_column="client_id", max_length=100, blank=True)
+#     client_secret = models.CharField(db_column="client_secret", max_length=100, blank=True)

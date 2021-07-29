@@ -10,6 +10,7 @@ urlpatterns = [
     path('order_list/', views.order_list.as_view(), name="order_list"),
     path('sales/', views.total_sales.as_view(), name="sales"),
     path('order_invoice/', views.order_invoice.as_view(), name="order_invoice"),
+    path('generic_tables/', views.generic_tables.as_view(), name="generic_tables"),
     # path('device_list/', views.device_list.as_view(), name="device_list"),
     # path('get_device_code/', views.get_device_code.as_view(), name="get_device_code"),
     # path('create_token/', views.create_token.as_view(), name="create_token"),

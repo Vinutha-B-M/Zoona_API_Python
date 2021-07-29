@@ -7,11 +7,12 @@ import requests
 import uuid
 from customer.models import CustomerInfo, VehicleInfo, TestDetails
 from users.models import UserType, UserInfo
-from .models import PaymentEntry, InvoiceItem,TaxItem,FeesItem,DiscountItem
-from service.models import ServicesList,Taxes,Discounts,Fees
+from .models import PaymentEntry, InvoiceItem,TaxItem,FeesItem,DiscountItem,TestTypeItem,MustHaveItem
+from service.models import ServicesList,Taxes,Discounts,Fees,TestType,MustHave
 from .serializers import PaymentEntrySerializer, InvoiceItemSerializer,FeesItemSerializer,TaxItemSerializer,DiscountItemSerializer
 from customer.serializers import CustomerInfoSerializer, VehicleInfoSerializer
-from .square_api import base_url, client_id, client_secret, grant_type, Content_Type, scope
+from service.serializers import TestTypeSerializer,MustHaveSerializer
+from .square_api import base_url, client_id, client_secret, scope
 
 
 # class device_list(APIView):
@@ -25,6 +26,14 @@ from .square_api import base_url, client_id, client_secret, grant_type, Content_
 #     def post(self, request):
 #
 #       return
+class generic_tables(APIView):
+    def get(self,request):
+        test_type= TestType.objects.all()
+        must_have = MustHave.objects.all()
+        serializer = TestTypeSerializer(test_type,many=True)
+        serializer2 = MustHaveSerializer(must_have,many=True)
+        myjson = {"status":"1","tset":serializer.data,"must":serializer2.data}
+        return JsonResponse(myjson)
 
 class payment_entry(APIView):
     def post(self, request):
@@ -42,6 +51,8 @@ class payment_entry(APIView):
         discounts = data['discounts']
         taxes = data['taxes']
         fees = data['fees']
+        test_type = data['test_type']
+        must_have = data['must_have']
         additional_comments = data['additional_comments']
         payment_obj = PaymentEntry.objects.create(final_amount=final_amount, tax_offered=tax_offered,
                                                   discount_offered=discount_offered, payment_mode=payment_mode,
@@ -71,7 +82,17 @@ class payment_entry(APIView):
             discount_obj = Discounts.objects.get(id=discount_id)
             discount_name = Discounts.objects.get(id=discount_id).offer_name
             amount = Discounts.objects.get(id=discount_id).discount_value
-            DiscountItem.objects.create(discount_item=discount_obj,discount_name=discount_name,amount=amount,Payment=payment_obj)
+            DiscountItem.objects.create(discount_item=discount_obj,offer_name=discount_name,amount=amount,Payment=payment_obj)
+        for i in test_type:
+            test_id = i['id']
+            test_obj = TestType.objects.get(id=test_id)
+            test_name = TestType.objects.get(id=test_id).test_type_name
+            TestTypeItem.objects.create(test_item=test_obj, test_type_name=test_name,Payment=payment_obj)
+        for i in must_have:
+            must_id = i['id']
+            must_obj = MustHave.objects.get(id=must_id)
+            must_name = MustHave.objects.get(id=must_id).must_have_name
+            MustHaveItem.objects.create(must_have_item=must_obj, must_have_name=must_name,Payment=payment_obj)
         serializer = PaymentEntrySerializer(payment_obj)
         myJson = {"status": "1", "data": serializer.data}
         return JsonResponse(myJson)
@@ -149,9 +170,9 @@ def discount_updation(discounts, payment_exist):
         discount_name = Discounts.objects.get(id=discount_id).offer_name
         amount = Discounts.objects.get(id=discount_id).discount_value
         if DiscountItem.objects.filter(discount_item=discount_id, Payment=payment_exist):
-            DiscountItem.objects.filter(discount_item=discount_id).update(discount_name=discount_name,amount=amount)
+            DiscountItem.objects.filter(discount_item=discount_id).update(offer_name=discount_name,amount=amount)
         else:
-            DiscountItem.objects.create(discount_item=discount_obj, discount_name=discount_name,amount=amount, Payment=payment_exist)
+            DiscountItem.objects.create(discount_item=discount_obj, offer_name=discount_name,amount=amount, Payment=payment_exist)
 
     updated_list = DiscountItem.objects.filter(Payment=payment_exist).values_list('discount_item', flat=True)
     for i in updated_list:
@@ -261,7 +282,7 @@ class order_invoice(APIView):
         return JsonResponse(myJson)
 
 
-
+#
 # class create_token(APIView):
 #     def post(self, request):
 #         data = request.data
@@ -273,7 +294,7 @@ class order_invoice(APIView):
 #         code = 'sq0cgp-7QjQLaly1h999T0dF9LrSA'
 #
 #         token = requests.post(base_url + '/oauth2/token',
-#                               data={"client_id": client_id, "client_secret": client_secret, "grant_type": grant_type,
+#                               data={"client_id": client_id, "client_secret": client_secret, "grant_type": "authorization_code",
 #                                     "code": code},
 #                               headers={"Content-Type": "application/json", "Square-Version": "2021-07-21"})
 #         json_response = token.json()
@@ -286,7 +307,7 @@ class order_invoice(APIView):
 #                                       client=user_obj)
 #         myJson = {"status": "1", "data": "success"}
 #         return JsonResponse(myJson)
-#
+
 #
 # class renew_token(APIView):
 #     def post(self, request):
@@ -356,29 +377,29 @@ class order_invoice(APIView):
 #         return JsonResponse(json_response)
 
 
-class create_terminal_checkout(APIView):
-    def post(self, request):
-        data = request.data
-        session = data['id']
-        amount = data['amount']
-        currency = data['currency']
-        device_id = data['device_id']
-        user_info_obj = UserType.objects.get(id=session)
-        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-        token = SquareTerminal.objects.get(client=user_obj).square_token
-        key=uuid.uuid1()
-        list_device = requests.post(base_url + '/v2/terminals/checkouts',
-                                    data={"idempotency_key": key,
-                                          "checkout": {
-                                              "amount_money": {
-                                                  "amount": amount,
-                                                  "currency": currency
-                                              },
-                                              "device_options": {
-                                                  "device_id": device_id
-                                              }
-                                          }},
-                                    headers={"Authorization": 'Bearer ' + token,
-                                             "Content-Type": "application/json", "Square-Version": "2021-07-21"})
-        json_response = list_device.json()
-        return JsonResponse(json_response)
+# class create_terminal_checkout(APIView):
+#     def post(self, request):
+#         data = request.data
+#         session = data['id']
+#         amount = data['amount']
+#         currency = data['currency']
+#         device_id = data['device_id']
+#         user_info_obj = UserType.objects.get(id=session)
+#         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+#         token = SquareTerminal.objects.get(client=user_obj).square_token
+#         key=uuid.uuid1()
+#         list_device = requests.post(base_url + '/v2/terminals/checkouts',
+#                                     data={"idempotency_key": key,
+#                                           "checkout": {
+#                                               "amount_money": {
+#                                                   "amount": amount,
+#                                                   "currency": currency
+#                                               },
+#                                               "device_options": {
+#                                                   "device_id": device_id
+#                                               }
+#                                           }},
+#                                     headers={"Authorization": 'Bearer ' + token,
+#                                              "Content-Type": "application/json", "Square-Version": "2021-07-21"})
+#         json_response = list_device.json()
+#         return JsonResponse(json_response)

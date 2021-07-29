@@ -46,3 +46,8 @@ class Default(models.Model):
     date_format = models.CharField(db_column='date_format', max_length=200, blank=True)
     client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
 
+class TestType(models.Model):
+    test_type_name=models.CharField(db_column="test_type_name", max_length=100, blank=True)
+
+class MustHave(models.Model):
+    must_have_name = models.CharField(db_column="must_have_name", max_length=100, blank=True)

@@ -1,6 +1,4 @@
 base_url = 'https://connect.squareup.com'
 client_id = 'sq0idp-VG89cPXiW7WgdpQIAZNR3A'
 client_secret = 'sq0csp-EEPAuGpkH6E0KWmzZ3oaLA31GJTuoj0RvVH2zz3vuBc'
-grant_type = 'authorization_code'
-Content_Type = 'application/json'
 scope='CUSTOMERS_WRITE+CUSTOMERS_READ+PAYMENTS_WRITE_IN_PERSON+MERCHANT_PROFILE_READ+PAYMENTS_READ+PAYMENTS_WRITE+PAYMENTS_WRITE_ADDITIONAL_RECIPIENTS+ORDERS_READ+ORDERS_WRITE+DEVICE_CREDENTIAL_MANAGEMENT'
