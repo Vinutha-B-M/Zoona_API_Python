@@ -19,6 +19,7 @@ class PaymentEntrySerializer(serializers.ModelSerializer):
             'discount_offered',
             'payment_mode',
             'created_date',
+            'additional_comments',
             'Vehicle',
         )
 

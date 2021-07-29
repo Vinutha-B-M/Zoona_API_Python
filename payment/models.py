@@ -25,7 +25,7 @@ class PaymentEntry(models.Model):
         (Other, 'Other')
     )
     final_amount = models.FloatField(db_column='final_amount', max_length=200, blank=True, null=True)
-    # invoice_no = models.CharField(db_column='invoice_no', max_length=200, blank=True)
+    additional_comments = models.CharField(db_column='additional_comments', max_length=200, blank=True)
     tax_offered = models.FloatField(db_column='tax_offered', max_length=200, blank=True, null=True)
     amount_tendered = models.FloatField(db_column='amount_tendered', max_length=200, blank=True, null=True)
     changed_given = models.FloatField(db_column='changed_given', max_length=200, blank=True, null=True)

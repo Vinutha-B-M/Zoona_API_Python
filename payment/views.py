@@ -46,7 +46,7 @@ class payment_entry(APIView):
         payment_obj = PaymentEntry.objects.create(final_amount=final_amount, tax_offered=tax_offered,
                                                   discount_offered=discount_offered, payment_mode=payment_mode,
                                                   status=status, Vehicle=vehicle_obj, amount_tendered=amount_tendered,
-                                                  changed_given=changed_given)
+                                                  changed_given=changed_given,additional_comments=additional_comments)
         for i in service_item:
             service_id = i['id']
             service_obj = ServicesList.objects.get(id=service_id)
@@ -178,11 +178,12 @@ class update_payment_entry(APIView):
         discounts = data['discounts']
         taxes = data['taxes']
         fees = data['fees']
+        additional_comments = data['additional_comments']
         payment_exist = PaymentEntry.objects.get(id=payment_id)
         payment_obj = PaymentEntry.objects.filter(id=payment_id).update(final_amount=final_amount, tax_offered=tax_offered,
                                                   discount_offered=discount_offered, payment_mode=payment_mode,
                                                   status=status, amount_tendered=amount_tendered,
-                                                  changed_given=changed_given)
+                                                  changed_given=changed_given,additional_comments=additional_comments)
         none_response=service_updation(service_item,payment_exist)
         none_response =tax_updation(taxes,payment_exist)
         none_response = fees_updation(fees, payment_exist)
