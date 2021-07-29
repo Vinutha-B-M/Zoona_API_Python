@@ -9,7 +9,8 @@ from customer.models import CustomerInfo, VehicleInfo, TestDetails
 from users.models import UserType, UserInfo
 from .models import PaymentEntry, InvoiceItem,TaxItem,FeesItem,DiscountItem,TestTypeItem,MustHaveItem
 from service.models import ServicesList,Taxes,Discounts,Fees,TestType,MustHave
-from .serializers import PaymentEntrySerializer, InvoiceItemSerializer,FeesItemSerializer,TaxItemSerializer,DiscountItemSerializer
+from .serializers import PaymentEntrySerializer, InvoiceItemSerializer,FeesItemSerializer,TaxItemSerializer,\
+    DiscountItemSerializer,TestTypeItemSerializer,MustHaveItemSerializer
 from customer.serializers import CustomerInfoSerializer, VehicleInfoSerializer
 from service.serializers import TestTypeSerializer,MustHaveSerializer
 from .square_api import base_url, client_id, client_secret, scope
@@ -277,8 +278,12 @@ class order_invoice(APIView):
         serializer4 = TaxItemSerializer(cust5, many=True)
         cust6 = DiscountItem.objects.filter(Payment=cust2)
         serializer5 = DiscountItemSerializer(cust6, many=True)
+        cust7 = TestTypeItem.objects.filter(Payment=cust2)
+        serializer6 = TestTypeItemSerializer(cust7, many=True)
+        cust8 = MustHaveItem.objects.filter(Payment=cust2)
+        serializer7 = MustHaveItemSerializer(cust8, many=True)
         myJson = {"status": "1", "Invoice": serializer2.data, "Service" : serializer.data, "Fees":serializer3.data,
-                  "Taxes": serializer4.data, "Discounts" : serializer5.data}
+                  "Taxes": serializer4.data, "Discounts" : serializer5.data,"test_type": serializer6.data,"must":serializer7.data}
         return JsonResponse(myJson)
 
 
