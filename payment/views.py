@@ -8,11 +8,11 @@ import uuid
 from customer.models import CustomerInfo, VehicleInfo, TestDetails
 from users.models import UserType, UserInfo
 from .models import PaymentEntry, InvoiceItem,TaxItem,FeesItem,DiscountItem,TestTypeItem,MustHaveItem
-from service.models import ServicesList,Taxes,Discounts,Fees,TestType,MustHave
+from service.models import ServicesList,Taxes,Discounts,Fees,TestType,MustHave,CashDiscount
 from .serializers import PaymentEntrySerializer, InvoiceItemSerializer,FeesItemSerializer,TaxItemSerializer,\
     DiscountItemSerializer,TestTypeItemSerializer,MustHaveItemSerializer
 from customer.serializers import CustomerInfoSerializer, VehicleInfoSerializer
-from service.serializers import TestTypeSerializer,MustHaveSerializer
+from service.serializers import TestTypeSerializer,MustHaveSerializer,CashDiscountSerializer
 from .square_api import base_url, client_id, client_secret, scope
 
 
@@ -185,6 +185,44 @@ def discount_updation(discounts, payment_exist):
             DiscountItem.objects.filter(discount_item=i).delete()
 
 
+def test_type_updation(test_type, payment_exist):
+    for i in test_type:
+        tax_id = i['id']
+        tax_obj = TestType.objects.get(id=tax_id)
+        if TestTypeItem.objects.filter(tax_item=tax_id, Payment=payment_exist):
+            pass
+        else:
+            TestTypeItem.objects.create(test_item=tax_obj,  Payment=payment_exist)
+
+    updated_list = TestTypeItem.objects.filter(Payment=payment_exist).values_list('test_item', flat=True)
+    for i in updated_list:
+        dt = 0
+        for j in test_type:
+            if j['id'] == i:
+                dt = dt + 1
+        if dt == 0:
+            TestTypeItem.objects.filter(test_item=i).delete()
+
+
+def must_have_updation(must_have, payment_exist):
+    for i in must_have:
+        tax_id = i['id']
+        tax_obj = MustHave.objects.get(id=tax_id)
+        if MustHaveItem.objects.filter(must_have_item=tax_id, Payment=payment_exist):
+            pass
+        else:
+            MustHaveItem.objects.create(must_have_item=tax_obj,  Payment=payment_exist)
+
+    updated_list = MustHaveItem.objects.filter(Payment=payment_exist).values_list('must_have_item', flat=True)
+    for i in updated_list:
+        dt = 0
+        for j in must_have:
+            if j['id'] == i:
+                dt = dt + 1
+        if dt == 0:
+            MustHaveItem.objects.filter(must_have_item=i).delete()
+
+
 class update_payment_entry(APIView):
     def post(self, request):
         data = request.data
@@ -200,6 +238,8 @@ class update_payment_entry(APIView):
         discounts = data['discounts']
         taxes = data['taxes']
         fees = data['fees']
+        test_type = data['test_type']
+        must_have = data['must_have']
         additional_comments = data['additional_comments']
         payment_exist = PaymentEntry.objects.get(id=payment_id)
         payment_obj = PaymentEntry.objects.filter(id=payment_id).update(final_amount=final_amount, tax_offered=tax_offered,
@@ -210,6 +250,8 @@ class update_payment_entry(APIView):
         none_response =tax_updation(taxes,payment_exist)
         none_response = fees_updation(fees, payment_exist)
         none_response = discount_updation(discounts, payment_exist)
+        none_response = test_type_updation(test_type, payment_exist)
+        none_response = must_have_updation(must_have, payment_exist)
         payment_exist = PaymentEntry.objects.get(id=payment_id)
         serializer = PaymentEntrySerializer(payment_exist)
         myJson = {"status": "1", "data": serializer.data}
@@ -269,6 +311,11 @@ class order_invoice(APIView):
         data = request.data
         session = data['id']
         cust2 = PaymentEntry.objects.get(id=session)
+        veh = VehicleInfo.objects.get(id=cust2.Vehicle.id)
+        cut = CustomerInfo.objects.get(id=veh.customer_id.id)
+        user_info_obj = UserType.objects.get(id=cut.user_id.id)
+        print(user_info_obj)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         serializer2 = PaymentEntrySerializer(cust2)
         cust3 = InvoiceItem.objects.filter(Payment=cust2)
         serializer = InvoiceItemSerializer(cust3, many=True)
@@ -282,8 +329,11 @@ class order_invoice(APIView):
         serializer6 = TestTypeItemSerializer(cust7, many=True)
         cust8 = MustHaveItem.objects.filter(Payment=cust2)
         serializer7 = MustHaveItemSerializer(cust8, many=True)
+        cust9 = CashDiscount.objects.get(client=user_obj)
+        serializer8 = CashDiscountSerializer(cust9)
         myJson = {"status": "1", "Invoice": serializer2.data, "Service" : serializer.data, "Fees":serializer3.data,
-                  "Taxes": serializer4.data, "Discounts" : serializer5.data,"test_type": serializer6.data,"must":serializer7.data}
+                  "Taxes": serializer4.data, "Discounts" : serializer5.data,"test_type": serializer6.data,
+                  "must":serializer7.data, "Cash_discount" : serializer8.data}
         return JsonResponse(myJson)
 
 

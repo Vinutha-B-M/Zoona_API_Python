@@ -70,6 +70,9 @@ class MustHaveItem(models.Model):
     must_have_item = models.ForeignKey(MustHave, db_column='must_have_item', null=True, on_delete=models.PROTECT)
     must_have_name = models.CharField(db_column="must_have_name", max_length=100,blank=True)
     Payment = models.ForeignKey(PaymentEntry, db_column='payment', null=True, on_delete=models.PROTECT)
+
+
+
 #
 # class SquareTerminal(models.Model):
 #     square_token = models.CharField(db_column="token", max_length=200, blank=True)

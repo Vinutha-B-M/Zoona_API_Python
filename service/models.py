@@ -51,3 +51,8 @@ class TestType(models.Model):
 
 class MustHave(models.Model):
     must_have_name = models.CharField(db_column="must_have_name", max_length=100, blank=True)
+
+class CashDiscount(models.Model):
+    cash_discount_amount = models.CharField(db_column='cash_discount_amount', max_length=200, blank=True)
+    visible = models.BooleanField(db_column='visible', default=False)
+    client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)

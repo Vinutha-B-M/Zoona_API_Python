@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 import requests
 from .serializers import ReceiptContentSerializer, TaxesSerializer, DiscountsSerializer, ServiceListSerializer, \
-    DefaultListSerializer, FeesSerializer
-from .models import ReceiptContent, Taxes, Discounts, ServicesList, Default, Fees
+    DefaultListSerializer, FeesSerializer,CashDiscountSerializer
+from .models import ReceiptContent, Taxes, Discounts, ServicesList, Default, Fees,CashDiscount
 from django.http import HttpResponse, JsonResponse
 from users.models import UserInfo, UserType
 
@@ -495,3 +495,50 @@ class add_fees(APIView):
     # else:
     #     myJson = {"status": "0", "message": "Login expired"}
     #     return JsonResponse(myJson)
+
+class cash_discount(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        if CashDiscount.objects.filter(client=user_obj).exists():
+            content = CashDiscount.objects.filter(client=user_obj)
+            serializer = CashDiscountSerializer(content, many=True)
+            myJson = {"status": "1", "data": serializer.data}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "1", "data": ""}
+            return JsonResponse(myJson)
+
+class update_cash_discount(APIView):
+    def post(self, request):
+        data = request.data
+        id = data['id']
+        cash_discount_amount = data['cash_discount_amount']
+        visible = data['visible']
+        if CashDiscount.objects.filter(id=id).exists():
+            content = CashDiscount.objects.filter(id=id).update(cash_discount_amount=cash_discount_amount,visible=visible)
+            myJson = {"status": "1", "data": "updated"}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "0", "data": "error"}
+            return JsonResponse(myJson)
+
+class add_cash_discount(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        cash_discount_amount = data['cash_discount_amount']
+        visible = data['visible']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        if UserType.objects.filter(id=session, is_admin=True).exists():
+            create = CashDiscount.objects.create(cash_discount_amount=cash_discount_amount,
+                                         visible=visible, client=user_obj)
+            serializer = CashDiscountSerializer(create)
+            myJson = {"status": "1", "data": serializer.data}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "0", "data": "error"}
+            return JsonResponse(myJson)

@@ -26,4 +26,7 @@ urlpatterns = [
     path('add_fees/', views.add_fees.as_view(), name="add_fees"),
     path('delete_fees/', views.delete_fees.as_view(), name="delete_fees"),
     path('update_fees/', views.update_fees.as_view(), name="update_fees"),
+    path('cash_discount/', views.cash_discount.as_view(), name="cash_discount"),
+    path('add_cash_discount/', views.add_cash_discount.as_view(), name="add_cash_discount"),
+    path('update_cash_discount/', views.update_cash_discount.as_view(), name="update_cash_discount"),
 ]
