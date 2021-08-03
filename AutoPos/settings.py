@@ -123,7 +123,7 @@ DATABASES = {
          'PASSWORD': 'postgres',
          'USER': 'postgres',
          'HOST': 'localhost',
-         'PORT': '5433',
+         'PORT': '5432',
        # 'ENGINE': 'django.db.backends.sqlite3',
        # 'NAME': 'mydatabase',
     }
