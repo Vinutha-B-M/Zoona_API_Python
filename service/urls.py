@@ -29,4 +29,8 @@ urlpatterns = [
     path('cash_discount/', views.cash_discount.as_view(), name="cash_discount"),
     path('add_cash_discount/', views.add_cash_discount.as_view(), name="add_cash_discount"),
     path('update_cash_discount/', views.update_cash_discount.as_view(), name="update_cash_discount"),
+    path('square_credential/', views.square_credential.as_view(), name="square_credential"),
+    path('add_square_credential/', views.add_square_credential.as_view(), name="add_square_credential"),
+    path('delete_square_credential/', views.delete_square_credential.as_view(), name="delete_square_credential"),
+    path('update_square_credential/', views.update_square_credential.as_view(), name="update_square_credential"),
 ]

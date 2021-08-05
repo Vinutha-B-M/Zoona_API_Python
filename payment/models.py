@@ -73,23 +73,17 @@ class MustHaveItem(models.Model):
 
 
 
-#
-# class SquareTerminal(models.Model):
-#     square_token = models.CharField(db_column="token", max_length=200, blank=True)
-#     expires_at = models.CharField(db_column="expires_at", max_length=200, blank=True)
-#     merchant_id = models.CharField(db_column="merchant_id", max_length=200, blank=True)
-#     refresh_token = models.CharField(db_column="refresh_token", max_length=200, blank=True)
-#     client = models.ForeignKey(UserInfo, db_column='client', null=True, on_delete=models.PROTECT)
-#
-#
-# class SquareDevice(models.Model):
-#     device_id = models.CharField(db_column="device", max_length=100, blank=True)
-#     name = models.CharField(db_column="name_device", max_length=100, blank=True)
-#     code = models.CharField(db_column="code", max_length=100, blank=True)
-#     location = models.CharField(db_column="location", max_length=100, blank=True)
-#     status = models.CharField(db_column="status", max_length=100, blank=True)
-#     client = models.ForeignKey(UserInfo, db_column='client', null=True, on_delete=models.PROTECT)
 
-# class SquareCredentials(models.Model):
-#     client_id = models.CharField(db_column="client_id", max_length=100, blank=True)
-#     client_secret = models.CharField(db_column="client_secret", max_length=100, blank=True)
+class SquareTerminalCheckout(models.Model):
+    checkout_id = models.CharField(db_column="checkout_id", max_length=200, blank=True)
+    client = models.ForeignKey(UserInfo, db_column='client', null=True, on_delete=models.PROTECT)
+
+
+class SquareDevice(models.Model):
+    square_id = models.CharField(db_column="square_id", max_length=100, blank=True)
+    device_id = models.CharField(db_column="device_id", max_length=100, blank=True,null=True)
+    name = models.CharField(db_column="name_device", max_length=100, blank=True)
+    code = models.CharField(db_column="code", max_length=100, blank=True)
+    location = models.CharField(db_column="location", max_length=100, blank=True)
+    status = models.CharField(db_column="status", max_length=100, blank=True)
+    client = models.ForeignKey(UserInfo, db_column='client', null=True, on_delete=models.PROTECT)

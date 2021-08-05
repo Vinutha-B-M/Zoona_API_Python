@@ -5,15 +5,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 import requests
 import uuid
+import json
 from customer.models import CustomerInfo, VehicleInfo, TestDetails
 from users.models import UserType, UserInfo
-from .models import PaymentEntry, InvoiceItem,TaxItem,FeesItem,DiscountItem,TestTypeItem,MustHaveItem
-from service.models import ServicesList,Taxes,Discounts,Fees,TestType,MustHave,CashDiscount
+from .models import PaymentEntry, InvoiceItem,TaxItem,FeesItem,DiscountItem,TestTypeItem,MustHaveItem,SquareDevice,SquareTerminalCheckout
+from service.models import ServicesList,Taxes,Discounts,Fees,TestType,MustHave,CashDiscount,SquareCredential
 from .serializers import PaymentEntrySerializer, InvoiceItemSerializer,FeesItemSerializer,TaxItemSerializer,\
     DiscountItemSerializer,TestTypeItemSerializer,MustHaveItemSerializer
 from customer.serializers import CustomerInfoSerializer, VehicleInfoSerializer
-from service.serializers import TestTypeSerializer,MustHaveSerializer,CashDiscountSerializer
-from .square_api import base_url, client_id, client_secret, scope
+from service.serializers import TestTypeSerializer,MustHaveSerializer,CashDiscountSerializer,SquareCredentialSerializer
+from .square_api import base_url
 
 
 # class device_list(APIView):
@@ -340,26 +341,30 @@ class order_invoice(APIView):
 #     def post(self, request):
 #         data = request.data
 #         session = data['id']
-#         user_info_obj = UserType.objects.get(id=session)
-#         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-#         # response = requests.get(base_url+'/oauth2/authorize?client_id='+client_id+'&scope='+scope+'&state=82201dd8d83d23cc8a48caf52ba4f4fb')
-#         # json_response = response.json()
-#         code = 'sq0cgp-7QjQLaly1h999T0dF9LrSA'
-#
-#         token = requests.post(base_url + '/oauth2/token',
-#                               data={"client_id": client_id, "client_secret": client_secret, "grant_type": "authorization_code",
-#                                     "code": code},
-#                               headers={"Content-Type": "application/json", "Square-Version": "2021-07-21"})
-#         json_response = token.json()
-#         square_token = token['access_token"']
-#         expires_at = token['expires_at']
-#         merchant_id = token['merchant_id']
-#         refresh_token = token['refresh_token']
-#         SquareTerminal.objects.create(square_token=square_token, expires_at=expires_at, merchant_id=merchant_id,
-#                                       refresh_token=refresh_token,
-#                                       client=user_obj)
-#         myJson = {"status": "1", "data": "success"}
-#         return JsonResponse(myJson)
+
+        # user_info_obj = UserType.objects.get(id=session)
+        # user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        # code = requests.get(base_url+'/oauth2/authorize?client_id='+client_id+'$scope='+scope+'$state=82201dd8d83d23cc8a48caf52ba4f4fb')
+        # code = requests.get('https://connect.squareup.com/oauth2/authorize?client_id=sq0idp-VG89cPXiW7WgdpQIAZNR3A&scope=CUSTOMERS_WRITE+CUSTOMERS_READ+PAYMENTS_WRITE_IN_PERSON+MERCHANT_PROFILE_READ+PAYMENTS_READ+PAYMENTS_WRITE+PAYMENTS_WRITE_ADDITIONAL_RECIPIENTS+ORDERS_READ+ORDERS_WRITE+DEVICE_CREDENTIAL_MANAGEMENT&state=82201dd8d83d23cc8a48caf52ba4f4fb')
+        # print(code)
+        # code = 'sq0cgp-7QjQLaly1h999T0dF9LrSA'
+        #
+        # token = requests.post(base_url + '/oauth2/token',
+        #                       data={"client_id": client_id, "client_secret": client_secret, "grant_type": "authorization_code",
+        #                             "code": code},
+        #                       headers={"Content-Type": "application/json", "Square-Version": "2021-07-21"})
+        # json_response = token.json()
+        # square_token = token['access_token"']
+        # expires_at = token['expires_at']
+        # token_type = token['token_type']
+        # merchant_id = token['merchant_id']
+        # refresh_token = token['refresh_token']
+        # sq_token=SquareTerminal.objects.create(square_token=square_token, expires_at=expires_at, merchant_id=merchant_id,
+        #                               refresh_token=refresh_token,
+        #                               client=user_obj)
+        # serializer =
+        # myJson = {"status": "1", "data": "success"}
+        # return JsonResponse(myJson)
 
 #
 # class renew_token(APIView):
@@ -392,67 +397,94 @@ class order_invoice(APIView):
 #         session = data['id']
 #         user_info_obj = UserType.objects.get(id=session)
 #         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-#         token = SquareTerminal.objects.get(client=user_obj).square_token
-#         list_device = requests.post(base_url + '/v2/devices/codes',
+#         token = SquareCredential.objects.get(client=user_obj).accees_token
+#         location_id = SquareCredential.objects.get(client=user_obj).location_id
+#         list_device = requests.get(base_url + '/v2/devices/codes?product_type=TERMINAL_API&location_id='+ location_id,
 #                                     headers={"Authorization": 'Bearer ' + token,
 #                                              "Content-Type": "application/json", "Square-Version": "2021-07-21"})
 #         json_response = list_device.json()
-#         return JsonResponse(json_response)
-#
-#
-# class get_device(APIView):
-#     def post(self, request):
-#         data = request.data
-#         session = data['id']
-#         user_info_obj = UserType.objects.get(id=session)
-#         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-#         token = SquareTerminal.objects.get(client=user_obj).square_token
-#         code = SquareDevice.objects.get(client=user_obj).code
-#         list_device = requests.post(base_url + '/v2/devices/codes/' + code,
-#                                     headers={"Authorization": 'Bearer ' + token,
-#                                              "Content-Type": "application/json", "Square-Version": "2021-07-21"})
-#         json_response = list_device.json()
-#         return JsonResponse(json_response)
-#
-#
-# class create_device(APIView):
-#     def post(self, request):
-#         data = request.data
-#         session = data['id']
-#         user_info_obj = UserType.objects.get(id=session)
-#         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-#         token = SquareTerminal.objects.get(client=user_obj).square_token
-#         list_device = requests.post(base_url + '/v2/devices/codes/',
-#                                     data={"device_code": {"product_type": "TERMINAL_API"}},
-#                                     headers={"Authorization": 'Bearer ' + token,
-#                                              "Content-Type": "application/json", "Square-Version": "2021-07-21"})
-#         json_response = list_device.json()
-#         return JsonResponse(json_response)
+#         myJson = {"status": "1", "data": json_response}
+#         return JsonResponse(myJson)
+
+class get_device(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        token = SquareCredential.objects.get(client=user_obj).accees_token
+        code = SquareDevice.objects.get(client=user_obj).square_id
+        list_device = requests.get(base_url + '/v2/devices/codes/' + code,
+                                    headers={"Authorization": 'Bearer ' + token,
+                                             "Content-Type": "application/json", "Square-Version": "2021-07-21"})
+        json_response = list_device.json()
+        status=json_response['device_code']['status']
+        if status=="PAIRED":
+            device_id = json_response['device_code']['device_id']
+            SquareDevice.objects.filter(square_id=code).update(status=status,device_id=device_id)
+        myJson = {"status": "1", "data": json_response}
+        return JsonResponse(myJson)
 
 
-# class create_terminal_checkout(APIView):
-#     def post(self, request):
-#         data = request.data
-#         session = data['id']
-#         amount = data['amount']
-#         currency = data['currency']
-#         device_id = data['device_id']
-#         user_info_obj = UserType.objects.get(id=session)
-#         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-#         token = SquareTerminal.objects.get(client=user_obj).square_token
-#         key=uuid.uuid1()
-#         list_device = requests.post(base_url + '/v2/terminals/checkouts',
-#                                     data={"idempotency_key": key,
-#                                           "checkout": {
-#                                               "amount_money": {
-#                                                   "amount": amount,
-#                                                   "currency": currency
-#                                               },
-#                                               "device_options": {
-#                                                   "device_id": device_id
-#                                               }
-#                                           }},
-#                                     headers={"Authorization": 'Bearer ' + token,
-#                                              "Content-Type": "application/json", "Square-Version": "2021-07-21"})
-#         json_response = list_device.json()
-#         return JsonResponse(json_response)
+class create_device(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        token = SquareCredential.objects.get(client=user_obj).accees_token
+        location_id = SquareCredential.objects.get(client=user_obj).location_id
+        key = uuid.uuid1()
+        vaule = {"device_code": {"product_type": "TERMINAL_API"}, "idempotency_key": str(key)}
+        list_device = requests.post(base_url + '/v2/devices/codes/',
+                                    data=json.dumps(vaule),
+                                    headers={"Authorization": 'Bearer ' + token,
+                                             "Content-Type": "application/json", "Square-Version": "2021-07-21"})
+        json_response = list_device.json()
+        device_id=json_response["device_code"]["id"]
+        name = json_response["device_code"]["name"]
+        code = json_response["device_code"]["code"]
+        location_id= json_response["device_code"]["location_id"]
+        status = json_response["device_code"]["status"]
+        SquareDevice.objects.create(square_id=device_id,name=name,code=code,location=location_id,status=status,
+                                            client=user_obj)
+        myJson = {"status": "1", "data": json_response}
+        return JsonResponse(myJson)
+
+
+class create_terminal_checkout(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        payment_id = data['payment_id']
+        amount = data['amount']
+        currency = data['currency']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        if SquareDevice.objects.filter(client=user_obj,status="PAIRED").exists():
+            token = SquareCredential.objects.get(client=user_obj).accees_token
+            device_id = SquareDevice.objects.get(client=user_obj).device_id
+            key=uuid.uuid1()
+            value={"idempotency_key": str(key),
+                    "checkout": {
+                                "amount_money": { "amount": amount,
+                                                  "currency": currency
+                                                  },
+                                                  "device_options": {
+                                                      "device_id": device_id
+                                                  }
+                                }}
+            list_device = requests.post(base_url + '/v2/terminals/checkouts',
+                                        data=json.dumps(value),
+                                        headers={"Authorization": 'Bearer ' + token,
+                                                 "Content-Type": "application/json", "Square-Version": "2021-07-21"})
+            json_response = list_device.json()
+            checkout_id = json_response['checkout']['id']
+            checkout_status = json_response['checkout']['status']
+            SquareTerminalCheckout.objects.create(checkout_id=checkout_id,client=user_obj)
+            PaymentEntry.objects.filter(id=payment_id).update(status=checkout_status,mode="Card")
+            myJson = {"status": "1", "data": json_response}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "1", "data": "error"}
+            return JsonResponse(myJson)

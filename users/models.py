@@ -15,3 +15,7 @@ class UserType(models.Model):
     is_admin = models.BooleanField(db_column='is_admin', default=False)
     created_date = models.DateField(db_column='created_date', blank=True, null=True, auto_now_add=True)
     userinfo = models.ForeignKey(UserInfo, db_column='userinfo', null=True, on_delete=models.PROTECT)
+
+
+
+

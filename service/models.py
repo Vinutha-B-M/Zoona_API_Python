@@ -56,3 +56,10 @@ class CashDiscount(models.Model):
     cash_discount_amount = models.CharField(db_column='cash_discount_amount', max_length=200, blank=True)
     visible = models.BooleanField(db_column='visible', default=False)
     client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
+
+class SquareCredential(models.Model):
+    application_id = models.CharField(db_column='application_id', max_length=100, blank=True)
+    application_secret = models.CharField(db_column='application_secret', max_length=100, blank=True)
+    location_id = models.CharField(db_column='location_id', max_length=100, blank=True)
+    accees_token = models.CharField(db_column='accees_token', max_length=100, blank=True)
+    client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)

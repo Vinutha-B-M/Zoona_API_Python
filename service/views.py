@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 import requests
 from .serializers import ReceiptContentSerializer, TaxesSerializer, DiscountsSerializer, ServiceListSerializer, \
-    DefaultListSerializer, FeesSerializer,CashDiscountSerializer
-from .models import ReceiptContent, Taxes, Discounts, ServicesList, Default, Fees,CashDiscount
+    DefaultListSerializer, FeesSerializer,CashDiscountSerializer,SquareCredentialSerializer
+from .models import ReceiptContent, Taxes, Discounts, ServicesList, Default, Fees,CashDiscount,SquareCredential
 from django.http import HttpResponse, JsonResponse
 from users.models import UserInfo, UserType
 
@@ -539,6 +539,81 @@ class add_cash_discount(APIView):
             serializer = CashDiscountSerializer(create)
             myJson = {"status": "1", "data": serializer.data}
             return JsonResponse(myJson)
+        else:
+            myJson = {"status": "0", "data": "error"}
+            return JsonResponse(myJson)
+
+
+class square_credential(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        if SquareCredential.objects.filter(client=user_obj).exists():
+            content = SquareCredential.objects.filter(client=user_obj)
+            serializer = SquareCredentialSerializer(content, many=True)
+            myJson = {"status": "1", "data": serializer.data}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "1", "data": ""}
+            return JsonResponse(myJson)
+
+
+
+class delete_square_credential(APIView):
+    def post(self, request):
+        data = request.data
+        id = data['id']
+        if SquareCredential.objects.filter(id=id).exists():
+            content = SquareCredential.objects.filter(id=id).delete()
+            myJson = {"status": "1", "data": "Success"}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "0", "data": "error"}
+            return JsonResponse(myJson)
+
+
+class update_square_credential(APIView):
+    def post(self, request):
+        data = request.data
+        id = data['id']
+        application_id = data['application_id']
+        application_secret = data['application_secret']
+        location_id = data['location_id']
+        accees_token = data['accees_token']
+        if SquareCredential.objects.filter(id=id).exists():
+            content = SquareCredential.objects.filter(id=id).update(application_id=application_id,location_id=location_id,
+                                                                    application_secret=application_secret,accees_token=accees_token)
+            myJson = {"status": "1", "data": "updated"}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "0", "data": "error"}
+            return JsonResponse(myJson)
+
+
+class add_square_credential(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        application_id = data['application_id']
+        application_secret = data['application_secret']
+        location_id = data['location_id']
+        accees_token = data['accees_token']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        if UserType.objects.filter(id=session, is_admin=True).exists():
+            if SquareCredential.objects.filter(client=user_obj).exists():
+                content = SquareCredential.objects.filter(client=user_obj)
+                serializer = SquareCredentialSerializer(content, many=True)
+                myJson = {"status": "1", "data": serializer.data}
+                return JsonResponse(myJson)
+            else:
+                create = SquareCredential.objects.create(application_id=application_id, application_secret=application_secret,
+                                             location_id=location_id, client=user_obj,accees_token=accees_token)
+                serializer = SquareCredentialSerializer(create)
+                myJson = {"status": "1", "data": serializer.data}
+                return JsonResponse(myJson)
         else:
             myJson = {"status": "0", "data": "error"}
             return JsonResponse(myJson)

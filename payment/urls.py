@@ -16,7 +16,7 @@ urlpatterns = [
     # path('create_token/', views.create_token.as_view(), name="create_token"),
     # path('renew_token/', views.renew_token.as_view(), name="renew_token"),
     # path('list_device/', views.list_device.as_view(), name="list_device"),
-    # path('get_device/', views.get_device.as_view(), name="get_device"),
-    # path('create_device/', views.create_device.as_view(), name="create_device"),
-    # path('create_terminal_checkout',views.create_terminal_checkout.as_view(), name="create_terminal_checkout")
+    path('get_device/', views.get_device.as_view(), name="get_device"),
+    path('create_device/', views.create_device.as_view(), name="create_device"),
+    path('create_terminal_checkout/',views.create_terminal_checkout.as_view(), name="create_terminal_checkout")
 ]
