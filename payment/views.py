@@ -412,18 +412,22 @@ class get_device(APIView):
         session = data['id']
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-        token = SquareCredential.objects.get(client=user_obj).accees_token
-        code = SquareDevice.objects.get(client=user_obj).square_id
-        list_device = requests.get(base_url + '/v2/devices/codes/' + code,
-                                    headers={"Authorization": 'Bearer ' + token,
-                                             "Content-Type": "application/json", "Square-Version": "2021-07-21"})
-        json_response = list_device.json()
-        status=json_response['device_code']['status']
-        if status=="PAIRED":
-            device_id = json_response['device_code']['device_id']
-            SquareDevice.objects.filter(square_id=code).update(status=status,device_id=device_id)
-        myJson = {"status": "1", "data": json_response}
-        return JsonResponse(myJson)
+        if SquareDevice.objects.filter(client=user_obj).exists():
+            token = SquareCredential.objects.get(client=user_obj).accees_token
+            code = SquareDevice.objects.get(client=user_obj).square_id
+            list_device = requests.get(base_url + '/v2/devices/codes/' + code,
+                                        headers={"Authorization": 'Bearer ' + token,
+                                                 "Content-Type": "application/json", "Square-Version": "2021-07-21"})
+            json_response = list_device.json()
+            status=json_response['device_code']['status']
+            if status=="PAIRED":
+                device_id = json_response['device_code']['device_id']
+                SquareDevice.objects.filter(square_id=code).update(status=status,device_id=device_id)
+            myJson = {"status": "1", "data": json_response}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "1", "data": ""}
+            return JsonResponse(myJson)
 
 
 class create_device(APIView):
