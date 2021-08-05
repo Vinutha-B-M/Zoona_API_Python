@@ -1,1 +1,1 @@
-base_url = 'https://connect.squareupsandbox.com'
+base_url = 'https://connect.squareup.com'
