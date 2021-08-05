@@ -486,7 +486,7 @@ class create_terminal_checkout(APIView):
             checkout_id = json_response['checkout']['id']
             checkout_status = json_response['checkout']['status']
             SquareTerminalCheckout.objects.create(checkout_id=checkout_id,client=user_obj)
-            PaymentEntry.objects.filter(id=payment_id).update(status=checkout_status,mode="Card")
+            PaymentEntry.objects.filter(id=payment_id).update(status=checkout_status,payment_mode="Card")
             myJson = {"status": "1", "data": json_response}
             return JsonResponse(myJson)
         else:
