@@ -190,7 +190,7 @@ def test_type_updation(test_type, payment_exist):
     for i in test_type:
         tax_id = i['id']
         tax_obj = TestType.objects.get(id=tax_id)
-        if TestTypeItem.objects.filter(tax_item=tax_id, Payment=payment_exist):
+        if TestTypeItem.objects.filter(test_item=tax_id, Payment=payment_exist):
             pass
         else:
             TestTypeItem.objects.create(test_item=tax_obj,  Payment=payment_exist)
