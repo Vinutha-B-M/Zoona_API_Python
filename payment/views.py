@@ -320,8 +320,6 @@ class order_invoice(APIView):
     def post(self, request):
         data = request.data
         session = data['id']
-        pay=PaymentEntry.objects.get(id=session)
-        SquareTerminalCheckout.objects.filter(id=4).update(payment=pay)
         cust2 = PaymentEntry.objects.get(id=session)
         veh = VehicleInfo.objects.get(id=cust2.Vehicle.id)
         cut = CustomerInfo.objects.get(id=veh.customer_id.id)
