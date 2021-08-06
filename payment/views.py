@@ -285,15 +285,16 @@ class order_list(APIView):
         customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
         cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
         cust3 = PaymentEntry.objects.filter(Vehicle__in=cust2).order_by('-created_date')
-        token = SquareCredential.objects.get(client=user_obj).accees_token
-        checkout_id = SquareTerminalCheckout.objects.filter(payment__in=cust3)
-        for i in checkout_id:
-            checkout = requests.get(base_url + '/v2/terminals/checkouts/' + i.checkout_id,
-                                    headers={"Authorization": 'Bearer ' + token,
-                                             "Content-Type": "application/json", "Square-Version": "2021-07-21"})
-            json_response = checkout.json()
-            status = json_response['checkout']['status']
-            PaymentEntry.objects.filter(id=i.payment.id).update(status=status)
+        if SquareCredential.objects.filter(client=user_obj).exists():
+            token = SquareCredential.objects.get(client=user_obj).accees_token
+            checkout_id = SquareTerminalCheckout.objects.filter(payment__in=cust3)
+            for i in checkout_id:
+                checkout = requests.get(base_url + '/v2/terminals/checkouts/' + i.checkout_id,
+                                        headers={"Authorization": 'Bearer ' + token,
+                                                 "Content-Type": "application/json", "Square-Version": "2021-07-21"})
+                json_response = checkout.json()
+                status = json_response['checkout']['status']
+                PaymentEntry.objects.filter(id=i.payment.id).update(status=status)
         serializer = PaymentEntrySerializer(cust3, many=True)
         myJson = {"status": "1", "data": serializer.data}
         return JsonResponse(myJson)
