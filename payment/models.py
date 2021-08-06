@@ -72,11 +72,10 @@ class MustHaveItem(models.Model):
     Payment = models.ForeignKey(PaymentEntry, db_column='payment', null=True, on_delete=models.PROTECT)
 
 
-
-
 class SquareTerminalCheckout(models.Model):
     checkout_id = models.CharField(db_column="checkout_id", max_length=200, blank=True)
     client = models.ForeignKey(UserInfo, db_column='client', null=True, on_delete=models.PROTECT)
+    payment = models.ForeignKey(PaymentEntry, db_column='Payment', null=True, on_delete=models.PROTECT)
 
 
 class SquareDevice(models.Model):

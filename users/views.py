@@ -30,6 +30,12 @@ class signup(APIView):
             create = UserType.objects.create(full_name=full_name, username=username, password=password,
                                              userinfo=create_obj, is_admin=True)
             serializer = UserTypeSerializer(create)
+            email_subject = f'AutoPos Admin Account For {company_name}'
+            message = f"Your AutoPos Account is created with {username}  \n\n" \
+                      f"please Do login and check AutoPos Portal"
+            from_mail = settings.EMAIL_HOST_USER
+            to_list = [username]
+            send_mail(email_subject, message, from_mail, to_list, fail_silently=False)
             myJson = {"status": "1", "data": serializer.data}
             return JsonResponse(myJson)
 
@@ -62,6 +68,14 @@ class forgot(APIView):
         data = request.data
         username = data['username']
         if UserType.objects.filter(username=username).exists():
+            allowed_chars = ''.join((string.ascii_letters, string.digits))
+            unique_id = ''.join(random.choice(allowed_chars) for _ in range(12))
+            email_subject = f'Your Password Changed <> AutoPos'
+            message = f"Your Password : {unique_id} is changed to Username is {username} . \n\n" \
+                      f"Don't share your details with others"
+            from_mail = settings.EMAIL_HOST_USER
+            to_list = [username]
+            send_mail(email_subject, message, from_mail, to_list, fail_silently=False)
             myJson = {"status": "1", "data": "Success"}
             return JsonResponse(myJson)
         else:
