@@ -75,7 +75,7 @@ class add_Customer_List(APIView):
         selected_date = data['selected_date']
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-        if CustomerInfo.objects.filter(phone_number=phone_number).exists():
+        if CustomerInfo.objects.filter(phone_number=phone_number,user_id=user_obj).exists():
             myJson = {"status": "0", "data": "Phone Number Exits"}
             return JsonResponse(myJson)
         else:
