@@ -24,6 +24,7 @@ class PaymentEntry(models.Model):
         (Card, 'Card'),
         (Other, 'Other')
     )
+    invoice_id = models.CharField(db_column="invoice", max_length=100, blank=True, null=True)
     final_amount = models.FloatField(db_column='final_amount', max_length=200, blank=True, null=True)
     additional_comments = models.CharField(db_column='additional_comments', max_length=200, blank=True)
     tax_offered = models.FloatField(db_column='tax_offered', max_length=200, blank=True, null=True)
@@ -33,8 +34,8 @@ class PaymentEntry(models.Model):
     payment_mode = models.CharField(db_column='payment_mode', max_length=10, choices=MODE, blank=True)
     status = models.CharField(db_column='status', max_length=10, choices=STATUS, blank=True)
     Vehicle = models.ForeignKey(VehicleInfo, db_column='Vehicle', null=True, on_delete=models.PROTECT)
-    created_date = models.DateField(db_column='created_date', blank=True, null=True, auto_now_add=True)
-    modified_date = models.DateField(db_column='modified_date', blank=True, null=True, auto_now_add=True)
+    created_date = models.DateTimeField(db_column='created_date', blank=True, null=True, auto_now_add=True)
+    modified_date = models.DateTimeField(db_column='modified_date', blank=True, null=True, auto_now_add=True)
 
 
 class InvoiceItem(models.Model):

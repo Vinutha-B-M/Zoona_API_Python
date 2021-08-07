@@ -11,6 +11,7 @@ class PaymentEntrySerializer(serializers.ModelSerializer):
         model = PaymentEntry
         fields = (
             'id',
+            'invoice_id',
             'status',
             'final_amount',
             'tax_offered',

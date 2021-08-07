@@ -45,7 +45,10 @@ class fetch_customer_info(APIView):
     def post(self,request):
         data = request.data
         session = data['phone_number']
-        if CustomerInfo.objects.filter(phone_number=session).exists():
+        id = data['id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        if CustomerInfo.objects.filter(phone_number=session,user_id=user_obj).exists():
             obj=CustomerInfo.objects.get(phone_number=session)
             serializer = CustomerInfoSerializer(obj)
             myJson = {"status": "1", "data": serializer.data}

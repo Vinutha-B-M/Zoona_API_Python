@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 import requests
 import uuid
 import json
+import datetime
 from customer.models import CustomerInfo, VehicleInfo, TestDetails
 from users.models import UserType, UserInfo
 from .models import PaymentEntry, InvoiceItem,TaxItem,FeesItem,DiscountItem,TestTypeItem,MustHaveItem,SquareDevice,SquareTerminalCheckout
@@ -56,46 +57,63 @@ class payment_entry(APIView):
         test_type = data['test_type']
         must_have = data['must_have']
         additional_comments = data['additional_comments']
-        payment_obj = PaymentEntry.objects.create(final_amount=final_amount, tax_offered=tax_offered,
-                                                  discount_offered=discount_offered, payment_mode=payment_mode,
-                                                  status=status, Vehicle=vehicle_obj, amount_tendered=amount_tendered,
-                                                  changed_given=changed_given,additional_comments=additional_comments)
-        for i in service_item:
-            service_id = i['id']
-            service_obj = ServicesList.objects.get(id=service_id)
-            service_name = ServicesList.objects.get(id=service_id).service_name
-            amount = ServicesList.objects.get(id=service_id).amount
-            invoice_obj = InvoiceItem.objects.create(service_item=service_obj, service_name=service_name,
-                                                     amount=amount, Payment=payment_obj)
-        for i in taxes:
-            tax_id = i['id']
-            tax_obj = Taxes.objects.get(id=tax_id)
-            tax_name = Taxes.objects.get(id=tax_id).tax_name
-            amount = Taxes.objects.get(id=tax_id).tax_value
-            TaxItem.objects.create(tax_item=tax_obj,tax_name=tax_name,amount=amount,Payment=payment_obj)
-        for i in fees:
-            fees_id = i['id']
-            fees_obj = Fees.objects.get(id=fees_id)
-            fees_name = Fees.objects.get(id=fees_id).fees_name
-            amount = Fees.objects.get(id=fees_id).fees_value
-            FeesItem.objects.create(fees_item=fees_obj,fees_name=fees_name,amount=amount,Payment=payment_obj)
-        for i in discounts:
-            discount_id = i['id']
-            discount_obj = Discounts.objects.get(id=discount_id)
-            discount_name = Discounts.objects.get(id=discount_id).offer_name
-            amount = Discounts.objects.get(id=discount_id).discount_value
-            DiscountItem.objects.create(discount_item=discount_obj,offer_name=discount_name,amount=amount,Payment=payment_obj)
-        for i in test_type:
-            test_id = i['id']
-            test_obj = TestType.objects.get(id=test_id)
-            test_name = TestType.objects.get(id=test_id).test_type_name
-            TestTypeItem.objects.create(test_item=test_obj, test_type_name=test_name,Payment=payment_obj)
-        for i in must_have:
-            must_id = i['id']
-            must_obj = MustHave.objects.get(id=must_id)
-            must_name = MustHave.objects.get(id=must_id).must_have_name
-            MustHaveItem.objects.create(must_have_item=must_obj, must_have_name=must_name,Payment=payment_obj)
-        serializer = PaymentEntrySerializer(payment_obj)
+        veh = VehicleInfo.objects.get(id=vehicle)
+        cut = CustomerInfo.objects.get(id=veh.customer_id.id)
+        user_obj = UserInfo.objects.get(id=cut.user_id.id)
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+        cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
+        if PaymentEntry.objects.filter(Vehicle__in=cust2).exists():
+            count = PaymentEntry.objects.filter(Vehicle__in=cust2).count()
+        else:
+            count=0
+        today = datetime.datetime.now()
+        count = count+1
+        month=today.strftime("%b")
+        year=today.strftime ("%y")
+        invoice_id = str(month) +'/'+str(year)+'-'+ str(count)
+        if PaymentEntry.objects.filter(invoice_id=invoice_id).exists():
+            pass
+        else:
+            payment_obj = PaymentEntry.objects.create(final_amount=final_amount, tax_offered=tax_offered,invoice_id=invoice_id,
+                                                      discount_offered=discount_offered, payment_mode=payment_mode,
+                                                      status=status, Vehicle=vehicle_obj, amount_tendered=amount_tendered,
+                                                      changed_given=changed_given,additional_comments=additional_comments)
+            for i in service_item:
+                service_id = i['id']
+                service_obj = ServicesList.objects.get(id=service_id)
+                service_name = ServicesList.objects.get(id=service_id).service_name
+                amount = ServicesList.objects.get(id=service_id).amount
+                invoice_obj = InvoiceItem.objects.create(service_item=service_obj, service_name=service_name,
+                                                         amount=amount, Payment=payment_obj)
+            for i in taxes:
+                tax_id = i['id']
+                tax_obj = Taxes.objects.get(id=tax_id)
+                tax_name = Taxes.objects.get(id=tax_id).tax_name
+                amount = Taxes.objects.get(id=tax_id).tax_value
+                TaxItem.objects.create(tax_item=tax_obj,tax_name=tax_name,amount=amount,Payment=payment_obj)
+            for i in fees:
+                fees_id = i['id']
+                fees_obj = Fees.objects.get(id=fees_id)
+                fees_name = Fees.objects.get(id=fees_id).fees_name
+                amount = Fees.objects.get(id=fees_id).fees_value
+                FeesItem.objects.create(fees_item=fees_obj,fees_name=fees_name,amount=amount,Payment=payment_obj)
+            for i in discounts:
+                discount_id = i['id']
+                discount_obj = Discounts.objects.get(id=discount_id)
+                discount_name = Discounts.objects.get(id=discount_id).offer_name
+                amount = Discounts.objects.get(id=discount_id).discount_value
+                DiscountItem.objects.create(discount_item=discount_obj,offer_name=discount_name,amount=amount,Payment=payment_obj)
+            for i in test_type:
+                test_id = i['id']
+                test_obj = TestType.objects.get(id=test_id)
+                test_name = TestType.objects.get(id=test_id).test_type_name
+                TestTypeItem.objects.create(test_item=test_obj, test_type_name=test_name,Payment=payment_obj)
+            for i in must_have:
+                must_id = i['id']
+                must_obj = MustHave.objects.get(id=must_id)
+                must_name = MustHave.objects.get(id=must_id).must_have_name
+                MustHaveItem.objects.create(must_have_item=must_obj, must_have_name=must_name,Payment=payment_obj)
+            serializer = PaymentEntrySerializer(payment_obj)
         myJson = {"status": "1", "data": serializer.data}
         return JsonResponse(myJson)
 
@@ -284,7 +302,7 @@ class order_list(APIView):
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
         cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
-        cust3 = PaymentEntry.objects.filter(Vehicle__in=cust2).order_by('-created_date')
+        cust3 = PaymentEntry.objects.filter(Vehicle__in=cust2).order_by('-invoice_id')
         if SquareCredential.objects.filter(client=user_obj).exists():
             token = SquareCredential.objects.get(client=user_obj).accees_token
             checkout_id = SquareTerminalCheckout.objects.filter(payment__in=cust3)
