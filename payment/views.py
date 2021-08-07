@@ -72,7 +72,8 @@ class payment_entry(APIView):
         else:
             invoice_id = '#Order-' + str(count)
         if PaymentEntry.objects.filter(invoice_id=invoice_id).exists():
-            pass
+            myJson = {"status": "1", "data": "error"}
+            return JsonResponse(myJson)
         else:
             payment_obj = PaymentEntry.objects.create(final_amount=final_amount, tax_offered=tax_offered,invoice_id=invoice_id,
                                                       discount_offered=discount_offered, payment_mode=payment_mode,
