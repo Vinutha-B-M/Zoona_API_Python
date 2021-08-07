@@ -66,11 +66,11 @@ class payment_entry(APIView):
             count = PaymentEntry.objects.filter(Vehicle__in=cust2).count()
         else:
             count=0
-        today = datetime.datetime.now()
         count = count+1
-        month=today.strftime("%b")
-        year=today.strftime ("%y")
-        invoice_id = str(month) +'/'+str(year)+'-'+ str(count)
+        if count<= 9 :
+            invoice_id = '#Order-0'+ str(count)
+        else:
+            invoice_id = '#Order-' + str(count)
         if PaymentEntry.objects.filter(invoice_id=invoice_id).exists():
             pass
         else:
