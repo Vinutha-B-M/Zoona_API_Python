@@ -44,12 +44,12 @@ class Customer_List(APIView):
 class fetch_customer_info(APIView):
     def post(self,request):
         data = request.data
-        session = data['phone_number']
-        id = data['id']
+        session = data['id']
+        phone_number = data['phone_number']
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-        if CustomerInfo.objects.filter(phone_number=session,user_id=user_obj).exists():
-            obj=CustomerInfo.objects.get(phone_number=session)
+        if CustomerInfo.objects.filter(phone_number=phone_number,user_id=user_obj).exists():
+            obj=CustomerInfo.objects.get(phone_number=phone_number)
             serializer = CustomerInfoSerializer(obj)
             myJson = {"status": "1", "data": serializer.data}
             return JsonResponse(myJson)
