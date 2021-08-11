@@ -1,0 +1,193 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>SignUp</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #212529;
+            text-align: left;
+            background-color: #fff;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p {
+            margin: 0;
+            padding: 0;
+        }
+
+        #invoice {
+            margin-bottom: 30px;
+        }
+
+        .invoice {
+            padding: 0 20px;
+        }
+
+        .col-6 {
+            width: 50%;
+            float: left;
+        }
+
+        .fright {
+            float: right;
+            text-align: right;
+        }
+
+        .name {
+            font-size: 2rem;
+            margin: 0;
+            line-height: normal;
+        }
+
+        .row:before,
+        .row:after {
+            display: table;
+            content: " ";
+        }
+
+        .row:after {
+            clear: both;
+        }
+
+        .border {
+            padding: 10px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #3989c6;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        .invoice-id {
+            color: #3989c6;
+            font-size: 24px;
+            line-height: normal;
+        }
+
+        .invoice-details {
+            margin-bottom: 10px;
+            display: block;
+            width: 100%;
+        }
+
+        .text-gray-light {
+            font-size: 18px;
+        }
+
+        .m20 {
+            margin-bottom: 20px;
+        }
+
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-spacing: 0;
+            margin-bottom: 20px;
+        }
+
+        table.order-sum .no {
+            color: #fff;
+            font-size: 20px;
+            background: #3989c6;
+        }
+
+        .top-brdr tr {
+            background: #eee;
+            border: none;
+            border-color: #fff !important;
+        }
+
+        .top-brdr tr td {
+            border-color: #fff !important;
+        }
+
+        table.order-sum td,
+        table.order-sum th {
+            padding: 15px;
+            border: none;
+        }
+
+        table th {
+            font-weight: 400;
+            font-size: 1.6em;
+        }
+
+        table.order-sum tr:first-child td {
+            border: none;
+        }
+
+        table.order-sum tr td {
+            border-top: 1px solid #aaa;
+            text-align: center;
+        }
+
+        table.order-sum tbody:last-child tr:last-child td {
+            color: #3989c6;
+            font-size: 1.4em;
+
+        }
+
+        table.order-sum tbody:last-child tr td {
+            text-align: right;
+        }
+
+        table.order-sum tbody:last-child tr td:first-child,
+        table.order-sum tbody:last-child tr:last-child td:first-child {
+            border: none;
+
+        }
+
+
+        table.top-brdr tr:last-child td {
+            color: #212529 !important;
+            font-size: 1.4em;
+
+        }
+
+        table.order-sum tbody:last-child tr:last-child td {
+            border-top: 1px solid #3989c6;
+        }
+
+        .footer {
+            width: 100%;
+            text-align: center;
+            color: #777;
+            border-top: 1px solid #aaa;
+            padding: 8px 0;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <table class="invoice overflow-auto" border="0" cellspacing="0" cellpadding="30">
+        <tr>
+            <td>
+                <p>Hi {{}},</p> <br>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{}} welcomes you on board, refer the below mentioned credentials to login to your application.</p><br>
+                <p>Login ID/UserName: {{}} </p><br>
+                <p>Password: {{}} </p> <br><br><br>
+                <p>Regards, </p> <br>
+                <p>Team AutoPos </p>
+
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

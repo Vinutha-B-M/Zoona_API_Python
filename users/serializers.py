@@ -21,5 +21,7 @@ class UserTypeSerializer(serializers.ModelSerializer):
             'full_name',
             'phone_number',
             'is_admin',
+            'profile',
             'userinfo',
         )
+

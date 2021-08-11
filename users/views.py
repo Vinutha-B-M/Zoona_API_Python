@@ -1,6 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-# Create your views here.
+from django.core.files.storage import default_storage
+from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.views.decorators.csrf import csrf_exempt
 import json
 import random, string
 from rest_framework.decorators import api_view
@@ -31,8 +34,11 @@ class signup(APIView):
                                              userinfo=create_obj, is_admin=True)
             serializer = UserTypeSerializer(create)
             email_subject = f'AutoPos Admin Account For {company_name}'
-            message = f"Your AutoPos Account is created with {username}  \n\n" \
-                      f"please Do login and check AutoPos Portal"
+            message = f"Hi {full_name}, \n\n"\
+                      f"{company_name} welcomes you on board, refer the below mentioned credentials to login to your application.  \n\n" \
+                      f"Login ID/UserName: {username} \n"\
+                      f"Password: {password} \n\n"\
+                      f"Regards, \nTeam AutoPos"
             from_mail = settings.EMAIL_HOST_USER
             to_list = [username]
             send_mail(email_subject, message, from_mail, to_list, fail_silently=False)
@@ -66,6 +72,7 @@ class forgot(APIView):
 
     def post(self, request):
         data = request.data
+
         username = data['username']
         if UserType.objects.filter(username=username).exists():
             allowed_chars = ''.join((string.ascii_letters, string.digits))
@@ -123,17 +130,22 @@ class user_info(APIView):
 
 class update_user_info(APIView):
     def post(self, request):
-        # session = request.session.get("user_id")
-        # if session:
+
         data = request.data
+        pic = request.FILES.get('profile')
         session = data['id']
         full_name = data['full_name']
         username = data['username']
         phone_number = data['phone_number']
+
         if UserType.objects.filter(id=session).exists():
 
-            user_obj = UserType.objects.filter(id=session).update(full_name=full_name, username=username,
-                                                                  phone_number=phone_number)
+            user_obj = UserType.objects.get(id=session)
+            user_obj.full_name=full_name
+            user_obj.username=username
+            user_obj.phone_number=phone_number
+            user_obj.profile=pic
+            user_obj.save()
             user_data = UserType.objects.get(id=session)
             serializer = UserTypeSerializer(user_data)
             myJson = {"status": "1", "data": serializer.data}
@@ -165,7 +177,7 @@ class add_user(APIView):
         else:
             user_obj = UserType.objects.create(username=username, is_admin=is_admin, password=unique_id,
                                                userinfo=user_obj)
-            email_subject = f'Your Sales Account  For {company_name}'
+            email_subject = f'Your AutoPos Account  For {company_name}'
             message = f"Your Username is {username} with Password : {unique_id} \n\n" \
                       f"Don't share your details with others"
             from_mail = settings.EMAIL_HOST_USER
@@ -233,3 +245,19 @@ class delete_users(APIView):
         else:
             myJson = {"status": "0", "data": "error"}
             return JsonResponse(myJson)
+
+
+@csrf_exempt
+def company_logo(request):
+    if request.method == 'POST':
+        pic=request.FILES.get('company_logo')
+        id = request.POST.get('id')
+        user_info_obj = UserType.objects.get(id=id)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        user_profile=UserInfo.objects.get(id=user_obj.id)
+        user_profile.company_logo=pic
+        user_profile.save()
+        user_data = UserType.objects.filter(userinfo=user_obj)
+        serializer = UserTypeSerializer(user_data, many=True)
+        myJson = {"status": "1", "data": serializer.data}
+        return JsonResponse(myJson)
