@@ -137,13 +137,19 @@ class update_user_info(APIView):
         full_name = data['full_name']
         username = data['username']
         phone_number = data['phone_number']
+        company_name = data['company_name']
 
         if UserType.objects.filter(id=session).exists():
+
             user_obj = UserType.objects.get(id=session)
+            user = UserInfo.objects.get(id=user_obj.userinfo.id)
+            user.company_name = company_name
+            user.save()
             user_obj.full_name=full_name
             user_obj.username=username
             user_obj.phone_number=phone_number
-            user_obj.profile=pic
+            if pic != None:
+                user_obj.profile=pic
             user_obj.save()
             user_data = UserType.objects.get(id=session)
             serializer = UserTypeSerializer(user_data)

@@ -44,7 +44,9 @@ class update_receipt_content(APIView):
         footer_note = data['footer_note']
         if ReceiptContent.objects.filter(id=id).exists():
             content = ReceiptContent.objects.get(id=id)
-            content.company_logo=pic
+            if pic != None:
+                content.company_logo=pic
+                print("yes")
             content.address=address
             content.email=email
             content.footer_note=footer_note
@@ -68,11 +70,11 @@ class add_receipt_content(APIView):
         address = data['address']
         email = data['email']
         footer_note = data['footer_note']
-        print(session)
+
         user_info_obj = UserType.objects.get(id=session)
-        print(user_info_obj)
+
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-        print(user_obj)
+
         if UserType.objects.filter(id=session, is_admin=True).exists():
             create = ReceiptContent.objects.create()
             create.address=address
