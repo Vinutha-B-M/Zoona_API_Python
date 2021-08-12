@@ -147,7 +147,7 @@ class add_Vehicle_List(APIView):
         Transmission = data['Transmission']
         engine_group = data['engine_group']
         customer_obj = CustomerInfo.objects.get(id=customer_id)
-        if VehicleInfo.objects.filter(vin=vin).exists():
+        if VehicleInfo.objects.filter(vin=vin,customer_id=customer_obj).exists():
             myJson = {"status": "0", "data": "VIN Exists"}
             return JsonResponse(myJson)
         else:
