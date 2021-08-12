@@ -139,7 +139,6 @@ class update_user_info(APIView):
         phone_number = data['phone_number']
 
         if UserType.objects.filter(id=session).exists():
-
             user_obj = UserType.objects.get(id=session)
             user_obj.full_name=full_name
             user_obj.username=username
@@ -252,12 +251,16 @@ def company_logo(request):
     if request.method == 'POST':
         pic=request.FILES.get('company_logo')
         id = request.POST.get('id')
-        user_info_obj = UserType.objects.get(id=id)
-        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-        user_profile=UserInfo.objects.get(id=user_obj.id)
-        user_profile.company_logo=pic
-        user_profile.save()
-        user_data = UserType.objects.filter(userinfo=user_obj)
-        serializer = UserTypeSerializer(user_data, many=True)
-        myJson = {"status": "1", "data": serializer.data}
-        return JsonResponse(myJson)
+        if UserType.objects.filter(id=id).exists():
+            user_info_obj = UserType.objects.get(id=id)
+            user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+            user_profile=UserInfo.objects.get(id=user_obj.id)
+            user_profile.company_logo=pic
+            user_profile.save()
+            user_data = UserType.objects.filter(userinfo=user_obj)
+            serializer = UserTypeSerializer(user_data, many=True)
+            myJson = {"status": "1", "data": serializer.data}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "0", "data":"error"}
+            return JsonResponse(myJson)

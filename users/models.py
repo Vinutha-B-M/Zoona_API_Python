@@ -4,7 +4,6 @@ from django.db import models
 # Create your models here.
 class UserInfo(models.Model):
     company_name = models.CharField(db_column='company_name', max_length=200, blank=True)
-    company_logo = models.FileField(blank=True,null=True)
     created_date = models.DateField(db_column='created_date', blank=True, null=True, auto_now_add=True)
 
 

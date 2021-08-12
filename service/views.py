@@ -7,7 +7,7 @@ from .serializers import ReceiptContentSerializer, TaxesSerializer, DiscountsSer
 from .models import ReceiptContent, Taxes, Discounts, ServicesList, Default, Fees,CashDiscount,SquareCredential
 from django.http import HttpResponse, JsonResponse
 from users.models import UserInfo, UserType
-
+from users.serializers import UserInfoSerializer, UserTypeSerializer
 
 # Create your views here.
 class receipt_content(APIView):
@@ -20,8 +20,10 @@ class receipt_content(APIView):
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         if ReceiptContent.objects.filter(client=user_obj).exists():
             content = ReceiptContent.objects.get(client=user_obj)
+            userdata= UserType.objects.get(id=session)
+            serializer2= UserTypeSerializer(userdata)
             serializer = ReceiptContentSerializer(content)
-            myJson = {"status": "1", "data": serializer.data}
+            myJson = {"status": "1", "data": serializer.data,"userdata":serializer2.data}
             return JsonResponse(myJson)
         else:
             myJson = {"status": "1", "data": ""}
@@ -35,16 +37,18 @@ class update_receipt_content(APIView):
         # session = request.session.get("user_id")
         # if session:
         data = request.data
+        pic = request.FILES.get('company_logo')
         id = data['id']
-        company_name = data['company_name']
         address = data['address']
-        phone_number = data['phone_number']
-        website_url = data['website_url']
+        email = data['email']
         footer_note = data['footer_note']
         if ReceiptContent.objects.filter(id=id).exists():
-            content = ReceiptContent.objects.filter(id=id).update(company_name=company_name,address=address,
-                                                                  phone_number=phone_number,website_url=website_url,
-                                                                  footer_note=footer_note)
+            content = ReceiptContent.objects.get(id=id)
+            content.company_name=pic
+            content.address=address
+            content.email=email
+            content.footer_note=footer_note
+            content.save()
             myJson = {"status": "1", "data": "Success"}
             return JsonResponse(myJson)
         else:
@@ -59,20 +63,24 @@ class add_receipt_content(APIView):
         # session = request.session.get("user_id")
         # if session:
         data = request.data
+        pic = request.FILES.get('company_logo')
         session = data['id']
-        data = request.data
-        company_name = data['company_name']
         address = data['address']
-        phone_number = data['phone_number']
-        website_url = data['website_url']
+        email = data['email']
         footer_note = data['footer_note']
+        print(session)
         user_info_obj = UserType.objects.get(id=session)
+        print(user_info_obj)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-
+        print(user_obj)
         if UserType.objects.filter(id=session, is_admin=True).exists():
-            create = ReceiptContent.objects.create(company_name=company_name, address=address,
-                                                   phone_number=phone_number,
-                                                   website_url=website_url, footer_note=footer_note, client=user_obj)
+            create = ReceiptContent.objects.create()
+            create.address=address
+            create.company_logo=pic
+            create.email=email
+            create.footer_note=footer_note
+            create.client=user_obj
+            create.save()
             serializer = ReceiptContentSerializer(create)
             myJson = {"status": "1", "data": serializer.data}
             return JsonResponse(myJson)

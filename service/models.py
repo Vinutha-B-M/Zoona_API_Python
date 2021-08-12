@@ -5,10 +5,9 @@ from users.models import UserInfo
 # Create your models here.
 
 class ReceiptContent(models.Model):
-    company_name = models.CharField(db_column='company_name', max_length=200, blank=True)
+    company_logo = models.FileField(blank=True, null=True)
     address = models.CharField(db_column='address', max_length=200, blank=True)
-    phone_number = models.CharField(db_column='phone_number', max_length=200, blank=True)
-    website_url = models.CharField(db_column='website_url', max_length=200, blank=True)
+    email = models.CharField(db_column='email', max_length=200, blank=True)
     footer_note = models.CharField(db_column='footer_note', max_length=200, blank=True)
     client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
 
