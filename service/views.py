@@ -44,7 +44,7 @@ class update_receipt_content(APIView):
         footer_note = data['footer_note']
         if ReceiptContent.objects.filter(id=id).exists():
             content = ReceiptContent.objects.get(id=id)
-            content.company_name=pic
+            content.company_logo=pic
             content.address=address
             content.email=email
             content.footer_note=footer_note
