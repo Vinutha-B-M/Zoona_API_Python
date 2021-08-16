@@ -1,3 +1,5 @@
+from os.path import split
+
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 # Create your views here.
@@ -6,6 +8,7 @@ from rest_framework.views import APIView
 import requests
 import uuid
 import json
+from django.db.models import Q
 import datetime
 from customer.models import CustomerInfo, VehicleInfo, TestDetails
 from users.models import UserType, UserInfo
@@ -362,6 +365,41 @@ class order_invoice(APIView):
         return JsonResponse(myJson)
 
 
+class confirm_list(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+        cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
+        cust3 = PaymentEntry.objects.filter(Q(status ='Completed') | Q(status='COMPLETED'),Vehicle__in=cust2).order_by('-invoice_id')
+        serializer = PaymentEntrySerializer(cust3, many=True)
+        myJson = {"status": "1", "data": serializer.data}
+        return JsonResponse(myJson)
+
+class datewise_order_list(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        first = data['first_date']
+        last = data['last_date']
+        year,month,date =first.split('-')
+        year=int(year)
+        month=int(month)
+        date=int(date)
+        last_year, last_month, last_date = last.split('-')
+        last_year = int(last_year)
+        last_month = int(last_month)
+        last_date = int(last_date)
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+        cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
+        cust3 = PaymentEntry.objects.filter(Q(status ='Completed') | Q(status='COMPLETED'),created_date__date__range=(datetime.date(year,month,date), datetime.date(last_year,last_month,last_date)), Vehicle__in=cust2).order_by('-invoice_id')
+        serializer = PaymentEntrySerializer(cust3, many=True)
+        myJson = {"status": "1", "data":serializer.data}
+        return JsonResponse(myJson)
 #
 # class create_token(APIView):
 #     def post(self, request):

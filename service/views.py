@@ -46,7 +46,6 @@ class update_receipt_content(APIView):
             content = ReceiptContent.objects.get(id=id)
             if pic != None:
                 content.company_logo=pic
-                print("yes")
             content.address=address
             content.email=email
             content.footer_note=footer_note
