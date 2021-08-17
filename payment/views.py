@@ -400,6 +400,42 @@ class datewise_order_list(APIView):
         serializer = PaymentEntrySerializer(cust3, many=True)
         myJson = {"status": "1", "data":serializer.data}
         return JsonResponse(myJson)
+
+class datewise_customer_list(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        first = data['first_date']
+        last = data['last_date']
+        year,month,date =first.split('-')
+        year=int(year)
+        month=int(month)
+        date=int(date)
+        last_year, last_month, last_date = last.split('-')
+        last_year = int(last_year)
+        last_month = int(last_month)
+        last_date = int(last_date)
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+        cust3 = VehicleInfo.objects.filter(customer_id__in=customer_obj,created_date__date__range=(datetime.date(year,month,date), datetime.date(last_year,last_month,last_date)))
+        serializer = VehicleInfoSerializer(cust3, many=True)
+        myJson = {"status": "1", "data":serializer.data}
+        return JsonResponse(myJson)
+
+class delete_customer(APIView):
+    def post(self,request):
+        data = request.data
+        session = data['vehicle_id']
+        vehicle_obj=VehicleInfo.objects.get(id=session)
+        if PaymentEntry.objects.filter(Vehicle=vehicle_obj).exists():
+            myJson = {"status": "0", "data": "Order_Exist"}
+            return JsonResponse(myJson)
+        else:
+            VehicleInfo.objects.filter(id=session).delete()
+            myJson = {"status": "1", "data": "Deleted"}
+            return JsonResponse(myJson)
+
 #
 # class create_token(APIView):
 #     def post(self, request):

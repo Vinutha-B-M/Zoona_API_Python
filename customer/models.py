@@ -35,7 +35,7 @@ class VehicleInfo(models.Model):
     cylinder = models.CharField(db_column='cylinder', max_length=200, blank=True)
     Transmission = models.CharField(db_column='Transmission', max_length=10, choices=STATUS, blank=True)
     customer_id = models.ForeignKey(CustomerInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
-    created_date = models.DateField(db_column='created_date', blank=True, null=True, auto_now_add=True)
+    created_date = models.DateTimeField(db_column='created_date', blank=True, null=True, auto_now_add=True)
 
 
 class TestDetails(models.Model):
