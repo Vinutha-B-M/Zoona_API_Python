@@ -14,7 +14,9 @@ from .models import UserInfo, UserType
 from rest_framework import viewsets, status
 from django.conf import settings
 from django.core.mail import send_mail
-
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 class signup(APIView):
 
@@ -23,6 +25,7 @@ class signup(APIView):
         company_name = data['company_name']
         full_name = data['full_name']
         username = data['username']
+        username = username.lower()
         password = data['password']
         if UserType.objects.filter(username=username).exists():
             myJson = {"status": "0", "data": "Username Exits"}
@@ -33,15 +36,20 @@ class signup(APIView):
             create = UserType.objects.create(full_name=full_name, username=username, password=password,
                                              userinfo=create_obj, is_admin=True)
             serializer = UserTypeSerializer(create)
-            email_subject = f'AutoPos Admin Account For {company_name}'
-            message = f"Hi {full_name}, \n\n"\
-                      f"{company_name} welcomes you on board, refer the below mentioned credentials to login to your application.  \n\n" \
-                      f"Login ID/UserName: {username} \n"\
-                      f"Password: {password} \n\n"\
-                      f"Regards, \nTeam AutoPos"
+            html_content = render_to_string('signup.html', {'full_name': full_name,'username':username,'password':password})  # render with dynamic value
+            text_content = strip_tags(html_content)
+            email_subject = f'AutoPos Admin Account For Zunaco'
+            # message = f"Hi {full_name}, \n\n"\
+            #           f"Zunaco welcomes you on board, refer the below mentioned credentials to login to your application.  \n\n" \
+            #           f"Login ID/UserName: {username} \n"\
+            #           f"Password: {password} \n\n"\
+            #           f"Regards, \nTeam AutoPos"
             from_mail = settings.EMAIL_HOST_USER
             to_list = [username]
-            send_mail(email_subject, message, from_mail, to_list, fail_silently=False)
+            msg = EmailMultiAlternatives(email_subject, text_content, from_mail, to_list)
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
+            # send_mail(email_subject, message, from_mail, to_list, fail_silently=False)
             myJson = {"status": "1", "data": serializer.data}
             return JsonResponse(myJson)
 
@@ -51,6 +59,7 @@ class login(APIView):
     def post(self, request):
         data = request.data
         username = data['username']
+        username = username.lower()
         password = data['password']
         if UserType.objects.filter(username=username).exists():
             if UserType.objects.get(username=username).password == password:
@@ -72,17 +81,22 @@ class forgot(APIView):
 
     def post(self, request):
         data = request.data
-
         username = data['username']
+        username = username.lower()
         if UserType.objects.filter(username=username).exists():
             allowed_chars = ''.join((string.ascii_letters, string.digits))
             unique_id = ''.join(random.choice(allowed_chars) for _ in range(12))
+            html_content = render_to_string('forgot.html', { 'username': username,
+                                                            'password': unique_id})  # render with dynamic value
+            text_content = strip_tags(html_content)
             email_subject = f'Your Password Changed <> AutoPos'
-            message = f"Your Password : {unique_id} is changed to Username is {username} . \n\n" \
-                      f"Don't share your details with others"
+
             from_mail = settings.EMAIL_HOST_USER
             to_list = [username]
-            send_mail(email_subject, message, from_mail, to_list, fail_silently=False)
+            msg = EmailMultiAlternatives(email_subject, text_content, from_mail, to_list)
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
+            UserType.objects.filter(username=username).update(password=unique_id)
             myJson = {"status": "1", "data": "Success"}
             return JsonResponse(myJson)
         else:
@@ -136,6 +150,7 @@ class update_user_info(APIView):
         session = data['id']
         full_name = data['full_name']
         username = data['username']
+        username = username.lower()
         phone_number = data['phone_number']
         company_name = data['company_name']
 
@@ -172,6 +187,7 @@ class add_user(APIView):
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         username = data['username']
+        username = username.lower()
         is_admin = data['is_admin']
         company_name = user_obj.company_name
         allowed_chars = ''.join((string.ascii_letters, string.digits))
@@ -182,12 +198,15 @@ class add_user(APIView):
         else:
             user_obj = UserType.objects.create(username=username, is_admin=is_admin, password=unique_id,
                                                userinfo=user_obj)
-            email_subject = f'Your AutoPos Account  For {company_name}'
-            message = f"Your Username is {username} with Password : {unique_id} \n\n" \
-                      f"Don't share your details with others"
+            email_subject = f'Your Zunaco AutoPos Account  For {company_name}'
+            html_content = render_to_string('new_user.html', { 'username': username,
+                                                            'password': unique_id})  # render with dynamic value
+            text_content = strip_tags(html_content)
             from_mail = settings.EMAIL_HOST_USER
             to_list = [username]
-            send_mail(email_subject, message, from_mail, to_list, fail_silently=False)
+            msg = EmailMultiAlternatives(email_subject, text_content, from_mail, to_list)
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
             myJson = {"status": "1", "data": "success"}
             return JsonResponse(myJson)
     # else:
@@ -224,12 +243,13 @@ class update_users(APIView):
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         username = data['username']
+        username = username.lower()
         is_admin = data['is_admin']
         company_name = user_obj.company_name
         allowed_chars = ''.join((string.ascii_letters, string.digits))
         unique_id = ''.join(random.choice(allowed_chars) for _ in range(12))
         user_obj = UserType.objects.filter(id=session).update(username=username, is_admin=is_admin, password=unique_id)
-        email_subject = f'Your Sales Account  For {company_name}'
+        email_subject = f'Your Zunaco AutoPos Sales Account For {company_name}'
         message = f"Your Username is {username} with Password : {unique_id} \n\n" \
                   f"Don't share your details with others"
         from_mail = settings.EMAIL_HOST_USER
