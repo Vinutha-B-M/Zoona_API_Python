@@ -15,6 +15,7 @@ class UserType(models.Model):
     is_admin = models.BooleanField(db_column='is_admin', default=False)
     created_date = models.DateField(db_column='created_date', blank=True, null=True, auto_now_add=True)
     profile = models.ImageField(blank=True,null=True)
+    image_name = models.CharField(db_column='image_name', blank=True,max_length=300)
     userinfo = models.ForeignKey(UserInfo, db_column='userinfo', null=True, on_delete=models.PROTECT)
 
 

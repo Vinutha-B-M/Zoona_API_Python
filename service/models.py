@@ -6,6 +6,7 @@ from users.models import UserInfo
 
 class ReceiptContent(models.Model):
     company_logo = models.FileField(blank=True, null=True)
+    image_name = models.CharField(db_column='image_name', max_length=300,blank=True)
     address = models.CharField(db_column='address', max_length=200, blank=True)
     email = models.CharField(db_column='email', max_length=200, blank=True)
     footer_note = models.CharField(db_column='footer_note', max_length=200, blank=True)

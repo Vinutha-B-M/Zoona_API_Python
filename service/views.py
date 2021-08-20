@@ -48,6 +48,7 @@ class update_receipt_content(APIView):
             content = ReceiptContent.objects.get(id=id)
             if pic != None:
                 content.company_logo=pic
+                content.image_name = pic
             content.address=address
             content.email=email
             content.footer_note=footer_note
@@ -83,6 +84,7 @@ class add_receipt_content(APIView):
             create.email=email
             create.footer_note=footer_note
             create.client=user_obj
+            create.image_name=pic
             create.save()
             serializer = ReceiptContentSerializer(create)
             myJson = {"status": "1", "data": serializer.data}

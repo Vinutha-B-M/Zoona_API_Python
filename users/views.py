@@ -165,6 +165,7 @@ class update_user_info(APIView):
             user_obj.phone_number=phone_number
             if pic != None:
                 user_obj.profile=pic
+                user_obj.image_name=pic
             user_obj.save()
             user_data = UserType.objects.get(id=session)
             serializer = UserTypeSerializer(user_data)
