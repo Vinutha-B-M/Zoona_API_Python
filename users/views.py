@@ -245,16 +245,7 @@ class update_users(APIView):
         username = data['username']
         username = username.lower()
         is_admin = data['is_admin']
-        company_name = user_obj.company_name
-        allowed_chars = ''.join((string.ascii_letters, string.digits))
-        unique_id = ''.join(random.choice(allowed_chars) for _ in range(12))
-        user_obj = UserType.objects.filter(id=session).update(username=username, is_admin=is_admin, password=unique_id)
-        email_subject = f'Your Zunaco AutoPos Sales Account For {company_name}'
-        message = f"Your Username is {username} with Password : {unique_id} \n\n" \
-                  f"Don't share your details with others"
-        from_mail = settings.EMAIL_HOST_USER
-        to_list = [username]
-        send_mail(email_subject, message, from_mail, to_list, fail_silently=False)
+        user_obj = UserType.objects.filter(id=session).update(username=username, is_admin=is_admin)
         myJson = {"status": "1", "data": "success"}
         return JsonResponse(myJson)
 

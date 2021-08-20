@@ -26,7 +26,9 @@ class receipt_content(APIView):
             myJson = {"status": "1", "data": serializer.data,"userdata":serializer2.data}
             return JsonResponse(myJson)
         else:
-            myJson = {"status": "1", "data": ""}
+            userdata = UserType.objects.get(id=session)
+            serializer2 = UserTypeSerializer(userdata)
+            myJson = {"status": "1", "data": "", "userdata":serializer2.data}
             return JsonResponse(myJson)
     # else:
     #     myJson = {"status": "0", "message": "Login expired"}

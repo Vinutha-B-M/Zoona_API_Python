@@ -328,11 +328,12 @@ class total_sales(APIView):
         customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
         cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
         cust3 = PaymentEntry.objects.filter(Vehicle__in=cust2)
+        cust4 = PaymentEntry.objects.filter(Q(status ='Completed') | Q(status='COMPLETED'),Vehicle__in=cust2).count()
         total = 0
         count = cust3.count()
         for i in cust3:
             total = total + i.final_amount
-        sales = {"sales_count": count, "total_sales": total}
+        sales = {"sales_count": cust4, "total_sales": total}
         myJson = {"status": "1", "data": sales}
         return JsonResponse(myJson)
 
