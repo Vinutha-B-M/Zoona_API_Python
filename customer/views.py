@@ -147,15 +147,25 @@ class add_Vehicle_List(APIView):
         Transmission = data['Transmission']
         engine_group = data['engine_group']
         customer_obj = CustomerInfo.objects.get(id=customer_id)
-        if VehicleInfo.objects.filter(vin=vin,customer_id=customer_obj).exists():
-            myJson = {"status": "0", "data": "VIN Exists"}
-            return JsonResponse(myJson)
+        user = UserInfo.objects.get(id=customer_obj.user_id.id).id
+        user_obj = UserInfo.objects.get(id=user)
+        customer_obj_list = CustomerInfo.objects.filter(user_id=user_obj)
+        if CustomerInfo.objects.filter(user_id=user).exists():
+            if VehicleInfo.objects.filter(customer_id__in=customer_obj_list,vin=vin).exists():
+                myJson = {"status": "0", "data": "VIN Exists"}
+                return JsonResponse(myJson)
+            else:
+                create = VehicleInfo.objects.create(customer_id=customer_obj, year=year, brand=brand,
+                                                    brand_model=brand_model,
+                                                    odo_meter=odo_meter, lic_plate=lic_plate, gvwr=gvwr, vin=vin,
+                                                    engine=engine,
+                                                    cylinder=cylinder, Transmission=Transmission,
+                                                    engine_group=engine_group)
+                serializer = VehicleInfoSerializer(create)
+                myJson = {"status": "1", "data": serializer.data}
+                return JsonResponse(myJson)
         else:
-            create = VehicleInfo.objects.create(customer_id=customer_obj, year=year, brand=brand, brand_model=brand_model,
-                                                odo_meter=odo_meter, lic_plate=lic_plate, gvwr=gvwr, vin=vin, engine=engine,
-                                                cylinder=cylinder, Transmission=Transmission, engine_group=engine_group)
-            serializer = VehicleInfoSerializer(create)
-            myJson = {"status": "1", "data": serializer.data}
+            myJson = {"status": "0", "data":"login_error"}
             return JsonResponse(myJson)
 
 class update_vehicle_list(APIView):
@@ -173,13 +183,41 @@ class update_vehicle_list(APIView):
         vehicle_id = data['id']
         Transmission = data['Transmission']
         engine_group = data['engine_group']
-        VehicleInfo.objects.filter(id=vehicle_id).update(year=year, brand=brand, brand_model=brand_model,
-                                            odo_meter=odo_meter, lic_plate=lic_plate, gvwr=gvwr, vin=vin, engine=engine,
-                                            cylinder=cylinder, Transmission=Transmission, engine_group=engine_group)
-        create = VehicleInfo.objects.get(id=vehicle_id)
-        serializer = VehicleInfoSerializer(create)
-        myJson = {"status": "1", "data": serializer.data}
-        return JsonResponse(myJson)
+        vehicle = VehicleInfo.objects.get(id=vehicle_id)
+        customer = CustomerInfo.objects.get(id=vehicle.customer_id.id).id
+        if VehicleInfo.objects.filter(id=vehicle_id).exists():
+            customer_obj = CustomerInfo.objects.get(id=customer)
+            user = UserInfo.objects.get(id=customer_obj.user_id.id).id
+            user_obj = UserInfo.objects.get(id=user)
+            customer_obj_list = CustomerInfo.objects.filter(user_id=user_obj).values_list('id')
+            if CustomerInfo.objects.filter(user_id=user,id=customer).exists():
+                if VehicleInfo.objects.filter(customer_id=customer_obj,vin=vin,id=vehicle_id).exists():
+                    VehicleInfo.objects.filter(id=vehicle_id).update(year=year, brand=brand, brand_model=brand_model,
+                                                                     odo_meter=odo_meter, lic_plate=lic_plate, gvwr=gvwr,
+                                                                     vin=vin, engine=engine,
+                                                                     cylinder=cylinder, Transmission=Transmission,
+                                                                     engine_group=engine_group)
+                    create = VehicleInfo.objects.get(id=vehicle_id)
+                    serializer = VehicleInfoSerializer(create)
+                    myJson = {"status": "1", "data": serializer.data}
+                    return JsonResponse(myJson)
+                elif VehicleInfo.objects.filter(customer_id__in=customer_obj_list,vin=vin).exists():
+                    myJson = {"status": "1", "data": "VIN Exists"}
+                    return JsonResponse(myJson)
+                else:
+                    VehicleInfo.objects.filter(id=vehicle_id).update(year=year, brand=brand, brand_model=brand_model,
+                                                                     odo_meter=odo_meter, lic_plate=lic_plate,
+                                                                     gvwr=gvwr,
+                                                                     vin=vin, engine=engine,
+                                                                     cylinder=cylinder, Transmission=Transmission,
+                                                                     engine_group=engine_group)
+                    create = VehicleInfo.objects.get(id=vehicle_id)
+                    serializer = VehicleInfoSerializer(create)
+                    myJson = {"status": "1", "data": serializer.data}
+                    return JsonResponse(myJson)
+        else:
+            myJson = {"status": "1", "data": "Login_error"}
+            return JsonResponse(myJson)
 
 class Test_List(APIView):
 
