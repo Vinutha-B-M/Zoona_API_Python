@@ -246,9 +246,13 @@ class update_users(APIView):
         username = data['username']
         username = username.lower()
         is_admin = data['is_admin']
-        user_obj = UserType.objects.filter(id=session).update(username=username, is_admin=is_admin)
-        myJson = {"status": "1", "data": "success"}
-        return JsonResponse(myJson)
+        if UserType.objects.filter(username=username).exists():
+            myJson = {"status": "0", "data": "Username Exits"}
+            return JsonResponse(myJson)
+        else:
+            user_obj = UserType.objects.filter(id=session).update(username=username, is_admin=is_admin)
+            myJson = {"status": "1", "data": "success"}
+            return JsonResponse(myJson)
 
 
 class delete_users(APIView):

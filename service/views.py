@@ -80,11 +80,12 @@ class add_receipt_content(APIView):
         if UserType.objects.filter(id=session, is_admin=True).exists():
             create = ReceiptContent.objects.create()
             create.address=address
-            create.company_logo=pic
+            if pic != None:
+                create.company_logo=pic
+                create.image_name = pic
             create.email=email
             create.footer_note=footer_note
             create.client=user_obj
-            create.image_name=pic
             create.save()
             serializer = ReceiptContentSerializer(create)
             myJson = {"status": "1", "data": serializer.data}

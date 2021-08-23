@@ -520,11 +520,15 @@ class get_device(APIView):
                                         headers={"Authorization": 'Bearer ' + token,
                                                  "Content-Type": "application/json", "Square-Version": "2021-07-21"})
             json_response = list_device.json()
+
+            device=''
             status=json_response['device_code']['status']
             if status=="PAIRED":
                 device_id = json_response['device_code']['device_id']
                 SquareDevice.objects.filter(square_id=code).update(status=status,device_id=device_id)
-            myJson = {"status": "1", "data": json_response}
+            if status=="EXPIRED":
+                device = SquareDevice.objects.get(client=user_obj).id
+            myJson = {"status": "1", "data": json_response,"device":device}
             return JsonResponse(myJson)
         else:
             myJson = {"status": "1", "data": ""}
