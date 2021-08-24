@@ -153,11 +153,14 @@ class Vehicle_List(APIView):
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
         cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
+
+        cust3 = TermsItems.objects.filter(customer__in=customer_obj)
+        serializer3 = TermsItemSerializer(cust3,many=True)
         serializer = VehicleInfoSerializer(cust2, many=True)
         SomeModel_json = serializers.serialize("json", cust2)
         # customer_obj = CustomerInfo.objects.filter(user_id=user_obj).exclude(id__in=cust2.customer_id[id])
         serializer2 = CustomerInfoSerializer(customer_obj, many=True)
-        myJson = {"status": "1", "vehicle_info": serializer.data, "customer_info": serializer2.data}
+        myJson = {"status": "1", "vehicle_info": serializer.data, "customer_info": serializer2.data,"terms_data":serializer3.data}
         return JsonResponse(myJson)
 
 
