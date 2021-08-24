@@ -202,7 +202,7 @@ class update_vehicle_list(APIView):
                     myJson = {"status": "1", "data": serializer.data}
                     return JsonResponse(myJson)
                 elif VehicleInfo.objects.filter(customer_id__in=customer_obj_list,vin=vin).exists():
-                    myJson = {"status": "1", "data": "VIN Exists"}
+                    myJson = {"status": "0", "data": "VIN Exists"}
                     return JsonResponse(myJson)
                 else:
                     VehicleInfo.objects.filter(id=vehicle_id).update(year=year, brand=brand, brand_model=brand_model,
