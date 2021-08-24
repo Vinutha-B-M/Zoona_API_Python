@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 import requests
 from .serializers import ReceiptContentSerializer, TaxesSerializer, DiscountsSerializer, ServiceListSerializer, \
-    DefaultListSerializer, FeesSerializer,CashDiscountSerializer,SquareCredentialSerializer
-from .models import ReceiptContent, Taxes, Discounts, ServicesList, Default, Fees,CashDiscount,SquareCredential
+    DefaultListSerializer, FeesSerializer,CashDiscountSerializer,SquareCredentialSerializer,TermConditionSerializer
+from .models import ReceiptContent, Taxes, Discounts, ServicesList, Default, Fees,CashDiscount,SquareCredential,TermCondition
 from django.http import HttpResponse, JsonResponse
 from users.models import UserInfo, UserType
 from users.serializers import UserInfoSerializer, UserTypeSerializer
@@ -387,8 +387,9 @@ class update_defaults(APIView):
         time_zone = data['time_zone']
         display_time = data['display_time']
         date_format = data['date_format']
+        print_format = data['print_format']
         if Default.objects.filter(id=id).exists():
-            content = Default.objects.filter(id=id).update(currency=currency,langaugge=langaugge,time_zone=time_zone,
+            content = Default.objects.filter(id=id).update(currency=currency,langaugge=langaugge,time_zone=time_zone,print_format=print_format,
                                                            display_time=display_time,date_format=date_format)
             myJson = {"status": "1", "data": "Success"}
             return JsonResponse(myJson)
@@ -410,10 +411,11 @@ class add_defaults(APIView):
         time_zone = data['time_zone']
         display_time = data['display_time']
         date_format = data['date_format']
+        print_format = data['print_format']
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         if UserType.objects.filter(id=session, is_admin=True).exists():
-            create = Default.objects.create(currency=currency, langaugge=langaugge, time_zone=time_zone,
+            create = Default.objects.create(currency=currency, langaugge=langaugge, time_zone=time_zone,print_format=print_format,
                                             display_time=display_time, date_format=date_format, client=user_obj)
             serializer = DefaultListSerializer(create)
             myJson = {"status": "1", "data":serializer.data}
@@ -631,3 +633,66 @@ class add_square_credential(APIView):
         else:
             myJson = {"status": "0", "data": "error"}
             return JsonResponse(myJson)
+
+
+class terms(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        if TermCondition.objects.filter(client=user_obj).exists():
+            content = TermCondition.objects.filter(client=user_obj)
+            serializer = TermConditionSerializer(content, many=True)
+            myJson = {"status": "1", "data": serializer.data}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "1", "data": ""}
+            return JsonResponse(myJson)
+
+
+class delete_terms(APIView):
+    def post(self, request):
+        data = request.data
+        id = data['id']
+        if TermCondition.objects.filter(id=id).exists():
+            content = TermCondition.objects.filter(id=id).delete()
+            myJson = {"status": "1", "data": "Success"}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "0", "data": "error"}
+            return JsonResponse(myJson)
+
+
+class update_terms(APIView):
+    def post(self, request):
+        data = request.data
+        id = data['id']
+        term_text = data['term_text']
+        visible = data['visible']
+        if TermCondition.objects.filter(id=id).exists():
+            content = TermCondition.objects.filter(id=id).update(term_text=term_text,visible=visible)
+            myJson = {"status": "1", "data": "updated"}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "0", "data": "error"}
+            return JsonResponse(myJson)
+
+
+class add_terms(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        term_text = data['term_text']
+        visible = data['visible']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        if UserType.objects.filter(id=session, is_admin=True).exists():
+            create = TermCondition.objects.create(term_text=term_text,visible=visible, client=user_obj)
+            serializer = TermConditionSerializer(create)
+            myJson = {"status": "1", "data": serializer.data}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "0", "data": "error"}
+            return JsonResponse(myJson)
+

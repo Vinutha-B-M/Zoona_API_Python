@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ReceiptContent, Taxes, Discounts, ServicesList, Default, Fees,TestType,MustHave,CashDiscount,SquareCredential
+from .models import ReceiptContent, Taxes, Discounts, ServicesList, Default, Fees,TestType,MustHave,CashDiscount,SquareCredential,TermCondition
 
 
 class ReceiptContentSerializer(serializers.ModelSerializer):
@@ -51,4 +51,9 @@ class CashDiscountSerializer(serializers.ModelSerializer):
 class SquareCredentialSerializer(serializers.ModelSerializer):
     class Meta:
         model = SquareCredential
+        fields = '__all__'
+
+class TermConditionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TermCondition
         fields = '__all__'

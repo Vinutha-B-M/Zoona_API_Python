@@ -22,5 +22,6 @@ urlpatterns = [
     # path('list_device/', views.list_device.as_view(), name="list_device"),
     path('get_device/', views.get_device.as_view(), name="get_device"),
     path('create_device/', views.create_device.as_view(), name="create_device"),
-    path('create_terminal_checkout/',views.create_terminal_checkout.as_view(), name="create_terminal_checkout")
+    path('create_terminal_checkout/',views.create_terminal_checkout.as_view(), name="create_terminal_checkout"),
+    path('delete_device/', views.delete_device.as_view(), name="delete_device"),
 ]

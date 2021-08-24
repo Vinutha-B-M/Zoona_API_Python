@@ -139,7 +139,7 @@ def service_updation(service_item, payment_exist):
             if j['id'] == i:
                 dt = dt + 1
         if dt == 0:
-            InvoiceItem.objects.filter(service_item=i).delete()
+            InvoiceItem.objects.filter(service_item=i,Payment=payment_exist).delete()
 
 
 def tax_updation(taxes, payment_exist):
@@ -160,7 +160,7 @@ def tax_updation(taxes, payment_exist):
             if j['id'] == i:
                 dt = dt + 1
         if dt == 0:
-            TaxItem.objects.filter(tax_item=i).delete()
+            TaxItem.objects.filter(tax_item=i,Payment=payment_exist).delete()
 
 
 def fees_updation(fees, payment_exist):
@@ -181,7 +181,7 @@ def fees_updation(fees, payment_exist):
             if j['id'] == i:
                 dt = dt + 1
         if dt == 0:
-            FeesItem.objects.filter(fees_item=i).delete()
+            FeesItem.objects.filter(fees_item=i,Payment=payment_exist).delete()
 
 
 def discount_updation(discounts, payment_exist):
@@ -221,7 +221,7 @@ def test_type_updation(test_type, payment_exist):
             if j['id'] == i:
                 dt = dt + 1
         if dt == 0:
-            TestTypeItem.objects.filter(test_item=i).delete()
+            TestTypeItem.objects.filter(test_item=i,Payment=payment_exist).delete()
 
 
 def must_have_updation(must_have, payment_exist):
@@ -240,7 +240,7 @@ def must_have_updation(must_have, payment_exist):
             if j['id'] == i:
                 dt = dt + 1
         if dt == 0:
-            MustHaveItem.objects.filter(must_have_item=i).delete()
+            MustHaveItem.objects.filter(must_have_item=i,Payment=payment_exist).delete()
 
 
 class update_payment_entry(APIView):
@@ -532,6 +532,19 @@ class get_device(APIView):
             return JsonResponse(myJson)
         else:
             myJson = {"status": "1", "data": ""}
+            return JsonResponse(myJson)
+
+
+class delete_device(APIView):
+    def post(self,request):
+        data = request.data
+        session = data['id']
+        if SquareDevice.objects.filter(id=session).exists():
+            SquareDevice.objects.filter(id=session).delete()
+            myJson = {"status": "1", "data": "Success"}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "0", "data": "error"}
             return JsonResponse(myJson)
 
 

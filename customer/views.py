@@ -9,8 +9,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import CustomerInfoSerializer, VehicleInfoSerializer, TestDetailsSerializer
-from .models import CustomerInfo, VehicleInfo, TestDetails
+from .serializers import CustomerInfoSerializer, VehicleInfoSerializer, TestDetailsSerializer,TermsItemSerializer
+from .models import CustomerInfo, VehicleInfo, TestDetails,TermsItems
+from service.models import TermCondition
 from users.models import UserInfo, UserType
 from rest_framework import viewsets, status
 from payment.models import PaymentEntry, InvoiceItem
@@ -29,10 +30,8 @@ class Customer_List(APIView):
         today = datetime.datetime.now()
         cust2 = CustomerInfo.objects.filter(created_date__year=today.year, created_date__month=today.month,
                                             user_id=user_obj)
-
         cust3 = VehicleInfo.objects.filter(customer_id__in=cust1)
         payment = PaymentEntry.objects.filter(Vehicle__in=cust3)
-        print(payment)
         total_number = cust1.count()
         new_number = cust2.count()
         customer_count = {"total_count": total_number, "new_count": new_number}
@@ -51,7 +50,9 @@ class fetch_customer_info(APIView):
         if CustomerInfo.objects.filter(phone_number=phone_number,user_id=user_obj).exists():
             obj=CustomerInfo.objects.get(phone_number=phone_number)
             serializer = CustomerInfoSerializer(obj)
-            myJson = {"status": "1", "data": serializer.data}
+            termitems = TermsItems.objects.filter(customer=obj)
+            serializer2 = TermsItemSerializer(termitems)
+            myJson = {"status": "1", "data": serializer.data,"terms":serializer2.data}
             return JsonResponse(myJson)
         else:
             myJson = {"status": "0", "data": ''}
@@ -73,6 +74,7 @@ class add_Customer_List(APIView):
         phone_number = data['phone_number']
         postal_code = data['postal_code']
         selected_date = data['selected_date']
+        terms_item = data['terms_item']
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         if CustomerInfo.objects.filter(phone_number=phone_number,user_id=user_obj).exists():
@@ -83,9 +85,35 @@ class add_Customer_List(APIView):
                                                  address=address, postal_code=postal_code, selected_date=selected_date,
                                                  phone_number=phone_number, address_2=address_2, city=city, state=state,
                                                  user_id=user_obj)
+            for i in terms_item:
+                tax_id = i['id']
+                term_obj = TermCondition.objects.get(id=tax_id)
+                term_text = TermCondition.objects.get(id=tax_id).term_text
+                TermsItems.objects.create(terms_text=term_text,term=term_obj,customer=create)
             serializer = CustomerInfoSerializer(create)
             myJson = {"status": "1", "data": serializer.data}
             return JsonResponse(myJson)
+
+
+def term_item_updation(customer_exist, terms_item):
+    for i in terms_item:
+        tax_id = i['id']
+        tax_obj = TermCondition.objects.get(id=tax_id)
+        term_text = TermCondition.objects.get(id=tax_id).term_text
+        if TermsItems.objects.filter(term=tax_id, customer=customer_exist):
+            TermsItems.objects.filter(term=tax_id).update(terms_text=term_text)
+        else:
+            TermsItems.objects.create(term=tax_obj, terms_text=term_text, customer=customer_exist)
+
+    updated_list = TermsItems.objects.filter(customer=customer_exist).values_list('term',flat=True)
+
+    for i in updated_list:
+        dt = 0
+        for j in terms_item:
+            if j['id'] == i:
+                dt = dt + 1
+        if dt == 0:
+                TermsItems.objects.filter(term=i,customer=customer_exist).delete()
 
 
 class update_customer_list(APIView):
@@ -102,12 +130,14 @@ class update_customer_list(APIView):
         phone_number = data['phone_number']
         postal_code = data['postal_code']
         selected_date = data['selected_date']
+        terms_item = data['terms_item']
+        customer_exist=CustomerInfo.objects.get(id=session)
         CustomerInfo.objects.filter(id=session).update(company_name=company_name, full_name=full_name,
                                                              email_id=email_id,address=address, postal_code=postal_code,
                                                              selected_date=selected_date,
                                                              phone_number=phone_number, address_2=address_2, city=city,
                                                              state=state)
-
+        none_response=term_item_updation(customer_exist,terms_item)
         create=CustomerInfo.objects.get(id=session)
         serializer = CustomerInfoSerializer(create)
         myJson = {"status": "1", "data": serializer.data}

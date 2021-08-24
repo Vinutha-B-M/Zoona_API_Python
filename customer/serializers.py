@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomerInfo, VehicleInfo, TestDetails
+from .models import CustomerInfo, VehicleInfo, TestDetails,TermsItems
 
 
 class CustomerInfoSerializer(serializers.ModelSerializer):
@@ -43,3 +43,8 @@ class TestDetailsSerializer(serializers.ModelSerializer):
         )
 
 
+class TermsItemSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TermsItems
+        fields = '__all__'

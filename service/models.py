@@ -44,6 +44,7 @@ class Default(models.Model):
     time_zone = models.CharField(db_column='time_zone', max_length=400, blank=True)
     display_time = models.CharField(db_column='display_time', max_length=200, blank=True)
     date_format = models.CharField(db_column='date_format', max_length=200, blank=True)
+    print_format = models.CharField(db_column='Print_format', max_length=50, blank=True)
     client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
 
 class TestType(models.Model):
@@ -62,4 +63,9 @@ class SquareCredential(models.Model):
     application_secret = models.CharField(db_column='application_secret', max_length=100, blank=True)
     location_id = models.CharField(db_column='location_id', max_length=100, blank=True)
     accees_token = models.CharField(db_column='accees_token', max_length=100, blank=True)
+    client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
+
+class TermCondition(models.Model):
+    term_text = models.CharField(db_column='term_text', max_length=200, blank=True)
+    visible = models.BooleanField(db_column='visible', default=False)
     client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)

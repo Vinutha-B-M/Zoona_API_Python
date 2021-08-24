@@ -33,4 +33,8 @@ urlpatterns = [
     path('add_square_credential/', views.add_square_credential.as_view(), name="add_square_credential"),
     path('delete_square_credential/', views.delete_square_credential.as_view(), name="delete_square_credential"),
     path('update_square_credential/', views.update_square_credential.as_view(), name="update_square_credential"),
+    path('terms/', views.terms.as_view(), name="terms"),
+    path('delete_terms/', views.delete_terms.as_view(), name="delete_terms"),
+    path('update_terms/', views.update_terms.as_view(), name="update_terms"),
+    path('add_terms/', views.add_terms.as_view(), name="add_terms"),
 ]

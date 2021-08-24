@@ -1,6 +1,6 @@
 from django.db import models
 from users.models import UserInfo
-
+from service.models import TermCondition
 
 class CustomerInfo(models.Model):
     selected_date = models.DateField(db_column='selected_date', blank=True,null=True, auto_now_add=False)
@@ -42,3 +42,7 @@ class TestDetails(models.Model):
     selected_date = models.DateField(db_column='selected_date', blank=True,null=True, auto_now_add=False)
     vehicle_id = models.ForeignKey(VehicleInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
 
+class TermsItems(models.Model):
+    terms_text = models.CharField(db_column="terms_text", blank=True,null=True,max_length=1000)
+    term = models.ForeignKey(TermCondition,db_column="term", null=True, on_delete=models.PROTECT)
+    customer = models.ForeignKey(CustomerInfo,db_column="customer", null=True, on_delete=models.PROTECT)
