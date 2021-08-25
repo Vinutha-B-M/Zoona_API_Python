@@ -169,13 +169,7 @@ class Vehicle_List(APIView):
                     list_2['term_text']=j.terms_text
                     list_term.append(list_2)
                     d=d+1
-            if d != 0:
-                list['Terms']=list_term
-            else:
-                list_1['term_id'] = None
-                list_1['term_text'] = None
-                list_term.append(list_1)
-                list['Terms']=list_term
+
             list['id']=i.id
             list['selected_date']=i.selected_date
             list['company_name']=i.company_name
@@ -189,11 +183,15 @@ class Vehicle_List(APIView):
             list['postal_code']=i.postal_code
             list['created_date']=i.created_date
             list['user_id']=i.user_id.id
+            if d != 0:
+                list['Terms']=list_term
+            else:
+                list['Terms']=list_term
             customer_data.append(list)
         SomeModel_json = serializers.serialize("json", cust2)
         # customer_obj = CustomerInfo.objects.filter(user_id=user_obj).exclude(id__in=cust2.customer_id[id])
         serializer2 = CustomerInfoSerializer(customer_obj, many=True)
-        myJson = {"status": "1", "vehicle_info": serializer.data, "customer_info": serializer2.data,"terms_data":customer_data}
+        myJson = {"status": "1", "vehicle_info": serializer.data, "customer_info":customer_data}
         return JsonResponse(myJson)
 
 class add_Vehicle_List(APIView):
