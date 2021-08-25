@@ -153,16 +153,48 @@ class Vehicle_List(APIView):
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
         cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
-
         cust3 = TermsItems.objects.filter(customer__in=customer_obj)
         serializer3 = TermsItemSerializer(cust3,many=True)
         serializer = VehicleInfoSerializer(cust2, many=True)
+        customer_data=[]
+        for i in customer_obj:
+            list = {}
+            list_1 = {}
+            list_term=[]
+            d=0
+            for j in cust3:
+                list_2 = {}
+                if j.customer == i:
+                    list_2['term_id']=j.term.id
+                    list_2['term_text']=j.terms_text
+                    list_term.append(list_2)
+                    d=d+1
+            if d != 0:
+                list['Terms']=list_term
+            else:
+                list_1['term_id'] = None
+                list_1['term_text'] = None
+                list_term.append(list_1)
+                list['Terms']=list_term
+            list['id']=i.id
+            list['selected_date']=i.selected_date
+            list['company_name']=i.company_name
+            list['full_name']=i.full_name
+            list['email_id']=i.email_id
+            list['address']=i.address
+            list['address_2']=i.address_2
+            list['city']=i.city
+            list['state']=i.state
+            list['phone_number']=i.phone_number
+            list['postal_code']=i.postal_code
+            list['created_date']=i.created_date
+            list['user_id']=i.user_id.id
+            customer_data.append(list)
         SomeModel_json = serializers.serialize("json", cust2)
         # customer_obj = CustomerInfo.objects.filter(user_id=user_obj).exclude(id__in=cust2.customer_id[id])
         serializer2 = CustomerInfoSerializer(customer_obj, many=True)
-        myJson = {"status": "1", "vehicle_info": serializer.data, "customer_info": serializer2.data,"terms_data":serializer3.data}
+        myJson = {"status": "1", "vehicle_info": serializer.data, "customer_info": serializer2.data,"terms_data":customer_data}
         return JsonResponse(myJson)
-
 
 class add_Vehicle_List(APIView):
     def post(self, request):

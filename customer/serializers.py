@@ -44,7 +44,12 @@ class TestDetailsSerializer(serializers.ModelSerializer):
 
 
 class TermsItemSerializer(serializers.ModelSerializer):
-
+    customer = CustomerInfoSerializer()
     class Meta:
         model = TermsItems
-        fields = '__all__'
+        fields =  (
+            'id',
+            'terms_text',
+            'term',
+            'customer',
+        )
