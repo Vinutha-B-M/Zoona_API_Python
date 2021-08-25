@@ -157,6 +157,60 @@ class Vehicle_List(APIView):
         serializer3 = TermsItemSerializer(cust3,many=True)
         serializer = VehicleInfoSerializer(cust2, many=True)
         customer_data=[]
+        vehicle_data=[]
+        for k in cust2:
+            vehicle={}
+            customer_id=[]
+            for i in customer_obj:
+                list = {}
+                list_term = []
+                d = 0
+                for j in cust3:
+                    list_2 = {}
+                    if j.customer == i:
+                        list_2['term_id'] = j.term.id
+                        list_2['term_text'] = j.terms_text
+                        list_term.append(list_2)
+                        d = d + 1
+
+                if d != 0:
+                    list['Terms'] = list_term
+                else:
+                    list['Terms'] = list_term
+
+                z=0
+                if k.customer_id == i:
+                    list_cust = {}
+                    z=z+1
+                    vehicle['id'] = k.id
+                    vehicle['year'] = k.year
+                    vehicle['brand'] = k.brand
+                    vehicle['odo_meter'] = k.odo_meter
+                    vehicle['vin'] = k.vin
+                    vehicle['lic_plate'] = k.lic_plate
+                    vehicle['gvwr'] = k.gvwr
+                    vehicle['engine'] = k.engine
+                    vehicle['engine_group'] = k.engine_group
+                    vehicle['cylinder'] = k.cylinder
+                    vehicle['Transmission'] = k.Transmission
+                    vehicle['brand_model'] = k.brand_model
+                    list_cust['id'] = i.id
+                    list_cust['selected_date'] = i.selected_date
+                    list_cust['company_name'] = i.company_name
+                    list_cust['full_name'] = i.full_name
+                    list_cust['email_id'] = i.email_id
+                    list_cust['address'] = i.address
+                    list_cust['address_2'] = i.address_2
+                    list_cust['city'] = i.city
+                    list_cust['state'] = i.state
+                    list_cust['phone_number'] = i.phone_number
+                    list_cust['postal_code'] = i.postal_code
+                    list_cust['created_date'] = i.created_date
+                    list_cust['user_id'] = i.user_id.id
+                    vehicle['customer_id']=list_cust
+                    vehicle['customer_id']['Terms']=list_term
+                if z != 0:
+                    vehicle_data.append(vehicle)
         for i in customer_obj:
             list = {}
             list_1 = {}
@@ -191,7 +245,7 @@ class Vehicle_List(APIView):
         SomeModel_json = serializers.serialize("json", cust2)
         # customer_obj = CustomerInfo.objects.filter(user_id=user_obj).exclude(id__in=cust2.customer_id[id])
         serializer2 = CustomerInfoSerializer(customer_obj, many=True)
-        myJson = {"status": "1", "vehicle_info": serializer.data, "customer_info":customer_data}
+        myJson = {"status": "1","customer_info":customer_data,"vehicle_info":vehicle_data}
         return JsonResponse(myJson)
 
 class add_Vehicle_List(APIView):
