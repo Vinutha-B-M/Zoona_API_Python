@@ -73,7 +73,7 @@ class login(APIView):
                 myJson = {"status": "0", "data": "Password is not Correct"}
                 return JsonResponse(myJson)
         else:
-            myJson = {"status": "0", "data": "UserName Doesnot Exits"}
+            myJson = {"status": "0", "data": "UserName Does not Exits"}
             return JsonResponse(myJson)
 
 
@@ -100,7 +100,7 @@ class forgot(APIView):
             myJson = {"status": "1", "data": "Success"}
             return JsonResponse(myJson)
         else:
-            myJson = {"status": "0", "data": "error"}
+            myJson = {"status": "0", "data": "UserName Does not Exits"}
             return JsonResponse(myJson)
 
 
@@ -120,7 +120,7 @@ class update(APIView):
                 myJson = {"status": "0", "data": "Password is Wrong"}
                 return JsonResponse(myJson)
         else:
-            myJson = {"status": "0", "data": "User Doesnot Exits"}
+            myJson = {"status": "0", "data": "UserName Does not Exits"}
             return JsonResponse(myJson)
 
 
@@ -138,7 +138,7 @@ class user_info(APIView):
             myJson = {"status": "1", "data": serializer.data}
             return JsonResponse(myJson)
         else:
-            myJson = {"status": "0", "data": "UserName Doesnot Exits"}
+            myJson = {"status": "0", "data": "UserName Does not Exits"}
             return JsonResponse(myJson)
 
 
@@ -172,7 +172,7 @@ class update_user_info(APIView):
             myJson = {"status": "1", "data": serializer.data}
             return JsonResponse(myJson)
         else:
-            myJson = {"status": "0", "data": "UserName Doesnot Exits"}
+            myJson = {"status": "0", "data": "UserName Does not Exits"}
             return JsonResponse(myJson)
     # else:
     #     myJson = {"status": "0", "message": "Login expired"}
@@ -247,7 +247,7 @@ class update_users(APIView):
         username = username.lower()
         is_admin = data['is_admin']
         if UserType.objects.filter(username=username).exists():
-            myJson = {"status": "0", "data": "Username Exits"}
+            myJson = {"status": "0", "data": "UserName Exits"}
             return JsonResponse(myJson)
         else:
             user_obj = UserType.objects.filter(id=session).update(username=username, is_admin=is_admin)

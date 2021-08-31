@@ -66,6 +66,6 @@ class SquareCredential(models.Model):
     client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
 
 class TermCondition(models.Model):
-    term_text = models.CharField(db_column='term_text', max_length=200, blank=True)
+    term_text = models.CharField(db_column='term_text', max_length=2000, blank=True)
     visible = models.BooleanField(db_column='visible', default=False)
     client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
