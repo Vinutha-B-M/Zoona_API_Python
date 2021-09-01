@@ -45,6 +45,7 @@ class payment_entry(APIView):
     def post(self, request):
         data = request.data
         final_amount = data['final_amount']
+        card_amount = data['card_amount']
         tax_offered = data['tax_offered']
         discount_offered = data['discount_offered']
         status = data['status']
@@ -76,9 +77,9 @@ class payment_entry(APIView):
             invoice_id = '#Order-' + str(count)
 
         payment_obj = PaymentEntry.objects.create(final_amount=final_amount, tax_offered=tax_offered,invoice_id=invoice_id,
-                                                      discount_offered=discount_offered, payment_mode=payment_mode,
-                                                      status=status, Vehicle=vehicle_obj, amount_tendered=amount_tendered,
-                                                      changed_given=changed_given,additional_comments=additional_comments)
+                                                  discount_offered=discount_offered, payment_mode=payment_mode,status=status,
+                                                  Vehicle=vehicle_obj, amount_tendered=amount_tendered,card_amount=card_amount,
+                                                  changed_given=changed_given,additional_comments=additional_comments)
         for i in service_item:
                 service_id = i['id']
                 service_obj = ServicesList.objects.get(id=service_id)
@@ -248,6 +249,7 @@ class update_payment_entry(APIView):
         data = request.data
         payment_id = data['id']
         final_amount = data['final_amount']
+        card_amount = data['card_amount']
         tax_offered = data['tax_offered']
         discount_offered = data['discount_offered']
         status = data['status']
@@ -264,7 +266,7 @@ class update_payment_entry(APIView):
         payment_exist = PaymentEntry.objects.get(id=payment_id)
         payment_obj = PaymentEntry.objects.filter(id=payment_id).update(final_amount=final_amount, tax_offered=tax_offered,
                                                   discount_offered=discount_offered, payment_mode=payment_mode,
-                                                  status=status, amount_tendered=amount_tendered,
+                                                  status=status, amount_tendered=amount_tendered,card_amount=card_amount,
                                                   changed_given=changed_given,additional_comments=additional_comments)
         none_response=service_updation(service_item,payment_exist)
         none_response =tax_updation(taxes,payment_exist)

@@ -22,10 +22,11 @@ class PaymentEntry(models.Model):
     MODE = (
         (Cash, 'Cash'),
         (Card, 'Card'),
-        (Other, 'Other')
+        (Other, 'Other'),
     )
     invoice_id = models.CharField(db_column="invoice", max_length=100, blank=True, null=True)
     final_amount = models.FloatField(db_column='final_amount', max_length=200, blank=True, null=True)
+    card_amount = models.FloatField(db_column='card_amount', max_length=200, blank=True, null=True)
     additional_comments = models.CharField(db_column='additional_comments', max_length=200, blank=True)
     tax_offered = models.FloatField(db_column='tax_offered', max_length=200, blank=True, null=True)
     amount_tendered = models.FloatField(db_column='amount_tendered', max_length=200, blank=True, null=True)
