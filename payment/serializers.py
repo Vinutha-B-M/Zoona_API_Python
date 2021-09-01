@@ -14,6 +14,7 @@ class PaymentEntrySerializer(serializers.ModelSerializer):
             'invoice_id',
             'status',
             'final_amount',
+            'card_amount',
             'tax_offered',
             'amount_tendered',
             'changed_given',
