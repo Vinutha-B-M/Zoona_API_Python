@@ -51,7 +51,7 @@ class fetch_customer_info(APIView):
             obj=CustomerInfo.objects.get(phone_number=phone_number)
             serializer = CustomerInfoSerializer(obj)
             termitems = TermsItems.objects.filter(customer=obj)
-            serializer2 = TermsItemSerializer(termitems)
+            serializer2 = TermsItemSerializer(termitems,many=True)
             myJson = {"status": "1", "data": serializer.data,"terms":serializer2.data}
             return JsonResponse(myJson)
         else:
