@@ -12,10 +12,11 @@ from django.db.models import Q
 import datetime
 from customer.models import CustomerInfo, VehicleInfo, TestDetails
 from users.models import UserType, UserInfo
-from .models import PaymentEntry, InvoiceItem,TaxItem,FeesItem,DiscountItem,TestTypeItem,MustHaveItem,SquareDevice,SquareTerminalCheckout
+from .models import PaymentEntry, InvoiceItem,TaxItem,FeesItem,DiscountItem,TestTypeItem,MustHaveItem,SquareDevice,\
+    SquareTerminalCheckout,FortisPayCredentials
 from service.models import ServicesList,Taxes,Discounts,Fees,TestType,MustHave,CashDiscount,SquareCredential
 from .serializers import PaymentEntrySerializer, InvoiceItemSerializer,FeesItemSerializer,TaxItemSerializer,\
-    DiscountItemSerializer,TestTypeItemSerializer,MustHaveItemSerializer
+    DiscountItemSerializer,TestTypeItemSerializer,MustHaveItemSerializer,FortisPaySerializer
 from customer.serializers import CustomerInfoSerializer, VehicleInfoSerializer
 from service.serializers import TestTypeSerializer,MustHaveSerializer,CashDiscountSerializer,SquareCredentialSerializer
 from .square_api import base_url
@@ -614,3 +615,151 @@ class create_terminal_checkout(APIView):
             myJson = {"status": "1", "data": "error"}
             return JsonResponse(myJson)
 
+# ............................................fortispay............................
+
+
+class fortispay_credentials(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        username = data['username']
+        password = data['password']
+        domain = data['domain']
+        response = requests.post('https://api.sandbox.zeamster.com/v2/token',
+                                 json={"username": username, "password": password,
+                                       "domain": domain}, headers={"developer-id": "jKAdBXmQ"})
+        json_response = response.json()
+        if 'message' in json_response:
+            if json_response['message'] == 'invalid user':
+                myJson = {"status": "0", "data": "invalid user"}
+                return JsonResponse(myJson)
+            if json_response['message'] == 'invalid password':
+                myJson = {"status": "0", "data": "invalid password"}
+                return JsonResponse(myJson)
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        if FortisPayCredentials.objects.filter(username=username,domain=domain).exists():
+            myJson = {"status": "1", "data": "Success"}
+            return JsonResponse(myJson)
+        else:
+            FortisPayCredentials.objects.create(username=username,password=password,domain=domain,client=user_obj)
+            myJson = {"status": "1", "data": "Success"}
+            return JsonResponse(myJson)
+
+class fortispay_update_credentials(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        username = data['username']
+        password = data['password']
+        domain = data['domain']
+        response = requests.post('https://api.sandbox.zeamster.com/v2/token',
+                                 json={"username": username, "password": password,
+                                       "domain": domain}, headers={"developer-id": "jKAdBXmQ"})
+        json_response = response.json()
+        if 'message' in json_response:
+            if json_response['message'] == 'invalid user':
+                myJson = {"status": "0", "data": "invalid user"}
+                return JsonResponse(myJson)
+            if json_response['message'] == 'invalid password':
+                myJson = {"status": "0", "data": "invalid password"}
+                return JsonResponse(myJson)
+        if FortisPayCredentials.objects.filter(id=session).exists():
+            FortisPayCredentials.objects.filter(id=session).update(username=username, password=password, domain=domain)
+            myJson = {"status": "1", "data": "Success"}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "1", "data": "error"}
+            return JsonResponse(myJson)
+
+class fortispay(APIView):
+    def post(self,request):
+        data = request.data
+        session = data['id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        if FortisPayCredentials.objects.filter(client=user_obj).exists():
+            view=FortisPayCredentials.objects.get(client=user_obj)
+            serializer=FortisPaySerializer(view)
+            myJson = {"status": "1", "data": serializer.data}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "1", "data": ""}
+            return JsonResponse(myJson)
+
+class fortispay_terminal_list(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        username=FortisPayCredentials.objects.get(client=user_obj).username
+        password = FortisPayCredentials.objects.get(client=user_obj).password
+        domain = FortisPayCredentials.objects.get(client=user_obj).domain
+        response = requests.post('https://api.sandbox.zeamster.com/v2/token',
+                                 json={"username": username, "password": password,
+                                       "domain": domain}, headers={"developer-id": "jKAdBXmQ"})
+        json_response = response.json()
+        token_id = json_response['token']['token']
+        response = requests.get('https://api.sandbox.zeamster.com/v2/terminals?access-token=' + token_id,
+                                headers={"developer-id": "jKAdBXmQ"}
+                                )
+        json_response = response.json()
+        return JsonResponse(json_response)
+
+
+# @csrf_exempt
+# def view_single_transaction(request, transaction_id):
+#     response = requests.post('https://api.sandbox.zeamster.com/v2/token',
+#                              json={"username": "vikas@zunaco.com", "password": "Goalsr@123",
+#                                    "domain": "zunacoqvtizw.sandbox.zeamster.com"}, headers={"developer-id": "jKAdBXmQ"})
+#
+#     json_response = response.json()
+#     token_id = json_response['token']['token']
+#
+#     response = requests.get(
+#         'https://api.sandbox.zeamster.com/v2/transactions/' + transaction_id + '?access-token=' + token_id,
+#         headers={"developer-id": "jKAdBXmQ"}
+#         )
+#     json_response = response.json()
+#
+#     return JsonResponse(json_response)
+#
+
+class get_router_transaction(APIView):
+        def post(self, request):
+            data = request.data
+            session = data['id']
+            order_id = data['order_id']
+            terminal_id = data['terminal_id']
+            location_id = data['location_id']
+            user_info_obj = UserType.objects.get(id=session)
+            user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+            username = FortisPayCredentials.objects.get(client=user_obj).username
+            password = FortisPayCredentials.objects.get(client=user_obj).password
+            domain = FortisPayCredentials.objects.get(client=user_obj).domain
+            response = requests.post('https://api.sandbox.zeamster.com/v2/token',
+                                     json={"username": username, "password": password,
+                                           "domain": domain}, headers={"developer-id": "jKAdBXmQ"})
+            json_response = response.json()
+            token_id = json_response['token']['token']
+            if PaymentEntry.objects.filter(id=order_id).exists() :
+                amount=PaymentEntry.objects.get(id=order_id).card_amount
+                amount=float(amount)
+            data = {
+                "routertransaction":{
+                    "payment_method": "cc",
+                    "action": "sale",
+                    "location_id": location_id,
+                    "transaction_amount": amount,
+                    "terminal_id": terminal_id,
+                    "billing_zip": ""
+                }
+            }
+            response = requests.post('https://api.sandbox.zeamster.com/v2/routertransactions?access-token=' + token_id,
+                                     headers={"developer-id": "jKAdBXmQ"},
+                                    json=data,
+                                    )
+            json_response = response.json()
+
+            return JsonResponse(json_response)

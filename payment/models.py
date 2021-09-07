@@ -88,3 +88,9 @@ class SquareDevice(models.Model):
     location = models.CharField(db_column="location", max_length=100, blank=True)
     status = models.CharField(db_column="status", max_length=100, blank=True)
     client = models.ForeignKey(UserInfo, db_column='client', null=True, on_delete=models.PROTECT)
+
+class FortisPayCredentials(models.Model):
+    username=models.CharField(db_column="username",max_length=100,blank=True)
+    password=models.CharField(db_column="password",max_length=100,blank=True)
+    domain=models.CharField(db_column="domain", max_length=100,blank=True)
+    client = models.ForeignKey(UserInfo, db_column='client', null=True, on_delete=models.PROTECT)

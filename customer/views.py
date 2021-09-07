@@ -363,5 +363,6 @@ class vehicle_info(APIView):
         data = request.data
         vinField = data['vinField']
         response = requests.get('https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/' + vinField + '?format=json')
+        # response = requests.get('https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/' + vinField + '?format=json')
         json_response = response.json()
         return JsonResponse(json_response, safe=False)

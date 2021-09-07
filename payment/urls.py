@@ -24,4 +24,9 @@ urlpatterns = [
     path('create_device/', views.create_device.as_view(), name="create_device"),
     path('create_terminal_checkout/',views.create_terminal_checkout.as_view(), name="create_terminal_checkout"),
     path('delete_device/', views.delete_device.as_view(), name="delete_device"),
+    path('fortispay_credentials/', views.fortispay_credentials.as_view(), name="fortispay_credentials"),
+    path('fortispay_update_credentials/', views.fortispay_update_credentials.as_view(), name="fortispay_update_credentials"),
+    path('fortispay_terminal_list/', views.fortispay_terminal_list.as_view(), name="fortispay_terminal_list"),
+    path('fortispay/', views.fortispay.as_view(), name="fortispay"),
+    path('get_router_transaction/', views.get_router_transaction.as_view(), name="get_router_transaction"),
 ]
