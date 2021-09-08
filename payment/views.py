@@ -693,19 +693,23 @@ class fortispay_terminal_list(APIView):
         session = data['id']
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-        username=FortisPayCredentials.objects.get(client=user_obj).username
-        password = FortisPayCredentials.objects.get(client=user_obj).password
-        domain = FortisPayCredentials.objects.get(client=user_obj).domain
-        response = requests.post('https://api.sandbox.zeamster.com/v2/token',
-                                 json={"username": username, "password": password,
-                                       "domain": domain}, headers={"developer-id": "jKAdBXmQ"})
-        json_response = response.json()
-        token_id = json_response['token']['token']
-        response = requests.get('https://api.sandbox.zeamster.com/v2/terminals?access-token=' + token_id,
-                                headers={"developer-id": "jKAdBXmQ"}
-                                )
-        json_response = response.json()
-        return JsonResponse(json_response)
+        if FortisPayCredentials.objects.get(client=user_obj).exists():
+            username=FortisPayCredentials.objects.get(client=user_obj).username
+            password = FortisPayCredentials.objects.get(client=user_obj).password
+            domain = FortisPayCredentials.objects.get(client=user_obj).domain
+            response = requests.post('https://api.sandbox.zeamster.com/v2/token',
+                                     json={"username": username, "password": password,
+                                           "domain": domain}, headers={"developer-id": "jKAdBXmQ"})
+            json_response = response.json()
+            token_id = json_response['token']['token']
+            response = requests.get('https://api.sandbox.zeamster.com/v2/terminals?access-token=' + token_id,
+                                    headers={"developer-id": "jKAdBXmQ"}
+                                    )
+            json_response = response.json()
+            return JsonResponse(json_response)
+        else:
+            myJson = {"status": "0", "data": "FortisPay Account Is Not Linked"}
+            return JsonResponse(myJson)
 
 
 # @csrf_exempt
@@ -761,5 +765,4 @@ class get_router_transaction(APIView):
                                     json=data,
                                     )
             json_response = response.json()
-
             return JsonResponse(json_response)

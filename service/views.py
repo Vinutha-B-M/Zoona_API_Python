@@ -388,9 +388,10 @@ class update_defaults(APIView):
         display_time = data['display_time']
         date_format = data['date_format']
         print_format = data['print_format']
+        payment_gatway = data['payment_gatway']
         if Default.objects.filter(id=id).exists():
             content = Default.objects.filter(id=id).update(currency=currency,langaugge=langaugge,time_zone=time_zone,print_format=print_format,
-                                                           display_time=display_time,date_format=date_format)
+                                                           display_time=display_time,date_format=date_format,payment_gatway=payment_gatway)
             myJson = {"status": "1", "data": "Success"}
             return JsonResponse(myJson)
         else:
@@ -412,11 +413,12 @@ class add_defaults(APIView):
         display_time = data['display_time']
         date_format = data['date_format']
         print_format = data['print_format']
+        payment_gatway = data['payment_gatway']
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         if UserType.objects.filter(id=session, is_admin=True).exists():
             create = Default.objects.create(currency=currency, langaugge=langaugge, time_zone=time_zone,print_format=print_format,
-                                            display_time=display_time, date_format=date_format, client=user_obj)
+                                            display_time=display_time, date_format=date_format, client=user_obj,payment_gatway=payment_gatway)
             serializer = DefaultListSerializer(create)
             myJson = {"status": "1", "data":serializer.data}
             return JsonResponse(myJson)

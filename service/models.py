@@ -45,6 +45,7 @@ class Default(models.Model):
     display_time = models.CharField(db_column='display_time', max_length=200, blank=True)
     date_format = models.CharField(db_column='date_format', max_length=200, blank=True)
     print_format = models.CharField(db_column='Print_format', max_length=50, blank=True)
+    payment_gatway = models.CharField(db_column='payment_gatway', max_length=100, blank=True)
     client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
 
 class TestType(models.Model):
