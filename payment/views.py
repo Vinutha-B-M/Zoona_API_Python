@@ -638,7 +638,7 @@ class fortispay_credentials(APIView):
                 return JsonResponse(myJson)
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-        if FortisPayCredentials.objects.filter(username=username,domain=domain).exists():
+        if FortisPayCredentials.objects.filter(username=username,domain=domain,client=user_obj).exists():
             myJson = {"status": "1", "data": "Success"}
             return JsonResponse(myJson)
         else:
