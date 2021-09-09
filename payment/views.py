@@ -361,12 +361,18 @@ class order_invoice(APIView):
         serializer6 = TestTypeItemSerializer(cust7, many=True)
         cust8 = MustHaveItem.objects.filter(Payment=cust2)
         serializer7 = MustHaveItemSerializer(cust8, many=True)
-        cust9 = CashDiscount.objects.get(client=user_obj)
-        serializer8 = CashDiscountSerializer(cust9)
-        myJson = {"status": "1", "Invoice": serializer2.data, "Service" : serializer.data, "Fees":serializer3.data,
+        if CashDiscount.objects.filter(client=user_obj).exists():
+            cust9 = CashDiscount.objects.get(client=user_obj)
+            serializer8 = CashDiscountSerializer(cust9)
+            myJson = {"status": "1", "Invoice": serializer2.data, "Service" : serializer.data, "Fees":serializer3.data,
                   "Taxes": serializer4.data, "Discounts" : serializer5.data,"test_type": serializer6.data,
                   "must":serializer7.data, "Cash_discount" : serializer8.data}
-        return JsonResponse(myJson)
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "1", "Invoice": serializer2.data, "Service": serializer.data, "Fees": serializer3.data,
+                      "Taxes": serializer4.data, "Discounts": serializer5.data, "test_type": serializer6.data,
+                      "must": serializer7.data, "Cash_discount": ""}
+            return JsonResponse(myJson)
 
 
 class confirm_list(APIView):
