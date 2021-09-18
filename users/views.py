@@ -298,5 +298,5 @@ class confirm_password(APIView):
             myJson = {"status": "1", "data": "Success"}
             return JsonResponse(myJson)
         else:
-            myJson = {"status": "0", "data": "error"}
+            myJson = {"status": "0", "data": "Invalid Password"}
             return JsonResponse(myJson)
