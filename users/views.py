@@ -286,3 +286,17 @@ def company_logo(request):
         else:
             myJson = {"status": "0", "data":"error"}
             return JsonResponse(myJson)
+
+
+class confirm_password(APIView):
+
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        password = data['password']
+        if UserType.objects.filter(id=session, is_admin=True, password=password).exists():
+            myJson = {"status": "1", "data": "Success"}
+            return JsonResponse(myJson)
+        else:
+            myJson = {"status": "0", "data": "error"}
+            return JsonResponse(myJson)

@@ -16,6 +16,42 @@ from users.models import UserInfo, UserType
 from rest_framework import viewsets, status
 from payment.models import PaymentEntry, InvoiceItem
 from django.core import serializers
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+
+def paginate(self, object_list, page=1, limit=10, **kwargs):
+    try:
+        page = int(page)
+        if page < 1:
+            page = 1
+    except (TypeError, ValueError):
+        page = 1
+
+    try:
+        limit = int(limit)
+        if limit < self.min_limit:
+            limit = self.min_limit
+        if limit > self.max_limit:
+            limit = self.max_limit
+    except (ValueError, TypeError):
+        limit = self.max_limit
+
+    paginator = Paginator(object_list, limit)
+    try:
+        objects = paginator.page(page)
+    except PageNotAnInteger:
+        objects = paginator.page(1)
+    except EmptyPage:
+        objects = paginator.page(paginator.num_pages)
+    data = {
+        'previous_page': objects.has_previous() and objects.previous_page_number() or None,
+        'next_page': objects.has_next() and objects.next_page_number() or None,
+        'data': list(objects)
+    }
+    return data
+
+
+
 
 class Customer_List(APIView):
     def post(self, request):
@@ -243,6 +279,7 @@ class Vehicle_List(APIView):
                 list['Terms']=list_term
             customer_data.append(list)
         SomeModel_json = serializers.serialize("json", cust2)
+
         # customer_obj = CustomerInfo.objects.filter(user_id=user_obj).exclude(id__in=cust2.customer_id[id])
         serializer2 = CustomerInfoSerializer(customer_obj, many=True)
         myJson = {"status": "1","customer_info":customer_data,"vehicle_info":vehicle_data}
