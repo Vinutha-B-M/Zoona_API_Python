@@ -530,13 +530,14 @@ class get_device(APIView):
                                                  "Content-Type": "application/json", "Square-Version": "2021-07-21"})
             json_response = list_device.json()
 
-            device=''
+            device = SquareDevice.objects.get(client=user_obj).id
             status=json_response['device_code']['status']
             if status=="PAIRED":
                 device_id = json_response['device_code']['device_id']
                 SquareDevice.objects.filter(square_id=code).update(status=status,device_id=device_id)
             if status=="EXPIRED":
-                device = SquareDevice.objects.get(client=user_obj).id
+                SquareDevice.objects.filter(square_id=code).update(status=status)
+
             myJson = {"status": "1", "data": json_response,"device":device}
             return JsonResponse(myJson)
         else:
@@ -563,6 +564,36 @@ class create_device(APIView):
         session = data['id']
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        if SquareDevice.objects.filter(client=user_obj).exists():
+            myJson = {"status": "1", "data": ""}
+            return JsonResponse(myJson)
+        else:
+            token = SquareCredential.objects.get(client=user_obj).accees_token
+            location_id = SquareCredential.objects.get(client=user_obj).location_id
+            key = uuid.uuid1()
+            vaule = {"device_code": {"product_type": "TERMINAL_API"}, "idempotency_key": str(key)}
+            list_device = requests.post(base_url + '/v2/devices/codes/',
+                                        data=json.dumps(vaule),
+                                        headers={"Authorization": 'Bearer ' + token,
+                                                 "Content-Type": "application/json", "Square-Version": "2021-07-21"})
+            json_response = list_device.json()
+            device_id=json_response["device_code"]["id"]
+            name = json_response["device_code"]["name"]
+            code = json_response["device_code"]["code"]
+            location_id= json_response["device_code"]["location_id"]
+            status = json_response["device_code"]["status"]
+            SquareDevice.objects.create(square_id=device_id,name=name,code=code,location=location_id,status=status,
+                                                client=user_obj)
+            myJson = {"status": "1", "data": json_response}
+            return JsonResponse(myJson)
+
+
+class recreate_device(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         token = SquareCredential.objects.get(client=user_obj).accees_token
         location_id = SquareCredential.objects.get(client=user_obj).location_id
         key = uuid.uuid1()
@@ -577,7 +608,7 @@ class create_device(APIView):
         code = json_response["device_code"]["code"]
         location_id= json_response["device_code"]["location_id"]
         status = json_response["device_code"]["status"]
-        SquareDevice.objects.create(square_id=device_id,name=name,code=code,location=location_id,status=status,
+        SquareDevice.objects.filter(client=user_obj).update(square_id=device_id,name=name,code=code,location=location_id,status=status,
                                             client=user_obj)
         myJson = {"status": "1", "data": json_response}
         return JsonResponse(myJson)

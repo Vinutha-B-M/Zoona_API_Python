@@ -222,7 +222,6 @@ class users_data(APIView):
         # if session:
         data = request.data
         session = data['id']
-
         if UserType.objects.filter(id=session, is_admin=True).exists():
             user_info_obj = UserType.objects.get(id=session)
             user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
