@@ -69,11 +69,38 @@ class payment_entry(APIView):
         now = datetime.datetime.now()
         year=now.year%100
         if count<= 9 :
-            invoice_id = str(now.month)+str(now.day)+str(year)+'00'+ str(count)
+            if now.day <= 9:
+                if now.month <= 9:
+                    invoice_id = '0' + str(now.month) +'0' +str(now.day) + str(year) + '00' + str(count)
+                else:
+                    invoice_id =str(now.month) +'0'+ str(now.day) + str(year) + '00' + str(count)
+            else:
+                if now.month <= 9:
+                    invoice_id = '0' + str(now.month)  + str(now.day) + str(year) + '00' + str(count)
+                else:
+                    invoice_id = str(now.month) +  str(now.day) + str(year) + '00' + str(count)
         elif count<= 99:
-            invoice_id = str(now.month)+str(now.day)+str(year)+'0'+ str(count)
+            if now.day <= 9:
+                if now.month <= 9:
+                    invoice_id = '0' + str(now.month) + '0' + str(now.day) + str(year) + '0' + str(count)
+                else:
+                    invoice_id = str(now.month) + '0' + str(now.day) + str(year) + '0' + str(count)
+            else:
+                if now.month <= 9:
+                    invoice_id = '0' + str(now.month) + str(now.day) + str(year) + '0' + str(count)
+                else:
+                    invoice_id = str(now.month) + str(now.day) + str(year) + '0' + str(count)
         else:
-            invoice_id = str(now.month)+str(now.day)+str(year)+str(count)
+            if now.day <= 9:
+                if now.month <= 9:
+                    invoice_id = '0' + str(now.month) + '0' + str(now.day) + str(year)  + str(count)
+                else:
+                    invoice_id = str(now.month) + '0' + str(now.day) + str(year)  + str(count)
+            else:
+                if now.month <= 9:
+                    invoice_id = '0' + str(now.month) + str(now.day) + str(year)  + str(count)
+                else:
+                    invoice_id = str(now.month) + str(now.day) + str(year)  + str(count)
 
         payment_obj = PaymentEntry.objects.create(final_amount=final_amount, tax_offered=tax_offered,invoice_id=invoice_id,
                                                   discount_offered=discount_offered, payment_mode=payment_mode,status=status,
