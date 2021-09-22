@@ -20,19 +20,9 @@ from .serializers import PaymentEntrySerializer, InvoiceItemSerializer,FeesItemS
 from customer.serializers import CustomerInfoSerializer, VehicleInfoSerializer
 from service.serializers import TestTypeSerializer,MustHaveSerializer,CashDiscountSerializer,SquareCredentialSerializer
 from .square_api import base_url
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-
-# class device_list(APIView):
-#
-#     def get(self, request):
-#         response = requests.get('https://connect.squareupsandbox.com/v2/locations/L8BKETKRHE1PP/transactions/',
-#                                 headers={"Authorization": "Bearer EAAAENz618Mx91J_aZ2jq-VAlBEr05uLz6yTMngy84AfbuBCvKAvQ38pyhNKLYT3"})
-#         json_response = response.json()
-#         return JsonResponse(json_response)
-#
-#     def post(self, request):
-#
-#       return
+# ..............................invoice_generic_entry..............................
 class generic_tables(APIView):
     def get(self,request):
         test_type= TestType.objects.all()
@@ -41,6 +31,10 @@ class generic_tables(APIView):
         serializer2 = MustHaveSerializer(must_have,many=True)
         myjson = {"status":"1","tset":serializer.data,"must":serializer2.data}
         return JsonResponse(myjson)
+
+
+# ...............................Invoice-Entry-Into-Table...............................
+
 
 class payment_entry(APIView):
     def post(self, request):
@@ -72,10 +66,14 @@ class payment_entry(APIView):
         else:
             count=0
         count = count+1
+        now = datetime.datetime.now()
+        year=now.year%100
         if count<= 9 :
-            invoice_id = '#Order-0'+ str(count)
+            invoice_id = str(now.month)+str(now.day)+str(year)+'00'+ str(count)
+        elif count<= 99:
+            invoice_id = str(now.month)+str(now.day)+str(year)+'0'+ str(count)
         else:
-            invoice_id = '#Order-' + str(count)
+            invoice_id = str(now.month)+str(now.day)+str(year)+str(count)
 
         payment_obj = PaymentEntry.objects.create(final_amount=final_amount, tax_offered=tax_offered,invoice_id=invoice_id,
                                                   discount_offered=discount_offered, payment_mode=payment_mode,status=status,
@@ -120,6 +118,9 @@ class payment_entry(APIView):
         myJson = {"status": "1", "data": serializer.data}
         return JsonResponse(myJson)
 
+# ...............................END-Invoice-Entry-Into-Table...............................
+
+# ...............................Services-Update-Function-Of-Invoice...............................
 
 def service_updation(service_item, payment_exist):
     for i in service_item:
@@ -143,6 +144,9 @@ def service_updation(service_item, payment_exist):
         if dt == 0:
             InvoiceItem.objects.filter(service_item=i,Payment=payment_exist).delete()
 
+# ...............................END-Services-Update-Function-Of-Invoice...............................
+
+# ...............................Taxes-Update-Function-Of-Invoice......................................
 
 def tax_updation(taxes, payment_exist):
     for i in taxes:
@@ -164,6 +168,9 @@ def tax_updation(taxes, payment_exist):
         if dt == 0:
             TaxItem.objects.filter(tax_item=i,Payment=payment_exist).delete()
 
+# ...............................END-Taxes-Update-Function-Of-Invoice......................................
+
+# ...............................Fees-Update-Function-Of-Invoice......................................
 
 def fees_updation(fees, payment_exist):
     for i in fees:
@@ -185,6 +192,9 @@ def fees_updation(fees, payment_exist):
         if dt == 0:
             FeesItem.objects.filter(fees_item=i,Payment=payment_exist).delete()
 
+# ...............................END-Fees-Update-Function-Of-Invoice......................................
+
+# ...............................Discounts-Update-Function-Of-Invoice......................................
 
 def discount_updation(discounts, payment_exist):
     for i in discounts:
@@ -206,6 +216,9 @@ def discount_updation(discounts, payment_exist):
         if dt == 0:
             DiscountItem.objects.filter(discount_item=i).delete()
 
+# ...............................END-Discounts-Update-Function-Of-Invoice......................................
+
+# ...............................TestType-Update-Function-Of-Invoice......................................
 
 def test_type_updation(test_type, payment_exist):
     for i in test_type:
@@ -225,6 +238,9 @@ def test_type_updation(test_type, payment_exist):
         if dt == 0:
             TestTypeItem.objects.filter(test_item=i,Payment=payment_exist).delete()
 
+# ...............................END-TestType-Update-Function-Of-Invoice......................................
+
+# ...............................MustHave-Update-Function-Of-Invoice......................................
 
 def must_have_updation(must_have, payment_exist):
     for i in must_have:
@@ -244,6 +260,9 @@ def must_have_updation(must_have, payment_exist):
         if dt == 0:
             MustHaveItem.objects.filter(must_have_item=i,Payment=payment_exist).delete()
 
+# ...............................END-MustHave-Update-Function-Of-Invoice......................................
+
+# ...............................Invoice-Update-......................................
 
 class update_payment_entry(APIView):
     def post(self, request):
@@ -279,8 +298,9 @@ class update_payment_entry(APIView):
         serializer = PaymentEntrySerializer(payment_exist)
         myJson = {"status": "1", "data": serializer.data}
         return JsonResponse(myJson)
+# ...............................END-Invoice-Update-......................................
 
-
+# ...............................Invoice-Validate-After-Payment......................................
 
 class payment_validate(APIView):
     def post(self, request):
@@ -293,11 +313,12 @@ class payment_validate(APIView):
         payment_obj = PaymentEntry.objects.filter(id=id).update(status=status, payment_mode=payment_mode,
                                                                 changed_given=changed_given,
                                                                 amount_tendered=amount_tendered)
-
         myJson = {"status": "1", "data": id}
         return JsonResponse(myJson)
 
+# ...............................END-Invoice-Validate-After-Payment......................................
 
+# ...............................Invoice-List......................................
 class order_list(APIView):
     def post(self, request):
         data = request.data
@@ -321,7 +342,65 @@ class order_list(APIView):
         myJson = {"status": "1", "data": serializer.data}
         return JsonResponse(myJson)
 
+# ...............................END-Invoice-List......................................
 
+# ...............................Invoice-List-Pagination-Number......................................
+class order_list_page(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        page_no = data['page_number']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+        cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
+        cust3 = PaymentEntry.objects.filter(Vehicle__in=cust2).order_by('-invoice_id')
+        if SquareCredential.objects.filter(client=user_obj).exists():
+            token = SquareCredential.objects.get(client=user_obj).accees_token
+            checkout_id = SquareTerminalCheckout.objects.filter(payment__in=cust3)
+            for i in checkout_id:
+                checkout = requests.get(base_url + '/v2/terminals/checkouts/' + i.checkout_id,
+                                        headers={"Authorization": 'Bearer ' + token,
+                                                 "Content-Type": "application/json", "Square-Version": "2021-07-21"})
+                json_response = checkout.json()
+                status = json_response['checkout']['status']
+                PaymentEntry.objects.filter(id=i.payment.id).update(status=status)
+        items_per_page = 5
+        total_count = cust3.count()
+        pages = 0
+        if total_count > 0:
+            pages = total_count / items_per_page
+            if pages % 1 == 0:
+                pass
+            else:
+                pages = int(pages)
+                pages = pages + 1
+        paginator = Paginator(cust3, items_per_page)
+        page_num = page_no
+        pages_data = {}
+        if pages < page_num:
+            pages_data['current_page'] = pages
+        else:
+            pages_data['current_page'] = page_num
+        pages_data['total_pages'] = pages
+        try:
+            cust3 = paginator.page(page_num)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            cust3 = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range, deliver last page of results.
+            cust3 = paginator.page(paginator.num_pages)
+        serializer = PaymentEntrySerializer(cust3, many=True)
+        info={}
+        info['current_page']=page_num
+        info['total_pages']=pages
+        myJson = {"status": "1", "data": serializer.data,"page_info":info}
+        return JsonResponse(myJson)
+
+# ...............................END-Invoice-List-Pagination-Number......................................
+
+# ...............................Invoice-List-Count-With-Completed-Or-Without Completed..................
 class total_sales(APIView):
     def post(self, request):
         data = request.data
@@ -339,7 +418,9 @@ class total_sales(APIView):
         sales = {"sales_count": cust4, "total_sales": total}
         myJson = {"status": "1", "data": sales}
         return JsonResponse(myJson)
+# ...............................END-Invoice-List-Count-With-Completed-Or-Without Completed..................
 
+# ...............................Single-Invoice......................................
 class order_invoice(APIView):
     def post(self, request):
         data = request.data
@@ -374,6 +455,9 @@ class order_invoice(APIView):
                       "must": serializer7.data, "Cash_discount": ""}
             return JsonResponse(myJson)
 
+# ...............................END-Single-Invoice......................................
+
+# ...............................Only-Confirm-Invoice-List......................................
 
 class confirm_list(APIView):
     def post(self, request):
@@ -387,6 +471,10 @@ class confirm_list(APIView):
         serializer = PaymentEntrySerializer(cust3, many=True)
         myJson = {"status": "1", "data": serializer.data}
         return JsonResponse(myJson)
+
+# ...............................End-Only-Confirm-Invoice-List......................................
+
+# ...............................Date-Wise-Invoice-List......................................
 
 class datewise_order_list(APIView):
     def post(self, request):
@@ -411,6 +499,10 @@ class datewise_order_list(APIView):
         myJson = {"status": "1", "data":serializer.data}
         return JsonResponse(myJson)
 
+# ...............................END-Date-Wise-Invoice-List......................................
+
+# ...............................Date-Wise-Customer-List......................................
+
 class datewise_customer_list(APIView):
     def post(self, request):
         data = request.data
@@ -433,6 +525,10 @@ class datewise_customer_list(APIView):
         myJson = {"status": "1", "data":serializer.data}
         return JsonResponse(myJson)
 
+# ...............................Date-Wise-Customer-List......................................
+
+# ...............................Delete-Customer..............................................
+
 class delete_customer(APIView):
     def post(self,request):
         data = request.data
@@ -445,6 +541,8 @@ class delete_customer(APIView):
             VehicleInfo.objects.filter(id=session).delete()
             myJson = {"status": "1", "data": "Deleted"}
             return JsonResponse(myJson)
+
+# ...............................END-Delete-Customer..............................................
 
 #
 # class create_token(APIView):
@@ -516,6 +614,8 @@ class delete_customer(APIView):
 #         myJson = {"status": "1", "data": json_response}
 #         return JsonResponse(myJson)
 
+# ...............................Square-Device-Info..............................................
+
 class get_device(APIView):
     def post(self, request):
         data = request.data
@@ -544,7 +644,9 @@ class get_device(APIView):
             myJson = {"status": "1", "data": ""}
             return JsonResponse(myJson)
 
+# ...............................END-Square-Device-Info..............................................
 
+# ...............................Square-Device-Delete..............................................
 class delete_device(APIView):
     def post(self,request):
         data = request.data
@@ -557,7 +659,9 @@ class delete_device(APIView):
             myJson = {"status": "0", "data": "error"}
             return JsonResponse(myJson)
 
+# ...............................END-Square-Device-Delete..............................................
 
+# ...............................Create-Square-Device..............................................
 class create_device(APIView):
     def post(self, request):
         data = request.data
@@ -587,6 +691,8 @@ class create_device(APIView):
             myJson = {"status": "1", "data": json_response}
             return JsonResponse(myJson)
 
+# ...............................END-Create-Square-Device..............................................
+# ...............................Re-Create-Square-Device..............................................
 
 class recreate_device(APIView):
     def post(self, request):
@@ -613,6 +719,8 @@ class recreate_device(APIView):
         myJson = {"status": "1", "data": json_response}
         return JsonResponse(myJson)
 
+# ...............................END-Re-Create-Square-Device..............................................
+# ...............................-Square-Terminal-Checkout..............................................
 
 class create_terminal_checkout(APIView):
     def post(self, request):
@@ -652,7 +760,8 @@ class create_terminal_checkout(APIView):
             myJson = {"status": "1", "data": "error"}
             return JsonResponse(myJson)
 
-# ............................................fortispay............................
+# ...............................END-Square-Terminal-Checkout..............................................
+# .............................. Fortispay-Credentials-Insert............................
 
 
 class fortispay_credentials(APIView):
@@ -683,6 +792,9 @@ class fortispay_credentials(APIView):
             myJson = {"status": "1", "data": "Success"}
             return JsonResponse(myJson)
 
+# ..............................END-Fortispay-Credentials-Insert............................
+# ..............................Update-Fortispay-Credentials............................
+
 class fortispay_update_credentials(APIView):
     def post(self, request):
         data = request.data
@@ -708,6 +820,8 @@ class fortispay_update_credentials(APIView):
         else:
             myJson = {"status": "1", "data": "error"}
             return JsonResponse(myJson)
+# ..............................END-Update-Fortispay-Credentials............................
+# ..............................Get-Fortispay-Credentials............................
 
 class fortispay(APIView):
     def post(self,request):
@@ -723,6 +837,9 @@ class fortispay(APIView):
         else:
             myJson = {"status": "1", "data": ""}
             return JsonResponse(myJson)
+
+# ..............................END-Get-Fortispay-Credentials............................
+# ..............................TErminal-List-Fortispay............................
 
 class fortispay_terminal_list(APIView):
     def post(self, request):
@@ -748,6 +865,7 @@ class fortispay_terminal_list(APIView):
             myJson = {"status": "0", "data": "FortisPay Account Is Not Linked"}
             return JsonResponse(myJson)
 
+# ..............................END-Terminal-List-Fortispay............................
 
 # @csrf_exempt
 # def view_single_transaction(request, transaction_id):
@@ -766,6 +884,7 @@ class fortispay_terminal_list(APIView):
 #
 #     return JsonResponse(json_response)
 #
+# ..............................Terminal-Transaction-Fortispay............................
 
 class get_router_transaction(APIView):
         def post(self, request):
@@ -803,3 +922,5 @@ class get_router_transaction(APIView):
                                     )
             json_response = response.json()
             return JsonResponse(json_response)
+
+# ..............................End-Terminal-Transaction-Fortispay............................
