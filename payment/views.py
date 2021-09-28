@@ -441,12 +441,16 @@ class total_sales(APIView):
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
         cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
-        cust3 = PaymentEntry.objects.filter(Vehicle__in=cust2)
+        cust3 = PaymentEntry.objects.filter(Q(status ='Completed') | Q(status='COMPLETED'),Vehicle__in=cust2)
         cust4 = PaymentEntry.objects.filter(Q(status ='Completed') | Q(status='COMPLETED'),Vehicle__in=cust2).count()
+
         total = 0
         count = cust3.count()
-        for i in cust3:
-            total = total + i.final_amount
+        for j in cust3:
+            if j.payment_mode == 'cash':
+                total =round( total + j.final_amount,2)
+            else:
+                total =round( total + j.card_amount,2)
         sales = {"sales_count": cust4, "total_sales": total}
         myJson = {"status": "1", "data": sales}
         return JsonResponse(myJson)
@@ -1004,11 +1008,11 @@ def yearwisedata(cust2):
                 tax = tax + j.tax_offered
                 discount = discount + j.discount_offered
 
-        stats['gross_amount'] = total
-        stats['cash_amount'] = total2
-        stats['card_amount'] = total-total2
-        stats['taxes']= tax
-        stats['cash_discount']=discount
+        stats['gross_amount'] = round( total,2)
+        stats['cash_amount'] = round( total2,2)
+        stats['card_amount'] = round( total-total2,2)
+        stats['taxes']= round(tax,2)
+        stats['cash_discount']=round(discount,2)
         year_wise_stats.append(stats)
 
     return year_wise_stats
@@ -1055,11 +1059,11 @@ def monthwisedata(month_list, cust2):
                         discount = discount + j.discount_offered
                 stats['year'] = '2021'
                 stats['month'] = i
-                stats['Gross_Sales'] = total
-                stats['Cash_Amount'] = total2
-                stats['Card_Amount'] = total - total2
-                stats['Tax_Amount'] = tax
-                stats['Discount_Amount'] = discount
+                stats['Gross_Sales'] = round( total,2)
+                stats['Cash_Amount'] = round( total2,2)
+                stats['Card_Amount'] = round( total - total2,2)
+                stats['Tax_Amount'] = round( tax,2)
+                stats['Discount_Amount'] = round( discount,2)
                 month_wise_stats.append(stats)
     return month_wise_stats
 
@@ -1089,11 +1093,11 @@ def daywisedata(month_list, cust2,day_list):
                         discount =round (discount + j.discount_offered,2)
 
                 stats['Date']= str(k)+'-'+str(i)+'-'+'2021'
-                stats['Gross_Sales'] = total
-                stats['Cash_Amount'] = cash
-                stats['Card_Amount'] = total - cash
-                stats['Tax_Amount'] = tax
-                stats['Discount_Amount'] = discount
+                stats['Gross_Sales'] = round( total,2)
+                stats['Cash_Amount'] = round( cash,2)
+                stats['Card_Amount'] = round( total - cash,2)
+                stats['Tax_Amount'] = round( tax,2)
+                stats['Discount_Amount'] = round( discount,2)
                 Day_wise_stats.append(stats)
     return Day_wise_stats
 
@@ -1111,11 +1115,11 @@ def weeklydata(cust2):
                     if i['week']==j['week']:
                         data={}
                         data['week']=i['week']
-                        data['Gross_Sales']=i['cash_total']+j['card_total']
-                        data['card_amount']=j['card_total']
-                        data['cash_amount']=i['cash_total']
-                        data['tax_amount']=i['tax_offered']+j['tax_offered']
-                        data['discount_amount']=i['discount_offered']+j['discount_offered']
+                        data['Gross_Sales']=round( i['cash_total']+j['card_total'],2)
+                        data['card_amount']=round( j['card_total'],2)
+                        data['cash_amount']=round( i['cash_total'],2)
+                        data['tax_amount']=round( i['tax_offered']+j['tax_offered'],2)
+                        data['discount_amount']=round( i['discount_offered']+j['discount_offered'],2)
                         week_data.append(data)
     week=[]
     for i in week_data:
@@ -1124,11 +1128,11 @@ def weeklydata(cust2):
         if j['week'] not in week:
             data = {}
             data['week'] = j['week']
-            data['Gross_Sales'] = j['cash_total']
+            data['Gross_Sales'] =round( j['cash_total'],2)
             data['card_amount'] = ''
-            data['cash_amount'] = j['cash_total']
-            data['tax_amount'] = j['tax_offered']
-            data['discount_amount'] = j['discount_offered']
+            data['cash_amount'] =  round( j['cash_total'],2)
+            data['tax_amount'] = round( j['tax_offered'],2)
+            data['discount_amount'] =round( j['discount_offered'],2)
             week_data.append(data)
     week = []
     for i in week_data:
@@ -1137,11 +1141,11 @@ def weeklydata(cust2):
         if j['week'] not in week:
             data = {}
             data['week'] = j['week']
-            data['Gross_Sales'] = j['card_total']
-            data['card_amount'] = j['card_total']
+            data['Gross_Sales'] =round( j['card_total'],2)
+            data['card_amount'] =round( j['card_total'],2)
             data['cash_amount'] = ''
-            data['tax_amount'] = j['tax_offered']
-            data['discount_amount'] = j['discount_offered']
+            data['tax_amount'] =round( j['tax_offered'],2)
+            data['discount_amount'] =round( j['discount_offered'],2)
             week_data.append(data)
     week_data.sort(key=lambda x: x["week"])
     return week_data
@@ -1229,11 +1233,11 @@ def filterwisedata(cust3):
                     tax = tax + j.tax_offered
                     discount = discount + j.discount_offered
 
-            stats['Gross_Sales'] = total
-            stats['Cash_Amount'] = total2
-            stats['Card_Amount'] = total - total2
-            stats['Tax_Amount'] = tax
-            stats['Discount_Amount'] = discount
+            stats['Gross_Sales'] = round( total,2)
+            stats['Cash_Amount'] = round( total2,2)
+            stats['Card_Amount'] = round( total - total2,2)
+            stats['Tax_Amount'] = round( tax,2)
+            stats['Discount_Amount'] = round( discount,2)
             month_wise_stats.append(stats)
         return month_wise_stats
 
