@@ -1044,7 +1044,7 @@ def monthwisedata(month_list, cust2):
             if cust3.count() != 0:
                 stats = {}
                 for j in cust3:
-                    if j.payment_mode == 'Cash':
+                    if j.payment_mode == 'cash':
                         total = total + j.final_amount
                         total2 = total2 + j.final_amount
                         tax = tax + j.tax_offered
@@ -1078,8 +1078,7 @@ def daywisedata(month_list, cust2,day_list):
             if cust3.count() != 0:
                 stats = {}
                 for j in cust3:
-                    if j.payment_mode == 'Cash':
-                        print(cash)
+                    if j.payment_mode == 'cash':
                         total = round( total + j.final_amount,2)
                         cash = round( cash + j.final_amount,2)
                         tax = round( tax + j.tax_offered,2)
@@ -1220,7 +1219,7 @@ def filterwisedata(cust3):
         if cust3.count() != 0:
             stats = {}
             for j in cust3:
-                if j.payment_mode == 'Cash':
+                if j.payment_mode == 'cash':
                     total = total + j.final_amount
                     total2 = total2 + j.final_amount
                     tax = tax + j.tax_offered
