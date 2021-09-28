@@ -8,6 +8,11 @@ from rest_framework.views import APIView
 import requests
 import uuid
 import json
+from django.db.models.functions import (
+  ExtractDay, ExtractMonth, ExtractQuarter, ExtractWeek,
+  ExtractWeekDay, ExtractYear,
+)
+from django.db.models import Avg, Count, Min, Sum
 from django.db.models import Q
 import datetime
 from customer.models import CustomerInfo, VehicleInfo, TestDetails
@@ -951,3 +956,250 @@ class get_router_transaction(APIView):
             return JsonResponse(json_response)
 
 # ..............................End-Terminal-Transaction-Fortispay............................
+# .............................. Stats............................
+def year_month_day_find(cust5,cust4):
+    now = datetime.datetime.now()
+    year = None
+    month = None
+    day = None
+
+    year=cust5.created_date.strftime("%Y")
+    month=cust5.created_date.strftime("%m")
+    day=cust5.created_date.strftime("%d")
+    year = int(year)
+    month = int(month)
+    day = int(day)
+
+    last_year = None
+    last_month = None
+    last_day = None
+
+    last_year= cust4.created_date.strftime("%Y")
+    last_month= cust4.created_date.strftime("%m")
+    last_day= cust4.created_date.strftime("%d")
+    last_year = int(last_year)
+    last_month = int(last_month)
+    last_day = int(last_day)
+
+
+    return year,month,day,last_year,last_month,last_day
+
+
+def yearwisedata(year_list, cust2):
+    year_wise_stats = []
+    for i in year_list:
+            cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'),
+                                                Vehicle__in=cust2, created_date__year__gte=i, created_date__year__lte=i)
+            total = 0.0
+            total2 = 0.0
+            tax = 0.0
+            discount = 0.0
+            if cust3.count() != 0:
+                stats = {}
+                for j in cust3:
+                    if j.payment_mode=='Cash':
+                        total = total + j.final_amount
+                        total2= total2+ j.final_amount
+                        tax=tax+j.tax_offered
+                        discount=discount+j.discount_offered
+                    else:
+                        total = total + j.card_amount
+                        tax = tax + j.tax_offered
+                        discount = discount + j.discount_offered
+                stats['year'] = i
+                stats['gross_amount'] = total
+                stats['cash_amount'] = total2
+                stats['card_amount'] = total-total2
+                stats['taxes']= tax
+                stats['cash_discount']=discount
+                year_wise_stats.append(stats)
+
+    return year_wise_stats
+
+
+def yearwiseservices(year_list, cust2, user_obj):
+    service_wise_stats = []
+    for i in year_list:
+        cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'),
+                                            Vehicle__in=cust2, created_date__year__gte=i, created_date__year__lte=i)
+        invoice = InvoiceItem.objects.filter(Payment__in=cust3)
+        if invoice.count() != 0:
+            service = ServicesList.objects.filter(client=user_obj)
+            for k in service:
+                count = 0
+                services = {}
+                for l in invoice:
+                    if l.service_item.id == k.id:
+                        count = count + 1
+                services['service_name'] = k.service_name
+                services['count'] = count
+                service_wise_stats.append(services)
+    return service_wise_stats
+
+
+def monthwisedata(month_list, cust2, start_month, last_month):
+    month_wise_stats = []
+    for i in month_list:
+            cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'),
+                                                Vehicle__in=cust2, created_date__month__gte=i, created_date__month__lte=i)
+            total = 0.0
+            total2 = 0.0
+            tax = 0.0
+            discount = 0.0
+            if cust3.count() != 0:
+                stats = {}
+                for j in cust3:
+                    if j.payment_mode == 'Cash':
+                        total = total + j.final_amount
+                        total2 = total2 + j.final_amount
+                        tax = tax + j.tax_offered
+                        discount = discount + j.discount_offered
+                    else:
+                        total = total + j.card_amount
+                        tax = tax + j.tax_offered
+                        discount = discount + j.discount_offered
+                stats['year'] = '2021'
+                stats['month'] = i
+                stats['gross_amount'] = total
+                stats['cash_amount'] = total2
+                stats['card_amount'] = total - total2
+                stats['taxes'] = tax
+                stats['cash_discount'] = discount
+                month_wise_stats.append(stats)
+
+    return month_wise_stats
+
+
+def daywisedata(month_list, cust2, start_month, last_month, start_day, last_day, start_year, last_year,day_list):
+    Day_wise_stats = []
+    gross_data = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), Vehicle__in=cust2,
+                                             ).annotate(
+        day=ExtractDay('created_date')
+    ).values('day').annotate(
+        gross_total=Sum('final_amount')
+    ).order_by('day')
+
+    normal_day_list = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
+    for i in month_list:
+        for k in day_list:
+            cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'),
+                                                Vehicle__in=cust2, created_date__month__gte=i,
+                                                created_date__month__lte=i,created_date__day__lte=k,
+                                                created_date__day__gte=k)
+            total = 0.0
+            total2 = 0.0
+            tax = 0.0
+            discount = 0.0
+            if cust3.count() != 0:
+                stats = {}
+                for j in cust3:
+                    if j.payment_mode == 'Cash':
+                        total = total + j.final_amount
+                        total2 = total2 + j.final_amount
+                        tax = tax + j.tax_offered
+                        discount = discount + j.discount_offered
+                    else:
+                        total = total + j.card_amount
+                        tax = tax + j.tax_offered
+                        discount = discount + j.discount_offered
+
+                stats['year'] = '2021'
+                stats['month'] = i
+                stats['day']= str(k)+str(i)+'2021'
+                stats['gross_amount'] = total
+                stats['cash_amount'] = total2
+                stats['card_amount'] = total - total2
+                stats['taxes'] = tax
+                stats['cash_discount'] = discount
+                Day_wise_stats.append(stats)
+
+    return Day_wise_stats
+
+
+def weeklydata(cust2):
+    card_data=PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), Vehicle__in=cust2,payment_mode='Card').annotate(
+        week=ExtractWeek('created_date')
+    ).values('week').annotate(
+        card_total=Sum('card_amount')
+    ).order_by('week')
+
+    cash_data = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), Vehicle__in=cust2,
+                                              payment_mode='Cash' ).annotate(
+        week=ExtractWeek('created_date')
+    ).values('week').annotate(
+        cash_total=Sum('card_amount')
+    ).order_by('week')
+
+    gross_data = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), Vehicle__in=cust2,
+                                            ).annotate(
+        week=ExtractWeek('created_date')
+    ).values('week').annotate(
+        cash_total=Sum('final_amount')
+    ).order_by('week')
+
+    taxes_data = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), Vehicle__in=cust2,
+                                             ).annotate(
+        week=ExtractWeek('created_date')
+    ).values('week').annotate(
+        cash_total=Sum('tax_offered')
+    ).order_by('week')
+
+    week_data=[]
+    if cash_data.count() !=0:
+        for i in cash_data:
+            if card_data.count() != 0:
+                for j in card_data:
+                    if i['week']==j['week']:
+                        data={}
+                        data['week']=i['week']
+                        data['card_amount']=j['card_total']
+                        data['cash_amount']=i['cash_total']
+                        week_data.append(data)
+                    else:
+                        data = {}
+                        data['week'] = i['week']
+                        data['card_amount'] = ''
+                        data['cash_amount'] = i['cash_total']
+                        week_data.append(data)
+                        data = {}
+                        data['week'] = j['week']
+                        data['card_amount'] =j['card_total']
+                        data['cash_amount'] = ''
+                        week_data.append(data)
+            else:
+                data = {}
+                data['week'] = i['week']
+                data['card_amount'] = ''
+                data['cash_amount'] = i['cash_total']
+                week_data.append(data)
+
+    return week_data
+
+
+class stats_daily_gross(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+        cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
+        cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), Vehicle__in=cust2).order_by('created_date')
+        cust4 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), Vehicle__in=cust2).last()
+        cust5 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), Vehicle__in=cust2).first()
+        start_year,start_month,start_day,last_year,last_month,last_day=year_month_day_find(cust5,cust4)
+        now = datetime.datetime.now()
+        current_year = now.year
+        current_month = now.month
+        current_day = now.day
+        year_list = [2021,2022,2023,2024,2025]
+        month_list = [1,2,3,4,5,6,7,8,9,10,11,12]
+        day_list = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]
+        year_wise_data = yearwisedata(year_list,cust2)
+        year_wise_servies = yearwiseservices(year_list,cust2,user_obj)
+        month_wise_data = monthwisedata(month_list,cust2,start_month,last_month)
+        weekly_data = weeklydata(cust2)
+        day_wise_data = daywisedata(month_list, cust2, start_month, last_month,start_day,last_day,start_year,last_year,day_list)
+        myJson = {"status": "1", "Year_Data": year_wise_data,"services":year_wise_servies,"Month_Data":month_wise_data,
+                  "Day_Data":day_wise_data,"Weekly_Data":weekly_data}
+        return JsonResponse(myJson, safe=False)

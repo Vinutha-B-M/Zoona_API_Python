@@ -8,6 +8,7 @@ urlpatterns = [
     path('update_invoice_entry/', views.update_payment_entry.as_view(), name="update_invoice_entry"),
     path('payment_validate/', views.payment_validate.as_view(), name="payment_validate"),
     path('order_list/', views.order_list.as_view(), name="order_list"),
+    path('order_list_page/', views.order_list_page.as_view(), name="order_list_page"),
     path('confirm_list/', views.confirm_list.as_view(), name="confirm_list"),
     path('datewise_order_list/', views.datewise_order_list.as_view(), name="datewise_order_list"),
     path('datewise_customer_list/', views.datewise_customer_list.as_view(), name="datewise_customer_list"),
@@ -30,4 +31,5 @@ urlpatterns = [
     path('fortispay_terminal_list/', views.fortispay_terminal_list.as_view(), name="fortispay_terminal_list"),
     path('fortispay/', views.fortispay.as_view(), name="fortispay"),
     path('get_router_transaction/', views.get_router_transaction.as_view(), name="get_router_transaction"),
+    path('stats_daily_gross/',views.stats_daily_gross.as_view(), name="stats_daily_gross")
 ]
