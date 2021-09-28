@@ -1072,26 +1072,27 @@ def daywisedata(month_list, cust2,day_list):
                                                 created_date__month__lte=i,created_date__day__lte=k,
                                                 created_date__day__gte=k)
             total = 0.0
-            total2 = 0.0
+            cash = 0.0
             tax = 0.0
             discount = 0.0
             if cust3.count() != 0:
                 stats = {}
                 for j in cust3:
                     if j.payment_mode == 'Cash':
-                        total = total + j.final_amount
-                        total2 = total2 + j.final_amount
-                        tax = tax + j.tax_offered
-                        discount = discount + j.discount_offered
+                        print(cash)
+                        total = round( total + j.final_amount,2)
+                        cash = round( cash + j.final_amount,2)
+                        tax = round( tax + j.tax_offered,2)
+                        discount = round(discount + j.discount_offered,2)
                     else:
-                        total = total + j.card_amount
-                        tax = tax + j.tax_offered
-                        discount = discount + j.discount_offered
+                        total =round( total + j.card_amount,2)
+                        tax =round( tax + j.tax_offered,2)
+                        discount =round (discount + j.discount_offered,2)
 
                 stats['Date']= str(k)+'-'+str(i)+'-'+'2021'
                 stats['Gross_Sales'] = total
-                stats['Cash_Amount'] = total2
-                stats['Card_Amount'] = total - total2
+                stats['Cash_Amount'] = cash
+                stats['Card_Amount'] = total - cash
                 stats['Tax_Amount'] = tax
                 stats['Discount_Amount'] = discount
                 Day_wise_stats.append(stats)
