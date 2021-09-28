@@ -31,5 +31,12 @@ urlpatterns = [
     path('fortispay_terminal_list/', views.fortispay_terminal_list.as_view(), name="fortispay_terminal_list"),
     path('fortispay/', views.fortispay.as_view(), name="fortispay"),
     path('get_router_transaction/', views.get_router_transaction.as_view(), name="get_router_transaction"),
-    path('stats_daily_gross/',views.stats_daily_gross.as_view(), name="stats_daily_gross")
+    path('stats_daily/',views.stats_daily.as_view(), name="stats_daily"),
+    path('stats_monthly/',views.stats_monthly.as_view(), name="stats_monthly"),
+    path('stats_weekly/',views.stats_weekly.as_view(), name="stats_weekly"),
+    path('stats_services/',views.stats_services.as_view(), name="stats_services"),
+    path('stats_overall/',views.stats_overall.as_view(), name="stats_overall"),
+    path('stats_filter/',views.stats_filter.as_view(), name="stats_filter"),
+    path('filter_services/',views.filter_services.as_view(), name="filter_services"),
+
 ]
