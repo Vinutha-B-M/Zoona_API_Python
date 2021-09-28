@@ -994,7 +994,7 @@ def yearwisedata(cust2):
     if cust3.count() != 0:
         stats = {}
         for j in cust3:
-            if j.payment_mode=='Cash':
+            if j.payment_mode=='cash':
                 total = total + j.final_amount
                 total2 = total2+ j.final_amount
                 tax = tax + j.tax_offered
