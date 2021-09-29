@@ -1104,9 +1104,9 @@ def daywisedata(month_list, cust2,day_list):
     return Day_wise_stats
 
 def weeklydata(cust2):
-    card_data=PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), Vehicle__in=cust2,payment_mode='Card')\
+    card_data=PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'),Q(payment_mode='Card') | Q(payment_mode='card'), Vehicle__in=cust2)\
         .annotate(week=ExtractWeek('created_date')).values('week').annotate(card_total=Sum('card_amount')).annotate(tax_offered=Sum('tax_offered')).annotate(discount_offered=Sum('discount_offered')).order_by('week')
-    cash_data = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), Vehicle__in=cust2,payment_mode='Cash' )\
+    cash_data = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), Vehicle__in=cust2,payment_mode='cash' )\
         .annotate(week=ExtractWeek('created_date')).values('week').annotate(cash_total=Sum('final_amount')).annotate(tax_offered=Sum('tax_offered')).annotate(discount_offered=Sum('discount_offered')).order_by('week')
 
     week_data=[]
