@@ -1032,6 +1032,8 @@ def yearwiseservices(cust2, user_obj):
                     count = count + 1
             services['service_name'] = k.service_name
             services['count'] = count
+            per = round( count*100/cust3.count(),2)
+            services['percentage'] = str(per) + '%'
             service_wise_stats.append(services)
     return service_wise_stats
 
@@ -1280,6 +1282,8 @@ def filterservices(cust3, user_obj):
                     count = count + 1
             services['service_name'] = k.service_name
             services['count'] = count
+            per = round(count * 100 / cust3.count(), 2)
+            services['percentage'] = str(per) + '%'
             service_wise_stats.append(services)
     return service_wise_stats
 
