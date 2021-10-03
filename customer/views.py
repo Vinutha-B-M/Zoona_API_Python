@@ -193,8 +193,11 @@ def customer_info_clientwise(user_obj, cust3,page_no,items_per_page):
             else:
                 list['Terms'] = list_term
             customer_data.append(list)
-
-        return customer_data
+        Customers = []
+        Data = {}
+        Data['Data'] = customer_data
+        Customers.append(Data)
+        return Customers
     else:
         customer_obj = CustomerInfo.objects.filter(user_id=user_obj).order_by('id')
         items_per_page = items_per_page
@@ -263,8 +266,12 @@ def customer_info_clientwise(user_obj, cust3,page_no,items_per_page):
             else:
                 list['Terms'] = list_term
             customer_data.append(list)
-        customer_data.append(pages_data)
-        return customer_data
+        Customers = []
+        Customers.append(pages_data)
+        Data = {}
+        Data['Data'] = customer_data
+        Customers.append(Data)
+        return Customers
 # .........................END-Customer-Info-Function.......................................
 # .........................Vehicle-Info-Function.......................................
 
@@ -324,7 +331,11 @@ def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page):
                     vehicle['customer_id']['Terms'] = list_term
                 if z != 0:
                     vehicle_data.append(vehicle)
-        return vehicle_data
+        Vehicles = []
+        Data = {}
+        Data['Data'] = vehicle_data
+        Vehicles.append(Data)
+        return Vehicles
 
     else:
         items_per_page = items_per_page
@@ -352,7 +363,7 @@ def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page):
             pages_data['Next']=False
         else:
             pages_data['Next'] = True
-        pages_data['total_pages'] = pages
+        pages_data['total_counts'] = total_count
         try:
             cust2 = paginator.page(page_num)
         except PageNotAnInteger:
@@ -415,8 +426,12 @@ def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page):
                     vehicle['customer_id']['Terms'] = list_term
                 if z != 0:
                     vehicle_data.append(vehicle)
-        vehicle_data.append(pages_data)
-        return vehicle_data
+        Vehicles=[]
+        Vehicles.append(pages_data)
+        Data={}
+        Data['Data']=vehicle_data
+        Vehicles.append(Data)
+        return Vehicles
 # .........................End-Vehicle-Info-Function.......................................
 
 # .........................Vehicle-Info......................................
