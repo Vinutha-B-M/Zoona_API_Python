@@ -38,5 +38,6 @@ urlpatterns = [
     path('stats_overall/',views.stats_overall.as_view(), name="stats_overall"),
     path('stats_filter/',views.stats_filter.as_view(), name="stats_filter"),
     path('filter_services/',views.filter_services.as_view(), name="filter_services"),
-
+    path('mail_to_customer/',views.mail_to_customer.as_view(), name="mail_to_customer"),
+    path('delete_order/',views.delete_order.as_view(), name="delete_order"),
 ]

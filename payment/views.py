@@ -12,6 +12,7 @@ from django.db.models.functions import (
   ExtractDay, ExtractMonth, ExtractQuarter, ExtractWeek,
   ExtractWeekDay, ExtractYear,
 )
+
 from django.db.models import Avg, Count, Min, Sum
 from django.db.models import Q
 import datetime
@@ -26,7 +27,16 @@ from customer.serializers import CustomerInfoSerializer, VehicleInfoSerializer
 from service.serializers import TestTypeSerializer,MustHaveSerializer,CashDiscountSerializer,SquareCredentialSerializer
 from .square_api import base_url
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.conf import settings
+from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives,EmailMessage
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from io import BytesIO
+from django.http import HttpResponse
+from django.template.loader import get_template
 
+from xhtml2pdf import pisa
 # ..............................invoice_generic_entry..............................
 class generic_tables(APIView):
     def get(self,request):
@@ -1310,4 +1320,64 @@ class filter_services(APIView):
                                             Vehicle__in=cust2)
         year_wise_servies = filterservices(cust3,user_obj)
         myJson = {"status": "1", "Services":year_wise_servies}
+        return JsonResponse(myJson, safe=False)
+
+# ..............................................mail_to_customer.................................
+
+
+def send_pdf(session):
+    template = get_template('order_template.html')
+    context = {
+        "billno": '1',
+        "billdate": '1',
+        "patientname": '1',
+        "totalbill": '1',
+        "billprocedure": '1',
+    }
+
+    html = template.render(context)
+    result = BytesIO()
+    pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)  # , link_callback=fetch_resources)
+    pdf = result.getvalue()
+    filename = 'Invoice.pdf'
+    to_emails = ['amolganjare12@gmail.com']
+    subject = "From CliMan"
+    email = EmailMessage(subject, "helloji", from_email=settings.EMAIL_HOST_USER, to=to_emails)
+    email.attach(filename, pdf, "application/pdf")
+    email.send(fail_silently=False)
+    myJson = {"status": "1", "Services": ''}
+    return myJson
+
+class mail_to_customer(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        myJson = send_pdf(session)
+        return JsonResponse(myJson, safe=False)
+
+
+def order_delete(session):
+    cust2 = PaymentEntry.objects.get(id=session)
+    if InvoiceItem.objects.filter(Payment=cust2).exists():
+        InvoiceItem.objects.filter(Payment=cust2).delete()
+    if FeesItem.objects.filter(Payment=cust2).exists():
+        FeesItem.objects.filter(Payment=cust2).delete()
+    if TaxItem.objects.filter(Payment=cust2).exists():
+        TaxItem.objects.filter(Payment=cust2).delete()
+    if DiscountItem.objects.filter(Payment=cust2).exists():
+        DiscountItem.objects.filter(Payment=cust2).delete()
+    if TestTypeItem.objects.filter(Payment=cust2).exists():
+        TestTypeItem.objects.filter(Payment=cust2).delete()
+    if MustHaveItem.objects.filter(Payment=cust2).exists():
+        MustHaveItem.objects.filter(Payment=cust2)
+    PaymentEntry.objects.get(id=session).delete()
+    myJson = {"status": "1", "data": 'Success'}
+    return myJson
+
+
+class delete_order(APIView):
+    def post(self,request):
+        data = request.data
+        session = data['id']
+        myJson = order_delete(session)
         return JsonResponse(myJson, safe=False)

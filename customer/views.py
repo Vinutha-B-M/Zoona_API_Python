@@ -8,7 +8,7 @@ import json
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from rest_framework.generics import ListAPIView
 from .serializers import CustomerInfoSerializer, VehicleInfoSerializer, TestDetailsSerializer,TermsItemSerializer
 from .models import CustomerInfo, VehicleInfo, TestDetails,TermsItems
 from service.models import TermCondition
@@ -17,43 +17,11 @@ from rest_framework import viewsets, status
 from payment.models import PaymentEntry, InvoiceItem
 from django.core import serializers
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
 
+# .........................Total-And-New-Customer-Count............................
 
-def paginate(self, object_list, page=1, limit=10, **kwargs):
-    try:
-        page = int(page)
-        if page < 1:
-            page = 1
-    except (TypeError, ValueError):
-        page = 1
-
-    try:
-        limit = int(limit)
-        if limit < self.min_limit:
-            limit = self.min_limit
-        if limit > self.max_limit:
-            limit = self.max_limit
-    except (ValueError, TypeError):
-        limit = self.max_limit
-
-    paginator = Paginator(object_list, limit)
-    try:
-        objects = paginator.page(page)
-    except PageNotAnInteger:
-        objects = paginator.page(1)
-    except EmptyPage:
-        objects = paginator.page(paginator.num_pages)
-    data = {
-        'previous_page': objects.has_previous() and objects.previous_page_number() or None,
-        'next_page': objects.has_next() and objects.next_page_number() or None,
-        'data': list(objects)
-    }
-    return data
-
-
-
-
-class Customer_List(APIView):
+class Customer(APIView):
     def post(self, request):
         # session = request.session.get("user_id")
         # if session:
@@ -73,9 +41,10 @@ class Customer_List(APIView):
         customer_count = {"total_count": total_number, "new_count": new_number}
         # serializer1 = CustomerInfoSerializer(cust1, many=True)
         return JsonResponse(customer_count, safe=False)
-    # else:
-    #     myJson = {"status": "0", "message": "Login expired"}
-    #     return JsonResponse(myJson)
+
+# .........................END-Total-And-New-Customer-Count............................
+# .........................Single-Customer-Info.......................................
+
 class fetch_customer_info(APIView):
     def post(self,request):
         data = request.data
@@ -93,6 +62,9 @@ class fetch_customer_info(APIView):
         else:
             myJson = {"status": "0", "data": ''}
             return JsonResponse(myJson)
+
+# .........................End-Single-Customer-Info.......................................
+# .........................Customer-Insert.......................................
 
 class add_Customer_List(APIView):
     def post(self, request):
@@ -130,6 +102,8 @@ class add_Customer_List(APIView):
             myJson = {"status": "1", "data": serializer.data}
             return JsonResponse(myJson)
 
+# .........................END-Customer-Insert.......................................
+# .........................Terms-Update-Function.......................................
 
 def term_item_updation(customer_exist, terms_item):
     for i in terms_item:
@@ -151,6 +125,8 @@ def term_item_updation(customer_exist, terms_item):
         if dt == 0:
                 TermsItems.objects.filter(term=i,customer=customer_exist).delete()
 
+# .........................END-Terms-Update-Function.......................................
+# .........................Customer-Update-Info.......................................
 
 class update_customer_list(APIView):
     def post(self, request):
@@ -179,24 +155,125 @@ class update_customer_list(APIView):
         myJson = {"status": "1", "data": serializer.data}
         return JsonResponse(myJson)
 
+# .........................END-Customer-Update-Info.......................................
+# .........................Customer-Info-Function.......................................
 
-class Vehicle_List(APIView):
+def customer_info_clientwise(user_obj, cust3,page_no,items_per_page):
+    if page_no == -1:
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj,).order_by('id')
+        customer_data = []
+        for i in customer_obj:
+            list = {}
+            list_1 = {}
+            list_term = []
+            d = 0
+            for j in cust3:
+                list_2 = {}
+                if j.customer == i:
+                    list_2['term_id'] = j.term.id
+                    list_2['term_text'] = j.terms_text
+                    list_term.append(list_2)
+                    d = d + 1
 
-    def post(self, request):
-        data = request.data
-        session = data['id']
-        user_info_obj = UserType.objects.get(id=session)
-        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
-        cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
-        cust3 = TermsItems.objects.filter(customer__in=customer_obj)
-        serializer3 = TermsItemSerializer(cust3,many=True)
-        serializer = VehicleInfoSerializer(cust2, many=True)
-        customer_data=[]
-        vehicle_data=[]
+            list['id'] = i.id
+            list['selected_date'] = i.selected_date
+            list['company_name'] = i.company_name
+            list['full_name'] = i.full_name
+            list['email_id'] = i.email_id
+            list['address'] = i.address
+            list['address_2'] = i.address_2
+            list['city'] = i.city
+            list['state'] = i.state
+            list['phone_number'] = i.phone_number
+            list['postal_code'] = i.postal_code
+            list['created_date'] = i.created_date
+            list['user_id'] = i.user_id.id
+            if d != 0:
+                list['Terms'] = list_term
+            else:
+                list['Terms'] = list_term
+            customer_data.append(list)
+
+        return customer_data
+    else:
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj).order_by('id')
+        items_per_page = items_per_page
+        total_count = customer_obj.count()
+        pages = 0
+        if total_count > 0:
+            pages = total_count / items_per_page
+            if pages % 1 == 0:
+                pass
+            else:
+                pages = int(pages)
+                pages = pages + 1
+        paginator = Paginator(customer_obj, items_per_page)
+        page_num = page_no
+        pages_data={}
+        if pages < page_num:
+            pages_data['current_page']=pages
+        else:
+            pages_data['current_page']=page_num
+        if page_num == 1:
+            pages_data['Prev']=False
+        else:
+            pages_data['Prev']=True
+        if page_num == pages:
+            pages_data['Next']=False
+        else:
+            pages_data['Next'] = True
+        pages_data['total_pages']=pages
+        try:
+            customer_obj = paginator.page(page_num)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            customer_obj = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range, deliver last page of results.
+            customer_obj = paginator.page(paginator.num_pages)
+        customer_data = []
+        for i in customer_obj:
+            list = {}
+            list_1 = {}
+            list_term = []
+            d = 0
+            for j in cust3:
+                list_2 = {}
+                if j.customer == i:
+                    list_2['term_id'] = j.term.id
+                    list_2['term_text'] = j.terms_text
+                    list_term.append(list_2)
+                    d = d + 1
+
+            list['id'] = i.id
+            list['selected_date'] = i.selected_date
+            list['company_name'] = i.company_name
+            list['full_name'] = i.full_name
+            list['email_id'] = i.email_id
+            list['address'] = i.address
+            list['address_2'] = i.address_2
+            list['city'] = i.city
+            list['state'] = i.state
+            list['phone_number'] = i.phone_number
+            list['postal_code'] = i.postal_code
+            list['created_date'] = i.created_date
+            list['user_id'] = i.user_id.id
+            if d != 0:
+                list['Terms'] = list_term
+            else:
+                list['Terms'] = list_term
+            customer_data.append(list)
+        customer_data.append(pages_data)
+        return customer_data
+# .........................END-Customer-Info-Function.......................................
+# .........................Vehicle-Info-Function.......................................
+
+def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page):
+    if page_no == -1:
+        vehicle_data = []
         for k in cust2:
-            vehicle={}
-            customer_id=[]
+            vehicle = {}
+            customer_id = []
             for i in customer_obj:
                 list = {}
                 list_term = []
@@ -214,10 +291,10 @@ class Vehicle_List(APIView):
                 else:
                     list['Terms'] = list_term
 
-                z=0
+                z = 0
                 if k.customer_id == i:
                     list_cust = {}
-                    z=z+1
+                    z = z + 1
                     vehicle['id'] = k.id
                     vehicle['year'] = k.year
                     vehicle['brand'] = k.brand
@@ -243,47 +320,143 @@ class Vehicle_List(APIView):
                     list_cust['postal_code'] = i.postal_code
                     list_cust['created_date'] = i.created_date
                     list_cust['user_id'] = i.user_id.id
-                    vehicle['customer_id']=list_cust
-                    vehicle['customer_id']['Terms']=list_term
+                    vehicle['customer_id'] = list_cust
+                    vehicle['customer_id']['Terms'] = list_term
                 if z != 0:
                     vehicle_data.append(vehicle)
-        for i in customer_obj:
-            list = {}
-            list_1 = {}
-            list_term=[]
-            d=0
-            for j in cust3:
-                list_2 = {}
-                if j.customer == i:
-                    list_2['term_id']=j.term.id
-                    list_2['term_text']=j.terms_text
-                    list_term.append(list_2)
-                    d=d+1
+        return vehicle_data
 
-            list['id']=i.id
-            list['selected_date']=i.selected_date
-            list['company_name']=i.company_name
-            list['full_name']=i.full_name
-            list['email_id']=i.email_id
-            list['address']=i.address
-            list['address_2']=i.address_2
-            list['city']=i.city
-            list['state']=i.state
-            list['phone_number']=i.phone_number
-            list['postal_code']=i.postal_code
-            list['created_date']=i.created_date
-            list['user_id']=i.user_id.id
-            if d != 0:
-                list['Terms']=list_term
+    else:
+        items_per_page = items_per_page
+        total_count = cust2.count()
+        pages = 0
+        if total_count > 0:
+            pages = total_count / items_per_page
+            if pages % 1 == 0:
+                pass
             else:
-                list['Terms']=list_term
-            customer_data.append(list)
-        SomeModel_json = serializers.serialize("json", cust2)
+                pages = int(pages)
+                pages = pages + 1
+        paginator = Paginator(cust2, items_per_page)
+        page_num = page_no
+        pages_data = {}
+        if pages < page_num:
+            pages_data['current_page'] = pages
+        else:
+            pages_data['current_page'] = page_num
+        if page_num == 1:
+            pages_data['Prev']=False
+        else:
+            pages_data['Prev']=True
+        if page_num == pages:
+            pages_data['Next']=False
+        else:
+            pages_data['Next'] = True
+        pages_data['total_pages'] = pages
+        try:
+            cust2 = paginator.page(page_num)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            cust2 = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range, deliver last page of results.
+            cust2 = paginator.page(paginator.num_pages)
+        vehicle_data = []
+        for k in cust2:
+            vehicle = {}
+            customer_id = []
+            for i in customer_obj:
+                list = {}
+                list_term = []
+                d = 0
+                for j in cust3:
+                    list_2 = {}
+                    if j.customer == i:
+                        list_2['term_id'] = j.term.id
+                        list_2['term_text'] = j.terms_text
+                        list_term.append(list_2)
+                        d = d + 1
 
-        # customer_obj = CustomerInfo.objects.filter(user_id=user_obj).exclude(id__in=cust2.customer_id[id])
-        serializer2 = CustomerInfoSerializer(customer_obj, many=True)
-        myJson = {"status": "1","customer_info":customer_data,"vehicle_info":vehicle_data}
+                if d != 0:
+                    list['Terms'] = list_term
+                else:
+                    list['Terms'] = list_term
+
+                z = 0
+                if k.customer_id == i:
+                    list_cust = {}
+                    z = z + 1
+                    vehicle['id'] = k.id
+                    vehicle['year'] = k.year
+                    vehicle['brand'] = k.brand
+                    vehicle['odo_meter'] = k.odo_meter
+                    vehicle['vin'] = k.vin
+                    vehicle['lic_plate'] = k.lic_plate
+                    vehicle['gvwr'] = k.gvwr
+                    vehicle['engine'] = k.engine
+                    vehicle['engine_group'] = k.engine_group
+                    vehicle['cylinder'] = k.cylinder
+                    vehicle['Transmission'] = k.Transmission
+                    vehicle['brand_model'] = k.brand_model
+                    list_cust['id'] = i.id
+                    list_cust['selected_date'] = i.selected_date
+                    list_cust['company_name'] = i.company_name
+                    list_cust['full_name'] = i.full_name
+                    list_cust['email_id'] = i.email_id
+                    list_cust['address'] = i.address
+                    list_cust['address_2'] = i.address_2
+                    list_cust['city'] = i.city
+                    list_cust['state'] = i.state
+                    list_cust['phone_number'] = i.phone_number
+                    list_cust['postal_code'] = i.postal_code
+                    list_cust['created_date'] = i.created_date
+                    list_cust['user_id'] = i.user_id.id
+                    vehicle['customer_id'] = list_cust
+                    vehicle['customer_id']['Terms'] = list_term
+                if z != 0:
+                    vehicle_data.append(vehicle)
+        vehicle_data.append(pages_data)
+        return vehicle_data
+# .........................End-Vehicle-Info-Function.......................................
+
+# .........................Vehicle-Info......................................
+
+class Vehicle_List(APIView):
+
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        page_no = data['page_number']
+        items_per_page = data['items_per_page']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+        cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj).order_by('id')
+        cust3 = TermsItems.objects.filter(customer__in=customer_obj)
+        vehicle_data = vehicle_info_clientwise(cust2, cust3, customer_obj,page_no,items_per_page)
+        myJson = {"status": "1","vehicle_info":vehicle_data}
         return JsonResponse(myJson)
+
+# .........................END-Vehicle-Info......................................
+# .........................Customer-Info......................................
+
+class customer_list(APIView):
+
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        page_no = data['page_number']
+        items_per_page = data['items_per_page']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+        cust3 = TermsItems.objects.filter(customer__in=customer_obj)
+        customer_data= customer_info_clientwise(user_obj,cust3,page_no,items_per_page)
+        myJson = {"status": "1","customer_info":customer_data}
+        return JsonResponse(myJson)
+
+# .........................END-Customer-Info......................................
+# .........................Vehicle-Insert......................................
 
 class add_Vehicle_List(APIView):
     def post(self, request):
@@ -321,6 +494,8 @@ class add_Vehicle_List(APIView):
         else:
             myJson = {"status": "0", "data":"login_error"}
             return JsonResponse(myJson)
+# .........................END-Vehicle-Insert......................................
+# .........................Vehicle-Info-Update......................................
 
 class update_vehicle_list(APIView):
     def post(self, request):
@@ -373,6 +548,319 @@ class update_vehicle_list(APIView):
             myJson = {"status": "1", "data": "Login_error"}
             return JsonResponse(myJson)
 
+# .........................END-Vehicle-Info-Update......................................
+
+
+# .........................Customer-Search-Function......................................
+
+def customer_filter_clientwise(user_obj, cust3,keyword,page_no,items_per_page):
+    if page_no == -1:
+        customer_obj = CustomerInfo.objects.filter(
+            Q(company_name__istartswith=keyword) | Q(full_name__istartswith=keyword) |
+            Q(email_id__istartswith=keyword) | Q(address__istartswith=keyword) |
+            Q(phone_number__startswith=keyword), user_id=user_obj).order_by('id')
+        customer_data = []
+        for i in customer_obj:
+            list = {}
+            list_1 = {}
+            list_term = []
+            d = 0
+            for j in cust3:
+                list_2 = {}
+                if j.customer == i:
+                    list_2['term_id'] = j.term.id
+                    list_2['term_text'] = j.terms_text
+                    list_term.append(list_2)
+                    d = d + 1
+
+            list['id'] = i.id
+            list['selected_date'] = i.selected_date
+            list['company_name'] = i.company_name
+            list['full_name'] = i.full_name
+            list['email_id'] = i.email_id
+            list['address'] = i.address
+            list['address_2'] = i.address_2
+            list['city'] = i.city
+            list['state'] = i.state
+            list['phone_number'] = i.phone_number
+            list['postal_code'] = i.postal_code
+            list['created_date'] = i.created_date
+            list['user_id'] = i.user_id.id
+            if d != 0:
+                list['Terms'] = list_term
+            else:
+                list['Terms'] = list_term
+            customer_data.append(list)
+
+        return customer_data
+    else:
+        customer_obj = CustomerInfo.objects.filter(
+            Q(company_name__istartswith=keyword) | Q(full_name__istartswith=keyword) |
+            Q(email_id__istartswith=keyword) | Q(address__istartswith=keyword) |
+            Q(phone_number__startswith=keyword),user_id=user_obj).order_by('id')
+        items_per_page = items_per_page
+        total_count = customer_obj.count()
+        pages = 0
+        if total_count > 0:
+            pages = total_count / items_per_page
+            if pages % 1 == 0:
+                pages=int(pages)
+            else:
+                pages = int(pages)
+                pages = pages + 1
+        paginator = Paginator(customer_obj, items_per_page)
+        page_num = page_no
+        pages_data={}
+        if pages < page_num:
+            pages_data['current_page']=pages
+        else:
+            pages_data['current_page']=page_num
+        if page_num == 1:
+            pages_data['Prev']=False
+        else:
+            pages_data['Prev']=True
+        if page_num == pages:
+            pages_data['Next']=False
+        elif pages == 0:
+            pages_data['Next'] = False
+        else:
+            pages_data['Next'] = True
+        pages_data['total_pages']=pages
+        try:
+            customer_obj = paginator.page(page_num)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            customer_obj = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range, deliver last page of results.
+            customer_obj = paginator.page(paginator.num_pages)
+        customer_data = []
+        for i in customer_obj:
+            list = {}
+            list_1 = {}
+            list_term = []
+            d = 0
+            for j in cust3:
+                list_2 = {}
+                if j.customer == i:
+                    list_2['term_id'] = j.term.id
+                    list_2['term_text'] = j.terms_text
+                    list_term.append(list_2)
+                    d = d + 1
+
+            list['id'] = i.id
+            list['selected_date'] = i.selected_date
+            list['company_name'] = i.company_name
+            list['full_name'] = i.full_name
+            list['email_id'] = i.email_id
+            list['address'] = i.address
+            list['address_2'] = i.address_2
+            list['city'] = i.city
+            list['state'] = i.state
+            list['phone_number'] = i.phone_number
+            list['postal_code'] = i.postal_code
+            list['created_date'] = i.created_date
+            list['user_id'] = i.user_id.id
+            if d != 0:
+                list['Terms'] = list_term
+            else:
+                list['Terms'] = list_term
+            customer_data.append(list)
+        customer_data.append(pages_data)
+        return customer_data
+# .........................End-Customer-Search-Function......................................
+
+# .........................Customer-Search......................................
+class customers_filter(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        page_no = data['page_number']
+        items_per_page = data['items_per_page']
+        keyword= data['keyword']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+        cust3 = TermsItems.objects.filter(customer__in=customer_obj)
+        customer_data= customer_filter_clientwise(user_obj,cust3,keyword,page_no,items_per_page)
+        myJson = {"status": "1","customer_info":customer_data}
+        return JsonResponse(myJson)
+# .........................End-Customer-Search......................................
+
+# .........................Vehicle-Search-Function......................................
+def vehicle_filter_clientwise(cust2, cust3,customer_obj,page_no,items_per_page):
+    if page_no == -1:
+        vehicle_data = []
+        for k in cust2:
+            vehicle = {}
+            customer_id = []
+            for i in customer_obj:
+                list = {}
+                list_term = []
+                d = 0
+                for j in cust3:
+                    list_2 = {}
+                    if j.customer == i:
+                        list_2['term_id'] = j.term.id
+                        list_2['term_text'] = j.terms_text
+                        list_term.append(list_2)
+                        d = d + 1
+
+                if d != 0:
+                    list['Terms'] = list_term
+                else:
+                    list['Terms'] = list_term
+
+                z = 0
+                if k.customer_id == i:
+                    list_cust = {}
+                    z = z + 1
+                    vehicle['id'] = k.id
+                    vehicle['year'] = k.year
+                    vehicle['brand'] = k.brand
+                    vehicle['odo_meter'] = k.odo_meter
+                    vehicle['vin'] = k.vin
+                    vehicle['lic_plate'] = k.lic_plate
+                    vehicle['gvwr'] = k.gvwr
+                    vehicle['engine'] = k.engine
+                    vehicle['engine_group'] = k.engine_group
+                    vehicle['cylinder'] = k.cylinder
+                    vehicle['Transmission'] = k.Transmission
+                    vehicle['brand_model'] = k.brand_model
+                    list_cust['id'] = i.id
+                    list_cust['selected_date'] = i.selected_date
+                    list_cust['company_name'] = i.company_name
+                    list_cust['full_name'] = i.full_name
+                    list_cust['email_id'] = i.email_id
+                    list_cust['address'] = i.address
+                    list_cust['address_2'] = i.address_2
+                    list_cust['city'] = i.city
+                    list_cust['state'] = i.state
+                    list_cust['phone_number'] = i.phone_number
+                    list_cust['postal_code'] = i.postal_code
+                    list_cust['created_date'] = i.created_date
+                    list_cust['user_id'] = i.user_id.id
+                    vehicle['customer_id'] = list_cust
+                    vehicle['customer_id']['Terms'] = list_term
+                if z != 0:
+                    vehicle_data.append(vehicle)
+        return vehicle_data
+
+    else:
+        items_per_page = items_per_page
+        total_count = cust2.count()
+        pages = 0
+        if total_count > 0:
+            pages = total_count / items_per_page
+            if pages % 1 == 0:
+                pass
+            else:
+                pages = int(pages)
+                pages = pages + 1
+        paginator = Paginator(cust2, items_per_page)
+        page_num = page_no
+        pages_data = {}
+        if pages < page_num:
+            pages_data['current_page'] = pages
+        else:
+            pages_data['current_page'] = page_num
+        if page_num == 1:
+            pages_data['Prev']=False
+        else:
+            pages_data['Prev']=True
+        if page_num == pages:
+            pages_data['Next']=False
+        else:
+            pages_data['Next'] = True
+        pages_data['total_pages'] = pages
+        try:
+            cust2 = paginator.page(page_num)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            cust2 = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range, deliver last page of results.
+            cust2 = paginator.page(paginator.num_pages)
+        vehicle_data = []
+        for k in cust2:
+            vehicle = {}
+            customer_id = []
+            for i in customer_obj:
+                list = {}
+                list_term = []
+                d = 0
+                for j in cust3:
+                    list_2 = {}
+                    if j.customer == i:
+                        list_2['term_id'] = j.term.id
+                        list_2['term_text'] = j.terms_text
+                        list_term.append(list_2)
+                        d = d + 1
+
+                if d != 0:
+                    list['Terms'] = list_term
+                else:
+                    list['Terms'] = list_term
+
+                z = 0
+                if k.customer_id == i:
+                    list_cust = {}
+                    z = z + 1
+                    vehicle['id'] = k.id
+                    vehicle['year'] = k.year
+                    vehicle['brand'] = k.brand
+                    vehicle['odo_meter'] = k.odo_meter
+                    vehicle['vin'] = k.vin
+                    vehicle['lic_plate'] = k.lic_plate
+                    vehicle['gvwr'] = k.gvwr
+                    vehicle['engine'] = k.engine
+                    vehicle['engine_group'] = k.engine_group
+                    vehicle['cylinder'] = k.cylinder
+                    vehicle['Transmission'] = k.Transmission
+                    vehicle['brand_model'] = k.brand_model
+                    list_cust['id'] = i.id
+                    list_cust['selected_date'] = i.selected_date
+                    list_cust['company_name'] = i.company_name
+                    list_cust['full_name'] = i.full_name
+                    list_cust['email_id'] = i.email_id
+                    list_cust['address'] = i.address
+                    list_cust['address_2'] = i.address_2
+                    list_cust['city'] = i.city
+                    list_cust['state'] = i.state
+                    list_cust['phone_number'] = i.phone_number
+                    list_cust['postal_code'] = i.postal_code
+                    list_cust['created_date'] = i.created_date
+                    list_cust['user_id'] = i.user_id.id
+                    vehicle['customer_id'] = list_cust
+                    vehicle['customer_id']['Terms'] = list_term
+                if z != 0:
+                    vehicle_data.append(vehicle)
+        vehicle_data.append(pages_data)
+        return vehicle_data
+# .........................End-Vehicle-Search-Function......................................
+
+# .........................Vehicle-Search......................................
+
+class vehicle_filter(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        page_no = data['page_number']
+        items_per_page = data['items_per_page']
+        keyword = data['keyword']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+        cust2 = VehicleInfo.objects.filter(Q(customer_id__phone_number__istartswith=keyword) | Q(customer_id__full_name__istartswith=keyword)|
+                                           Q(brand__istartswith=keyword) |  Q(year__istartswith=keyword) | Q(vin__istartswith=keyword) ,
+                                           customer_id__in=customer_obj).order_by('id')
+        cust3 = TermsItems.objects.filter(customer__in=customer_obj)
+        vehicle_data = vehicle_filter_clientwise(cust2, cust3, customer_obj,page_no,items_per_page)
+        myJson = {"status": "1", "vehicle_info": vehicle_data}
+        return JsonResponse(myJson)
+
+# .........................End-Vehicle-Search......................................
+
 class Test_List(APIView):
 
     def get(self, request):
@@ -393,6 +881,7 @@ class Test_List(APIView):
 def home(request):
     return JsonResponse("WELCOME", safe=False)
 
+# .........................Vehicle-Info-Thrid-Party_API......................................
 
 class vehicle_info(APIView):
 
@@ -403,3 +892,5 @@ class vehicle_info(APIView):
         # response = requests.get('https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/' + vinField + '?format=json')
         json_response = response.json()
         return JsonResponse(json_response, safe=False)
+
+# .........................END-Vehicle-Info-Thrid-Party_API......................................

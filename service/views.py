@@ -9,6 +9,7 @@ from django.http import HttpResponse, JsonResponse
 from users.models import UserInfo, UserType
 from users.serializers import UserInfoSerializer, UserTypeSerializer
 
+# ...................RECEIPT-CONTENT-Section-GET-UPDATE-INSERT..........................
 # Create your views here.
 class receipt_content(APIView):
     def post(self, request):
@@ -98,6 +99,8 @@ class add_receipt_content(APIView):
     #     myJson = {"status": "0", "message": "Login expired"}
     #     return JsonResponse(myJson)
 
+# ...................END-RECEIPT-CONTENT-Section-GET-UPDATE-INSERT..........................
+# ...................DISCOUNTS-Section-GET-DELETE-UPDATE-INSERT..........................
 
 class discounts(APIView):
 
@@ -179,10 +182,9 @@ class add_discounts(APIView):
         else:
             myJson = {"status": "0", "data": "error"}
             return JsonResponse(myJson)
-    # else:
-    #     myJson = {"status": "0", "message": "Login expired"}
-    #     return JsonResponse(myJson)
 
+# ...................END-DISCOUNTS-Section-GET-DELETE-UPDATE-INSERT..........................
+# ...................TAXES-Section-GET-DELETE-UPDATE-INSERT..........................
 
 class taxes(APIView):
     def post(self, request):
@@ -263,10 +265,10 @@ class add_taxes(APIView):
         else:
             myJson = {"status": "0", "data": "error"}
             return JsonResponse(myJson)
-    # else:
-    #     myJson = {"status": "0", "message": "Login expired"}
-    #     return JsonResponse(myJson)
 
+# ...................END-TAXES-Section-GET-DELETE-UPDATE-INSERT..........................
+
+# ...................SERVICES-Section-GET-DELETE-UPDATE-INSERT..........................
 
 class services(APIView):
     def post(self, request):
@@ -350,10 +352,9 @@ class add_services(APIView):
         else:
             myJson = {"status": "0", "data": "error"}
             return JsonResponse(myJson)
-    # else:
-    #     myJson = {"status": "0", "message": "Login expired"}
-    #     return JsonResponse(myJson)
 
+# ...................END-SERVICES--Section-GET-DELETE-UPDATE-INSERT..........................
+# ...................DEFAULTS-Section-GET-UPDATE-INSERT..........................
 
 class defaults(APIView):
     def post(self, request):
@@ -426,10 +427,9 @@ class add_defaults(APIView):
         else:
             myJson = {"status": "0", "data": "error"}
             return JsonResponse(myJson)
-    # else:
-    #     myJson = {"status": "0", "message": "Login expired"}
-    #     return JsonResponse(myJson)
 
+# ...................DEFAULTS-Section-GET-UPDATE-INSERT..........................
+# ...................FEES-Section-GET-DELETE-UPDATE-INSERT..........................
 
 class fees(APIView):
     def post(self, request):
@@ -510,9 +510,9 @@ class add_fees(APIView):
         else:
             myJson = {"status": "0", "data": "error"}
             return JsonResponse(myJson)
-    # else:
-    #     myJson = {"status": "0", "message": "Login expired"}
-    #     return JsonResponse(myJson)
+
+# ...................END-FEES-Section-GET-DELETE-UPDATE-INSERT..........................
+# ...................CASH-DISCOUNT-Section-GET-UPDATE-INSERT..........................
 
 class cash_discount(APIView):
     def post(self, request):
@@ -561,6 +561,8 @@ class add_cash_discount(APIView):
             myJson = {"status": "0", "data": "error"}
             return JsonResponse(myJson)
 
+# ...................END-CASH-DISCOUNT-Section-GET-UPDATE-INSERT..........................
+# ...................SQUARE-PAYMENT-Section-GET-DELETE-UPDATE-INSERT..........................
 
 class square_credential(APIView):
     def post(self, request):
@@ -636,6 +638,8 @@ class add_square_credential(APIView):
             myJson = {"status": "0", "data": "error"}
             return JsonResponse(myJson)
 
+# ...................END-SQUARE-PAYMENT-Section-GET-DELETE-UPDATE-INSERT..........................
+# ...................TERMS-Section-GET-DELETE-UPDATE-INSERT..........................
 
 class terms(APIView):
     def post(self, request):
@@ -698,3 +702,4 @@ class add_terms(APIView):
             myJson = {"status": "0", "data": "error"}
             return JsonResponse(myJson)
 
+# ...................END-TERMS-Section-GET-DELETE-UPDATE-INSERT..........................
