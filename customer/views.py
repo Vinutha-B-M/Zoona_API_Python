@@ -225,7 +225,7 @@ def customer_info_clientwise(user_obj, cust3,page_no,items_per_page):
             pages_data['Next']=False
         else:
             pages_data['Next'] = True
-        pages_data['total_pages']=pages
+        pages_data['total_counts']=total_count
         try:
             customer_obj = paginator.page(page_num)
         except PageNotAnInteger:
