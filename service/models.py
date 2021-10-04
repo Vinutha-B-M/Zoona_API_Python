@@ -32,8 +32,9 @@ class Discounts(models.Model):
 
 
 class ServicesList(models.Model):
+
     service_name = models.CharField(db_column='service_name', max_length=200, blank=True)
-    input_mode = models.CharField(db_column='input_mode', max_length=200, blank=True)
+    description = models.CharField(db_column='Description', max_length=500, blank=True)
     amount = models.FloatField(db_column='amount', max_length=30, blank=True,null=True)
     client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
 

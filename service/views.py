@@ -316,10 +316,10 @@ class update_services(APIView):
         data = request.data
         id = data['id']
         service_name = data['service_name']
-        input_mode = data['input_mode']
+        description = data['description']
         amount = data['amount']
         if ServicesList.objects.filter(id=id).exists():
-            content = ServicesList.objects.filter(id=id).update(service_name=service_name, input_mode=input_mode,
+            content = ServicesList.objects.filter(id=id).update(service_name=service_name, description=description,
                                                                 amount=amount)
             myJson = {"status": "1", "data": "Success"}
             return JsonResponse(myJson)
@@ -330,7 +330,6 @@ class update_services(APIView):
     #     myJson = {"status": "0", "message": "Login expired"}
     #     return JsonResponse(myJson)
 
-
 class add_services(APIView):
     def post(self, request):
         # session = request.session.get("user_id")
@@ -338,14 +337,14 @@ class add_services(APIView):
         data = request.data
         session = data['id']
         service_name = data['service_name']
-        input_mode = data['input_mode']
         amount = data['amount']
+        description = data['description']
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
 
         if UserType.objects.filter(id=session, is_admin=True).exists():
-            create = ServicesList.objects.create(service_name=service_name, input_mode=input_mode,
-                                                 client=user_obj, amount=amount)
+            create = ServicesList.objects.create(service_name=service_name,
+                                                 client=user_obj, amount=amount,description=description)
             serializer = ServiceListSerializer(create)
             myJson = {"status": "1", "data": serializer.data}
             return JsonResponse(myJson)

@@ -1369,7 +1369,7 @@ def order_delete(session):
     if TestTypeItem.objects.filter(Payment=cust2).exists():
         TestTypeItem.objects.filter(Payment=cust2).delete()
     if MustHaveItem.objects.filter(Payment=cust2).exists():
-        MustHaveItem.objects.filter(Payment=cust2)
+        MustHaveItem.objects.filter(Payment=cust2).delete()
     PaymentEntry.objects.get(id=session).delete()
     myJson = {"status": "1", "data": 'Success'}
     return myJson
