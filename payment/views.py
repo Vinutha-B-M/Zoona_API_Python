@@ -1075,7 +1075,7 @@ def monthwisedata(month_list, cust2):
                 stats['Cash_Amount'] = round( total2,2)
                 stats['Card_Amount'] = round( total - total2,2)
                 stats['Tax_Amount'] = round( tax,2)
-                stats['Discount_Amount'] = round( discount,2)
+                stats['Discount_amount'] = round( discount,2)
                 month_wise_stats.append(stats)
     return month_wise_stats
 
@@ -1128,10 +1128,10 @@ def weeklydata(cust2):
                         data={}
                         data['week']=i['week']
                         data['Gross_Sales']=round( i['cash_total']+j['card_total'],2)
-                        data['card_amount']=round( j['card_total'],2)
-                        data['cash_amount']=round( i['cash_total'],2)
-                        data['tax_amount']=round( i['tax_offered']+j['tax_offered'],2)
-                        data['discount_amount']=round( i['discount_offered']+j['discount_offered'],2)
+                        data['Card_amount']=round( j['card_total'],2)
+                        data['Cash_amount']=round( i['cash_total'],2)
+                        data['Tax_amount']=round( i['tax_offered']+j['tax_offered'],2)
+                        data['Discount_Amount']=round( i['discount_offered']+j['discount_offered'],2)
                         week_data.append(data)
     week=[]
     for i in week_data:
@@ -1141,10 +1141,10 @@ def weeklydata(cust2):
             data = {}
             data['week'] = j['week']
             data['Gross_Sales'] =round( j['cash_total'],2)
-            data['card_amount'] = ''
-            data['cash_amount'] =  round( j['cash_total'],2)
-            data['tax_amount'] = round( j['tax_offered'],2)
-            data['discount_amount'] =round( j['discount_offered'],2)
+            data['Cash_amount'] = ''
+            data['Cash_amount'] =  round( j['cash_total'],2)
+            data['Tax_amount'] = round( j['tax_offered'],2)
+            data['Discount_amount'] =round( j['discount_offered'],2)
             week_data.append(data)
     week = []
     for i in week_data:
@@ -1393,7 +1393,6 @@ def Daily_data(session):
     customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
     cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
     now = datetime.datetime.now()
-
     cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), created_date__day__gte=now.day,
                                         created_date__day__lte=now.day,created_date__month__lte=now.month,
                                         created_date__month__gte=now.month,Vehicle__in=cust2)
@@ -1415,7 +1414,7 @@ def Daily_data(session):
                 total = total + j.card_amount
                 tax = tax + j.tax_offered
                 discount = discount + j.discount_offered
-
+        stats['Date'] = str(now.day) + '-' + str(now.month) + '-' + '2021'
         stats['Gross_Sales'] = round(total, 2)
         stats['Cash_Amount'] = round(total2, 2)
         stats['Card_Amount'] = round(total - total2, 2)
@@ -1424,6 +1423,7 @@ def Daily_data(session):
         day_stats.append(stats)
     else:
         stats = {}
+        stats['Date'] = str(now.day) + '-' + str(now.month) + '-' + '2021'
         stats['Gross_Sales'] = 0
         stats['Cash_Amount'] = 0
         stats['Card_Amount'] = 0
