@@ -40,4 +40,7 @@ urlpatterns = [
     path('filter_services/',views.filter_services.as_view(), name="filter_services"),
     path('mail_to_customer/',views.mail_to_customer.as_view(), name="mail_to_customer"),
     path('delete_order/',views.delete_order.as_view(), name="delete_order"),
+    path('daily/', views.daily.as_view(), name="daily"),
+    path('monthly/', views.monthly.as_view(), name="monthly"),
+    path('weekly/', views.weekly.as_view(), name="weekly"),
 ]

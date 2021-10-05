@@ -1381,3 +1381,511 @@ class delete_order(APIView):
         session = data['id']
         myJson = order_delete(session)
         return JsonResponse(myJson, safe=False)
+
+
+
+# .................current date-week-month data .......................
+
+
+def Daily_data(session):
+    user_info_obj = UserType.objects.get(id=session)
+    user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+    customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+    cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
+    now = datetime.datetime.now()
+
+    cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), created_date__day__gte=now.day,
+                                        created_date__day__lte=now.day,created_date__month__lte=now.month,
+                                        created_date__month__gte=now.month,Vehicle__in=cust2)
+
+    day_stats = []
+    total = 0.0
+    total2 = 0.0
+    tax = 0.0
+    discount = 0.0
+    if cust3.count() != 0:
+        stats = {}
+        for j in cust3:
+            if j.payment_mode == 'cash':
+                total = total + j.final_amount
+                total2 = total2 + j.final_amount
+                tax = tax + j.tax_offered
+                discount = discount + j.discount_offered
+            else:
+                total = total + j.card_amount
+                tax = tax + j.tax_offered
+                discount = discount + j.discount_offered
+
+        stats['Gross_Sales'] = round(total, 2)
+        stats['Cash_Amount'] = round(total2, 2)
+        stats['Card_Amount'] = round(total - total2, 2)
+        stats['Tax_Amount'] = round(tax, 2)
+        stats['Discount_Amount'] = round(discount, 2)
+        day_stats.append(stats)
+    else:
+        stats = {}
+        stats['Gross_Sales'] = 0
+        stats['Cash_Amount'] = 0
+        stats['Card_Amount'] = 0
+        stats['Tax_Amount'] = 0
+        stats['Discount_Amount'] = 0
+        day_stats.append(stats)
+    myJson = {"status": "1", "data": day_stats}
+    return myJson
+
+
+class daily(APIView):
+    def post(self,request):
+        data = request.data
+        session = data['id']
+        myJson = Daily_data(session)
+        return JsonResponse(myJson, safe=False)
+
+
+def day_list_week(now):
+    day = now.day
+    month = now.month
+    year = now.year
+    list=[]
+    data={}
+
+    if day >= 8:
+        for i in range(1, 8):
+            data = {}
+            data['date']=day-i
+            data['month']=month
+            list.append(data)
+    if day == 7:
+        for i in range(1,7):
+            data = {}
+            data['date'] = day - i
+            data['month'] = month
+            list.append(data)
+        if (month - 1) % 2 == 0:
+            data = {}
+            data['date'] = 31
+            data['month'] = month-1
+            list.append(data)
+        else:
+            data = {}
+            data['date'] = 30
+            data['month'] = month - 1
+            list.append(data)
+    if day == 6:
+        for i in range(1,6):
+            data={}
+            data['date'] = day-i
+            data['month'] = month
+            list.append((data))
+        if (month - 1) % 2 == 0:
+            data={}
+            data['date'] = 31
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 30
+            data['month'] = month - 1
+            list.append(data)
+        else:
+            data = {}
+            data['date'] = 30
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 29
+            data['month'] = month - 1
+            list.append(data)
+    if day == 5:
+        for i in range(1,5):
+            data={}
+            data['date'] = day-i
+            data['month'] = month
+            list.append(data)
+        if (month - 1) % 2 == 0:
+            data={}
+            data['date'] = 31
+            data['month'] = month - 1
+            list.append(data)
+            data={}
+            data['date'] = 30
+            data['month'] = month - 1
+            list.append(data)
+            data={}
+            data['date'] = 29
+            data['month'] = month - 1
+            list.append(data)
+        else:
+            data={}
+            data['date'] = 30
+            data['month'] = month - 1
+            list.append(data)
+            data={}
+            data['date'] = 29
+            data['month'] = month - 1
+            list.append(data)
+            data={}
+            data['date'] = 28
+            data['month'] = month - 1
+            list.append(data)
+    if day == 4:
+        for i in range(1,4):
+            data = {}
+            data['date'] = day - i
+            data['month'] = month
+            list.append(data)
+        if (month - 1) % 2 == 0:
+            data = {}
+            data['date'] = 31
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 30
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 29
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 28
+            data['month'] = month - 1
+            list.append(data)
+        else:
+            data = {}
+            data['date'] = 30
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 29
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 28
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 27
+            data['month'] = month - 1
+            list.append(data)
+
+    if day == 3:
+        for i in range(1,3):
+            data = {}
+            data['date'] = day - i
+            data['month'] = month
+            list.append(data)
+        if (month - 1) % 2 == 0:
+            data = {}
+            data['date'] = 31
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 30
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 29
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 28
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 27
+            data['month'] = month - 1
+            list.append(data)
+        else:
+            data = {}
+            data['date'] = 30
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 29
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 28
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 27
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 26
+            data['month'] = month - 1
+            list.append(data)
+    if day == 2:
+        for i in range(1,2):
+            data = {}
+            data['date'] = day - i
+            data['month'] = month
+            list.append(data)
+        if (month - 1) % 2 == 0:
+            data = {}
+            data['date'] = 31
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 30
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 29
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 28
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 27
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 26
+            data['month'] = month - 1
+            list.append(data)
+        else:
+            data = {}
+            data['date'] = 30
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 29
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 28
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 27
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 26
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 25
+            data['month'] = month - 1
+            list.append(data)
+    if day == 1:
+        if (month - 1) % 2 == 0:
+            print("hi")
+            data = {}
+            data['date'] = 31
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 30
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 29
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 28
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 27
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 26
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 25
+            data['month'] = month - 1
+            list.append(data)
+        else:
+            data = {}
+            data['date'] = 30
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 29
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 28
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 27
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 26
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 25
+            data['month'] = month - 1
+            list.append(data)
+            data = {}
+            data['date'] = 24
+            data['month'] = month - 1
+            list.append(data)
+    return list
+
+def weekly_data(session):
+    user_info_obj = UserType.objects.get(id=session)
+    user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+    customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+    cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
+    now = datetime.datetime.now()
+    day=now.day
+    month = now.month
+    year = now.year
+    list = day_list_week(now)
+    day_stats = []
+    for i in list:
+
+        cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), created_date__day__gte=i['date'],
+                                            created_date__day__lte=i['date'],created_date__month__lte=i['month'],
+                                            created_date__month__gte=i['month'],Vehicle__in=cust2)
+
+
+
+        total = 0.0
+        total2 = 0.0
+        tax = 0.0
+        discount = 0.0
+        if cust3.count() != 0:
+            stats = {}
+            for j in cust3:
+                if j.payment_mode == 'cash':
+                    total = total + j.final_amount
+                    total2 = total2 + j.final_amount
+                    tax = tax + j.tax_offered
+                    discount = discount + j.discount_offered
+                else:
+                    total = total + j.card_amount
+                    tax = tax + j.tax_offered
+                    discount = discount + j.discount_offered
+            stats['Date'] = str(i['date']) + '-' + str(i['month']) + '-' + '2021'
+            stats['Gross_Sales'] = round(total, 2)
+            stats['Cash_Amount'] = round(total2, 2)
+            stats['Card_Amount'] = round(total - total2, 2)
+            stats['Tax_Amount'] = round(tax, 2)
+            stats['Discount_Amount'] = round(discount, 2)
+            day_stats.append(stats)
+        else:
+            stats = {}
+            stats['Date'] = str(i['date']) + '-' + str(i['month']) + '-' + '2021'
+            stats['Gross_Sales'] = 0
+            stats['Cash_Amount'] = 0
+            stats['Card_Amount'] = 0
+            stats['Tax_Amount'] = 0
+            stats['Discount_Amount'] = 0
+            day_stats.append(stats)
+
+    myJson = {"status": "1", "data": day_stats}
+    return myJson
+
+
+class weekly(APIView):
+    def post(self,request):
+        data = request.data
+        session = data['id']
+        myJson = weekly_data(session)
+        return JsonResponse(myJson, safe=False)
+
+
+def day_list_month(now):
+    day = now.day
+    month = now.month
+    year = now.year
+    list = []
+    data = {}
+    for i in range(1, day):
+        data = {}
+        data['date'] = day - i
+        data['month'] = month
+        list.append(data)
+    if (month-1)%2==0:
+        for i in reversed(range(30)):
+            data = {}
+            data['date'] = i
+            data['month'] = month-1
+            list.append(data)
+    else:
+        for i in reversed(range(31)):
+            data = {}
+            data['date'] = i
+            data['month'] = month-1
+            list.append(data)
+    list_final=[]
+    for i in range(0,30):
+        list_final.append(list[i])
+    return list_final
+
+def monthly_data(session):
+    user_info_obj = UserType.objects.get(id=session)
+    user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+    customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+    cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
+    now = datetime.datetime.now()
+    day = now.day
+    month = now.month
+    year = now.year
+    list = day_list_month(now)
+    day_stats = []
+    for i in list:
+
+        cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'),
+                                            created_date__day__gte=i['date'],
+                                            created_date__day__lte=i['date'], created_date__month__lte=i['month'],
+                                            created_date__month__gte=i['month'], Vehicle__in=cust2)
+
+        total = 0.0
+        total2 = 0.0
+        tax = 0.0
+        discount = 0.0
+        if cust3.count() != 0:
+            stats = {}
+            for j in cust3:
+                if j.payment_mode == 'cash':
+                    total = total + j.final_amount
+                    total2 = total2 + j.final_amount
+                    tax = tax + j.tax_offered
+                    discount = discount + j.discount_offered
+                else:
+                    total = total + j.card_amount
+                    tax = tax + j.tax_offered
+                    discount = discount + j.discount_offered
+            stats['Date'] = str(i['date']) + '-' + str(i['month']) + '-' + '2021'
+            stats['Gross_Sales'] = round(total, 2)
+            stats['Cash_Amount'] = round(total2, 2)
+            stats['Card_Amount'] = round(total - total2, 2)
+            stats['Tax_Amount'] = round(tax, 2)
+            stats['Discount_Amount'] = round(discount, 2)
+            day_stats.append(stats)
+        else:
+            stats = {}
+            stats['Date'] = str(i['date']) + '-' + str(i['month']) + '-' + '2021'
+            stats['Gross_Sales'] = 0
+            stats['Cash_Amount'] = 0
+            stats['Card_Amount'] = 0
+            stats['Tax_Amount'] = 0
+            stats['Discount_Amount'] = 0
+            day_stats.append(stats)
+
+    myJson = {"status": "1", "data": day_stats}
+    return myJson
+
+
+class monthly(APIView):
+    def post(self,request):
+        data = request.data
+        session = data['id']
+        myJson = monthly_data(session)
+        return JsonResponse(myJson, safe=False)
+
+

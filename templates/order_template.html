@@ -22,12 +22,13 @@
             padding: 5px;
             vertical-align: top;
             border-top: 1px solid #000;
-            text-align: center;
+            text-align: left;
         }
 
         .table thead th {
             vertical-align: bottom;
             border-bottom: 2px solid #000;
+            text-align:left;
         }
 
         .table tbody + tbody {
@@ -37,20 +38,22 @@
         .table .table {
             background-color: #fff;
         }
-        .card-header td{
+        .header-content td{
             border:none;
+            padding:0px;
         }
         .invoice-head td,th{
             border: none;
         }
         .invoice-head table{
             margin: 0;
-            margin-top: -1rem;
+            margin-top: -0.5rem;
         }
-        .card-header img{
-            margin-right: 1rem;
-            width: 100px;
+         .invoice-head td,th{
+            border: none;
+            padding: 0px;
         }
+
         .list-group {
             display: block;
             width: 100%;
@@ -66,7 +69,51 @@
             list-style: none;
             font-size: 1.1em;
         }
+        td.a{
+        margin-left:25px;
+        }
+        tr.b{
+        border-top:2px solid #000;
+        padding-top:1rem;
+        }
+        td.c{
+        font-weight:bold;
+        border-bottom:1px solid #000;
+        }
+        td.d{
+        font-weight:bold;
+        width:200px;
+        padding:5px;
+        border-top:none;
+        border-bottom:1px solid #000;
+        }
+        td.e{
+        width:300px;
+        padding:5px;
+        border-top:none;
+        border-bottom:1px solid #000;
+        }
+        tr.f{
+        padding 0.51rem 0 0 0;
+        border:none;
+        }
+         td.s{
+        font-weight:bold;
+        border-bottom:2px solid #000;
+        }
+         td.y{
+        font-weight:bold;
+        width:200px;
+        padding:5px;
+        border-top:none;
 
+        }
+        td.z{
+        width:300px;
+        padding:5px;
+        border-top:none;
+
+        }
     </style>
 </head>
 <body>
@@ -74,82 +121,101 @@
 <div class="container">
     <div class="card">
         <div class="card-header">
-            <table>
+            <table class="header-content">
                 <tbody>
-
                     <tr>
-                        <th rowspan="4"><img src="{% static 'images/amazon_pay_logo.jpg' %}" alt=""></th>
-                        <td>Goalsr</td>
+                        <th rowspan="4" style="width:100px;text-align:left;margin:0 15px 0 0"><img src="{% static 'images/amazon_pay_logo.jpg' %}" alt=""  ></th>
+                        <td class="a">Goalsr</td>
                       </tr>
                       <tr>
-                        <td>Bangalore</td>
+                        <td class="a">Bangalore</td>
                       </tr>
                       <tr>
-                          <td></td>
+                          <td class="a">Phone : 9513172737</td>
                       </tr>
                       <tr>
-                          <td>Email Id : thulasidass@goalsr.com
-                              </td>
-                          </tr>
+                          <td class="a">Email Id : thulasidass@goalsr.com</td>
+                      </tr>
                 </tbody>
             </table>
         </div>
-        <table class="table">
-            <tbody>
-                <tr>
-                    <td>To</td>
-                    <td>Invoice No: 092821036</td>
-                </tr>
-            </tbody>
-        </table>
         <div class="invoice-head">
-        <table class="table">
-            <tbody>
-                <tr>
-                    <td>SampleTest</td>
-                    <td>Date: 09-29-2021</td>
-                </tr>
-            </tbody>
-        </table>
+            <table class="table">
+                   <thead>
+                      <tr class="b">
+                            <td style="width:400px">To</td>
+                            <td>Invoice No: 092821036</td>
+                      </tr>
+                   </thead>
+                    <tbody>
+                        <tr>
+                            <td style="width: 400px;">Murugesh</td>
+                            <td>Date: 09-29-2021</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 400px;">murugesh@goalsr.com</td>
+                            <td>Time: 21 PM</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 400px;">9087654365</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 400px;"></td>
+                        </tr>
+                    </tbody>
+                </table>
         </div>
-        <table>
+        <table class="table">
             <tbody>
                 <tr>
-                    <td>Brand Name</td>
-                    <td>HONDA</td>
-                    <td>Year</td>
-                    <td>2021</td>
+                    <td class="c">Vehicle Information</td>
                 </tr>
             </tbody>
         </table>
         <table class="table">
-            <thead>
-            <tr>
-                <th>Sr</th>
-                <th>Product</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Customer</th>
+
+            <tr class="f">
+                <td class="d">Brand Name</td>
+                <td class="e">HONDA</td>
+                <td class="d">Year</td>
+                <td class="e">2010</td>
             </tr>
-            </thead>
-            <tbody>
-
-              <tr>
-                    <td>sale. </td>
-                    <td>product.title </td>
-                    <td> quantity </td>
-                    <td>sale.price</td>
-                    <td>sale.customer.first_name</td>
-                </tr>
-              <tr>
-                    <td>{{billno}}</td>
-                    <td>product.title</td>
-                    <td> quantity</td>
-                    <td>sale.price </td>
-                    <td>sale.customer.first_name </td>
-                </tr>
-
-            </tbody>
+              <tr class="f">
+                <td class="d">Brand Model</td>
+                <td class="e">HONDA</td>
+                <td class="d">VIN</td>
+                <td class="e">2010</td>
+            </tr>
+              <tr class="f">
+                <td class="d">Engine</td>
+                <td class="e">HONDA</td>
+                <td class="d">L.I.C Plate</td>
+                <td class="e">2010</td>
+            </tr>
+              <tr class="f">
+                <td class="d">Engine Group</td>
+                <td class="e">HONDA</td>
+                <td class="d">G.W.R</td>
+                <td class="e">2010</td>
+            </tr>
+              <tr class="f">
+                <td class="y">Transmission</td>
+                <td class="z">HONDA</td>
+                <td class="y">Odometer</td>
+                <td class="z">2010</td>
+            </tr>
+        </table>
+        <table class="table">
+            <tr>
+                <td class="s">Service Information</td>
+            </tr>
+        </table>
+        <table class="table">
+            <tr>
+                <th>1</th>
+                <th>Overall Service</th>
+                <th>$20.69</th>
+            </tr>
         </table>
     </div>
 </div>
