@@ -341,9 +341,10 @@ class add_services(APIView):
         description = data['description']
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-
+        no = ServicesList.objects.create(client=user_obj).count()
+        sequence = no+1
         if UserType.objects.filter(id=session, is_admin=True).exists():
-            create = ServicesList.objects.create(service_name=service_name,
+            create = ServicesList.objects.create(service_name=service_name,sequence=sequence,
                                                  client=user_obj, amount=amount,description=description)
             serializer = ServiceListSerializer(create)
             myJson = {"status": "1", "data": serializer.data}
