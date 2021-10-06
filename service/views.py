@@ -279,7 +279,7 @@ class services(APIView):
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         if ServicesList.objects.filter(client=user_obj).exists():
-            content = ServicesList.objects.filter(client=user_obj)
+            content = ServicesList.objects.filter(client=user_obj).order_by('sequence')
             serializer = ServiceListSerializer(content, many=True)
             myJson = {"status": "1", "data": serializer.data}
             return JsonResponse(myJson)
