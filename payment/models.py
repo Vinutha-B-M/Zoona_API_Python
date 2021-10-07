@@ -44,24 +44,28 @@ class InvoiceItem(models.Model):
     service_name = models.CharField(db_column='service_name', blank=True, max_length=100)
     amount = models.FloatField(db_column='amount', blank=True, max_length=100, null=True)
     Payment = models.ForeignKey(PaymentEntry, db_column='payment', null=True, on_delete=models.PROTECT)
+    created_date = models.DateTimeField(db_column='created_date', blank=True, null=True, auto_now_add=True)
 
 class TaxItem(models.Model):
     tax_item = models.ForeignKey(Taxes, db_column='tax_item', null=True, on_delete=models.PROTECT)
     tax_name = models.CharField(db_column='tax_name', blank=True, max_length=100)
     amount = models.CharField(db_column='amount', blank=True, max_length=100, null=True)
     Payment = models.ForeignKey(PaymentEntry, db_column='payment', null=True, on_delete=models.PROTECT)
+    created_date = models.DateTimeField(db_column='created_date', blank=True, null=True, auto_now_add=True)
 
 class FeesItem(models.Model):
     fees_item = models.ForeignKey(Fees, db_column='fees_item', null=True, on_delete=models.PROTECT)
     fees_name = models.CharField(db_column='fees_name', blank=True, max_length=100)
     amount = models.CharField(db_column='amount', blank=True, max_length=100, null=True)
     Payment = models.ForeignKey(PaymentEntry, db_column='payment', null=True, on_delete=models.PROTECT)
+    created_date = models.DateTimeField(db_column='created_date', blank=True, null=True, auto_now_add=True)
 
 class DiscountItem(models.Model):
     discount_item = models.ForeignKey(Discounts, db_column='discount_item', null=True, on_delete=models.PROTECT)
     offer_name = models.CharField(db_column='discount_name', blank=True, max_length=100)
     amount = models.CharField(db_column='amount', blank=True, max_length=100, null=True)
     Payment = models.ForeignKey(PaymentEntry, db_column='payment', null=True, on_delete=models.PROTECT)
+    created_date = models.DateTimeField(db_column='created_date', blank=True, null=True, auto_now_add=True)
 
 class TestTypeItem(models.Model):
     test_item = models.ForeignKey(TestType, db_column='test_item', null=True, on_delete=models.PROTECT)
