@@ -43,4 +43,5 @@ urlpatterns = [
     path('daily/', views.daily.as_view(), name="daily"),
     path('monthly/', views.monthly.as_view(), name="monthly"),
     path('weekly/', views.weekly.as_view(), name="weekly"),
+    path('test/', views.test.as_view(), name="test"),
 ]

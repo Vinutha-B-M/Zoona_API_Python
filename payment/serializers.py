@@ -22,6 +22,15 @@ class PaymentEntrySerializer(serializers.ModelSerializer):
             'payment_mode',
             'created_date',
             'additional_comments',
+            'test_results',
+            'inception_performed',
+            'lf',
+            'rf',
+            'lr',
+            'rr',
+            'inception_declined',
+            'reasons',
+            'initials',
             'Vehicle',
         )
 

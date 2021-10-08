@@ -71,6 +71,23 @@ class payment_entry(APIView):
         test_type = data['test_type']
         must_have = data['must_have']
         additional_comments = data['additional_comments']
+        test_results = data['test_results']
+        inception_performed = data['inception_performed']
+        lf = ''
+        rf =''
+        lr=''
+        rr =''
+        reasons =''
+        initials=''
+        if inception_performed:
+            lf = data['lf']
+            rf = data['rf']
+            lr = data['lr']
+            rr = data['rr']
+        inception_declined = data['inception_declined']
+        if inception_declined:
+            reasons = data['reasons']
+            initials = data['initials']
         veh = VehicleInfo.objects.get(id=vehicle)
         cut = CustomerInfo.objects.get(id=veh.customer_id.id)
         user_obj = UserInfo.objects.get(id=cut.user_id.id)
@@ -120,7 +137,9 @@ class payment_entry(APIView):
         payment_obj = PaymentEntry.objects.create(final_amount=final_amount, tax_offered=tax_offered,invoice_id=invoice_id,
                                                   discount_offered=discount_offered, payment_mode=payment_mode,status=status,
                                                   Vehicle=vehicle_obj, amount_tendered=amount_tendered,card_amount=card_amount,
-                                                  changed_given=changed_given,additional_comments=additional_comments)
+                                                  changed_given=changed_given,additional_comments=additional_comments,test_results=test_results,
+                                                  lf=lf,rf=rf,lr=lr,rr=rr,inception_performed=inception_performed,inception_declined=inception_declined,
+                                                  reasons=reasons,initials=initials)
         for i in service_item:
                 service_id = i['id']
                 service_obj = ServicesList.objects.get(id=service_id)
@@ -325,11 +344,31 @@ class update_payment_entry(APIView):
         test_type = data['test_type']
         must_have = data['must_have']
         additional_comments = data['additional_comments']
+        test_results = data['test_results']
+        inception_performed = data['inception_performed']
+        lf = ''
+        rf = ''
+        lr = ''
+        rr = ''
+        reasons = ''
+        initials = ''
+        if inception_performed:
+            lf = data['lf']
+            rf = data['rf']
+            lr = data['lr']
+            rr = data['rr']
+        inception_declined = data['inception_declined']
+        if inception_declined:
+            reasons = data['reasons']
+            initials = data['initials']
         payment_exist = PaymentEntry.objects.get(id=payment_id)
         payment_obj = PaymentEntry.objects.filter(id=payment_id).update(final_amount=final_amount, tax_offered=tax_offered,
                                                   discount_offered=discount_offered, payment_mode=payment_mode,
                                                   status=status, amount_tendered=amount_tendered,card_amount=card_amount,
-                                                  changed_given=changed_given,additional_comments=additional_comments)
+                                                  changed_given=changed_given,additional_comments=additional_comments,
+                                                  test_results=test_results,lf=lf, rf=rf, lr=lr, rr=rr,
+                                                  inception_performed=inception_performed,inception_declined=inception_declined,
+                                                  reasons=reasons, initials=initials)
         none_response= service_updation(service_item,payment_exist)
         none_response =tax_updation(taxes,payment_exist)
         none_response = fees_updation(fees, payment_exist)
@@ -2293,3 +2332,13 @@ class monthly(APIView):
         return JsonResponse(myJson, safe=False)
 
 
+class test(APIView):
+    def post(self,request):
+        data=request.data
+        temp = data['temp']
+        if temp:
+            zen = data['zen']
+            print(zen)
+
+        myJson = {'status':1, "data":temp}
+        return JsonResponse(myJson, safe=False)
