@@ -14,7 +14,7 @@ class ReceiptContent(models.Model):
 
 
 class Taxes(models.Model):
-    tax_value = models.CharField(db_column='tax_value', max_length=20, blank=True)
+    tax_value = models.CharField(db_column='tax_value', max_length=20, blank=True,null=True)
     tax_name = models.CharField(db_column='tax_name', max_length=200, blank=True)
     visible = models.BooleanField(db_column='visible', default=False)
     client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
@@ -29,7 +29,6 @@ class Discounts(models.Model):
     discount_value = models.CharField(db_column='discount_value', max_length=20, blank=True)
     offer_name = models.CharField(db_column='offer_name', max_length=50, blank=True)
     client = models.ForeignKey(UserInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
-
 
 class ServicesList(models.Model):
     service_name = models.CharField(db_column='service_name', max_length=200, blank=True)
