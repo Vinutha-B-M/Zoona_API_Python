@@ -35,6 +35,8 @@ class PaymentEntry(models.Model):
     payment_mode = models.CharField(db_column='payment_mode', max_length=100, choices=MODE, blank=True)
     status = models.CharField(db_column='status', max_length=100, choices=STATUS, blank=True)
     Vehicle = models.ForeignKey(VehicleInfo, db_column='Vehicle', null=True, on_delete=models.PROTECT)
+    fly_fees = models.FloatField(db_column='fly_fees',default=0)
+    fly_discount = models.FloatField(db_column='fly_discount',default=0)
     test_results = models.CharField(db_column='Test_Results', max_length=30, blank=True)
     inception_performed = models.BooleanField(db_column='inception_performed', default=False)
     lf = models.CharField(db_column='LF', max_length=30,blank=True)

@@ -31,6 +31,8 @@ class PaymentEntrySerializer(serializers.ModelSerializer):
             'inception_declined',
             'reasons',
             'initials',
+            'fly_fees',
+            'fly_discount',
             'Vehicle',
         )
 

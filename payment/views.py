@@ -60,6 +60,8 @@ class payment_entry(APIView):
         discount_offered = data['discount_offered']
         status = data['status']
         vehicle = data['Vehicle_id']
+        fly_fees= data['fly_fees']
+        fly_discount = data['fly_discount']
         payment_mode = 'Other'
         amount_tendered = 0
         changed_given = 0
@@ -139,7 +141,7 @@ class payment_entry(APIView):
                                                   Vehicle=vehicle_obj, amount_tendered=amount_tendered,card_amount=card_amount,
                                                   changed_given=changed_given,additional_comments=additional_comments,test_results=test_results,
                                                   lf=lf,rf=rf,lr=lr,rr=rr,inception_performed=inception_performed,inception_declined=inception_declined,
-                                                  reasons=reasons,initials=initials)
+                                                  reasons=reasons,initials=initials,fly_fees=fly_fees,fly_discount=fly_discount)
         for i in service_item:
                 service_id = i['id']
                 service_obj = ServicesList.objects.get(id=service_id)
@@ -335,6 +337,8 @@ class update_payment_entry(APIView):
         discount_offered = data['discount_offered']
         status = data['status']
         payment_mode = 'Other'
+        fly_fees= data['fly_fees']
+        fly_discount = data['fly_discount']
         amount_tendered = 0
         changed_given = 0
         service_item = data['service_item']
@@ -368,7 +372,7 @@ class update_payment_entry(APIView):
                                                   changed_given=changed_given,additional_comments=additional_comments,
                                                   test_results=test_results,lf=lf, rf=rf, lr=lr, rr=rr,
                                                   inception_performed=inception_performed,inception_declined=inception_declined,
-                                                  reasons=reasons, initials=initials)
+                                                  reasons=reasons,initials=initials,fly_discount=fly_discount,fly_fees=fly_fees)
         none_response= service_updation(service_item,payment_exist)
         none_response =tax_updation(taxes,payment_exist)
         none_response = fees_updation(fees, payment_exist)
@@ -1052,6 +1056,8 @@ def yearwisedata(cust2,user_obj):
     fees = 0.0
     tax_item = 0.0
     discount_item = 0.0
+    fly_discount = 0.0
+    fly_fees = 0.0
     if cust3.count() != 0:
         stats = {}
         for j in cust3:
@@ -1060,10 +1066,14 @@ def yearwisedata(cust2,user_obj):
                 total2 = total2+ j.final_amount
                 tax = tax + j.tax_offered
                 discount = discount+ j.discount_offered
+                fly_discount = fly_discount+j.fly_discount
+                fly_fees = fly_fees+j.fly_fees
             else:
                 total = total + j.card_amount
                 tax = tax + j.tax_offered
                 discount = discount + j.discount_offered
+                fly_discount = fly_discount+j.fly_discount
+                fly_fees = fly_fees+j.fly_fees
         # fees_data = []
         # for z in cust41:
         #     fees_amount = 0
@@ -1123,6 +1133,8 @@ def yearwisedata(cust2,user_obj):
         stats['card_amount'] = round( total-total2,2)
         stats['taxes']= round(tax,2)
         stats['cash_discount']=round(discount,2)
+        stats['fly_fees']=round(fly_fees,2)
+        stats['fly_discount']=round(fly_discount,2)
         # stats['Fees_Amount'] = fees
         # stats['Fees_individual'] = fees_data
         # stats['Tax_individual'] = tax_data
@@ -1347,6 +1359,8 @@ def filterwisedata(cust3,user_obj):
         fees = 0.0
         tax_item = 0.0
         discount_item = 0.0
+        fly_discount = 0.0
+        fly_fees =0.0
         if cust3.count() != 0:
             stats = {}
             for j in cust3:
@@ -1355,10 +1369,14 @@ def filterwisedata(cust3,user_obj):
                     total2 = total2 + j.final_amount
                     tax = tax + j.tax_offered
                     discount = discount + j.discount_offered
+                    fly_discount = fly_discount+j.fly_discount
+                    fly_fees = fly_fees+j.fly_fees
                 else:
                     total = total + j.card_amount
                     tax = tax + j.tax_offered
                     discount = discount + j.discount_offered
+                    fly_discount = fly_discount+j.fly_discount
+                    fly_fees = fly_fees+j.fly_fees
             # fees_data = []
             # for z in cust41:
             #     fees_amount = 0
@@ -1417,6 +1435,8 @@ def filterwisedata(cust3,user_obj):
             stats['Card_Amount'] = round( total - total2,2)
             stats['Tax_Amount'] = round( tax,2)
             stats['Discount_Amount'] = round( discount,2)
+            stats['fly_discount']=round(fly_discount,2)
+            stats['fly_fees']=round(fly_fees,2)
             # stats['Fees_Amount'] = fees
             # stats['Fees_individual'] = fees_data
             # stats['Tax_individual'] = tax_data
@@ -1589,6 +1609,8 @@ def Daily_data(session):
     fees =0.0
     tax_item =0.0
     discount_item =0.0
+    fly_fees=0.0
+    fly_discount=0.0
     if cust3.count() != 0:
         stats = {}
         for j in cust3:
@@ -1597,10 +1619,14 @@ def Daily_data(session):
                 total2 = total2 + j.final_amount
                 tax = tax + j.tax_offered
                 discount = discount + j.discount_offered
+                fly_discount = fly_discount+j.fly_discount
+                fly_fees = fly_fees+j.fly_fees
             else:
                 total = total + j.card_amount
                 tax = tax + j.tax_offered
                 discount = discount + j.discount_offered
+                fly_discount = fly_discount+j.fly_discount
+                fly_fees = fly_fees+j.fly_fees
         # fees_data=[]
         # for z in cust41:
         #     fees_amount =0
@@ -1659,6 +1685,8 @@ def Daily_data(session):
         stats['Card_Amount'] = round(total - total2, 2)
         stats['Tax_Amount'] = round(tax, 2)
         stats['Discount_Amount'] = round(discount, 2)
+        stats['fly_discount']=round(fly_discount,2)
+        stats['fly_fees']=round(fly_fees,2)
         # stats['Fees_Amount'] = round(fees,2)
         # stats['Fees_individual'] = fees_data
         # stats['Tax_individual'] = tax_data
@@ -1690,6 +1718,8 @@ def Daily_data(session):
         stats['Card_Amount'] = 0
         stats['Tax_Amount'] = 0
         stats['Discount_Amount'] = 0
+        stats['fly_discount']=0
+        stats['fly_fees']=0
         # stats['Fees_Amount'] = 0
         # stats['Fees_individual'] = fees_data
         # stats['Tax_individual'] = tax_data
@@ -2036,6 +2066,8 @@ def weekly_data(session):
         fees =0.0
         tax_item = 0.0
         discount_item = 0
+        fly_discount=0.0
+        fly_fees=0.0
         if cust3.count() != 0:
             stats = {}
             for j in cust3:
@@ -2044,10 +2076,14 @@ def weekly_data(session):
                     total2 = total2 + j.final_amount
                     tax = tax + j.tax_offered
                     discount = discount + j.discount_offered
+                    fly_discount = fly_discount+j.fly_discount
+                    fly_fees = fly_fees+j.fly_fees
                 else:
                     total = total + j.card_amount
                     tax = tax + j.tax_offered
                     discount = discount + j.discount_offered
+                    fly_discount = fly_discount+j.fly_discount
+                    fly_fees = fly_fees+j.fly_fees
             # fees_data = []
             # for z in cust41:
             #     fees_amount = 0
@@ -2103,6 +2139,8 @@ def weekly_data(session):
             stats['Card_Amount'] = round(total - total2, 2)
             stats['Tax_Amount'] = round(tax, 2)
             stats['Discount_Amount'] = round(discount, 2)
+            stats['fly_discount']=round(fly_discount,2)
+            stats['fly_fees']=round(fly_fees,2)
             # stats['Fees_Amount'] = round(fees,2)
             # stats['Fees_individual'] = fees_data
             # stats['Tax_individual'] = tax_data
@@ -2134,6 +2172,8 @@ def weekly_data(session):
             stats['Card_Amount'] = 0
             stats['Tax_Amount'] = 0
             stats['Discount_Amount'] = 0
+            stats['fly_discount']=0
+            stats['fly_fees']=0
             # stats['Fees_Amount'] =0
             # stats['Fees_individual'] = fees_data
             # stats['Tax_individual'] = tax_data
@@ -2216,6 +2256,8 @@ def monthly_data(session):
         fees =0.0
         tax_item = 0.0
         discount_item = 0
+        fly_discount=0.0
+        fly_fees=0.0
         if cust3.count() != 0:
             stats = {}
             for j in cust3:
@@ -2224,10 +2266,14 @@ def monthly_data(session):
                     total2 = total2 + j.final_amount
                     tax = tax + j.tax_offered
                     discount = discount + j.discount_offered
+                    fly_discount = fly_discount+j.fly_discount
+                    fly_fees = fly_fees+j.fly_fees
                 else:
                     total = total + j.card_amount
                     tax = tax + j.tax_offered
                     discount = discount + j.discount_offered
+                    fly_discount = fly_discount+j.fly_discount
+                    fly_fees = fly_fees+j.fly_fees
             # fees_data = []
             # for z in cust41:
             #     fees_amount = 0
@@ -2283,6 +2329,8 @@ def monthly_data(session):
             stats['Card_Amount'] = round(total - total2, 2)
             stats['Tax_Amount'] = round(tax, 2)
             stats['Discount_Amount'] = round(discount, 2)
+            stats['fly_discount']=round(fly_discount,2)
+            stats['fly_fees']=round(fly_fees,2)
             # stats['Fees_Amount'] = round(fees,2)
             # stats['Fees_individual'] = fees_data
             # stats['Tax_individual'] = tax_data
@@ -2314,6 +2362,8 @@ def monthly_data(session):
             stats['Card_Amount'] = 0
             stats['Tax_Amount'] = 0
             stats['Discount_Amount'] = 0
+            stats['fly_discount']=0
+            stats['fly_fees']=0
             # stats['Fees_Amount'] = 0
             # stats['Fees_individual']=fees_data
             # stats['Tax_individual'] = tax_data

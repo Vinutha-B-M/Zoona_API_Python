@@ -341,7 +341,7 @@ class add_services(APIView):
         description = data['description']
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-        no = ServicesList.objects.create(client=user_obj).count()
+        no = ServicesList.objects.filter(client=user_obj).count()
         sequence = no+1
         if UserType.objects.filter(id=session, is_admin=True).exists():
             create = ServicesList.objects.create(service_name=service_name,sequence=sequence,
