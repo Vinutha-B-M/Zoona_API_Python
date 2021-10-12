@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomerInfo, VehicleInfo, TestDetails,TermsItems
+from .models import CustomerInfo, SmogTest, VehicleInfo, TestDetails,TermsItems
 
 
 class CustomerInfoSerializer(serializers.ModelSerializer):
@@ -27,8 +27,13 @@ class VehicleInfoSerializer(serializers.ModelSerializer):
             'cylinder',
             'Transmission',
             'brand_model',
+            'state',
+            'tailpipe',
+            'smoke_pvc',
             'customer_id',
+            
         )
+
 
 
 class TestDetailsSerializer(serializers.ModelSerializer):
@@ -52,4 +57,15 @@ class TermsItemSerializer(serializers.ModelSerializer):
             'terms_text',
             'term',
             'customer',
+        )
+
+class SmogTestSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = SmogTest
+        fields = (
+            'smog',
+            'type',
+            'desc',
+            'vehicle_id',
         )

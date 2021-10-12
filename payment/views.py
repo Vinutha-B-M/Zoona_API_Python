@@ -12,18 +12,17 @@ from django.db.models.functions import (
   ExtractDay, ExtractMonth, ExtractQuarter, ExtractWeek,
   ExtractWeekDay, ExtractYear,
 )
-
 from django.db.models import Avg, Count, Min, Sum
 from django.db.models import Q
 import datetime
-from customer.models import CustomerInfo, VehicleInfo, TestDetails
+from customer.models import CustomerInfo, VehicleInfo, TestDetails,SmogTest
 from users.models import UserType, UserInfo
 from .models import PaymentEntry, InvoiceItem,TaxItem,FeesItem,DiscountItem,TestTypeItem,MustHaveItem,SquareDevice,\
     SquareTerminalCheckout,FortisPayCredentials
 from service.models import ServicesList,Taxes,Discounts,Fees,TestType,MustHave,CashDiscount,SquareCredential
 from .serializers import PaymentEntrySerializer, InvoiceItemSerializer,FeesItemSerializer,TaxItemSerializer,\
     DiscountItemSerializer,TestTypeItemSerializer,MustHaveItemSerializer,FortisPaySerializer
-from customer.serializers import CustomerInfoSerializer, VehicleInfoSerializer
+from customer.serializers import CustomerInfoSerializer, VehicleInfoSerializer,SmogTestSerializer
 from service.serializers import TestTypeSerializer,MustHaveSerializer,CashDiscountSerializer,SquareCredentialSerializer
 from .square_api import base_url
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -412,6 +411,7 @@ class order_list(APIView):
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
         cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
+        cust5 = SmogTest.objects.filter(vehicle_id__in=cust2)
         cust3 = PaymentEntry.objects.filter(Vehicle__in=cust2).order_by('-invoice_id')
         if SquareCredential.objects.filter(client=user_obj).exists():
             token = SquareCredential.objects.get(client=user_obj).accees_token
@@ -424,6 +424,7 @@ class order_list(APIView):
                 status = json_response['checkout']['status']
                 PaymentEntry.objects.filter(id=i.payment.id).update(status=status)
         serializer = PaymentEntrySerializer(cust3, many=True)
+        
         myJson = {"status": "1", "data": serializer.data}
         return JsonResponse(myJson)
 

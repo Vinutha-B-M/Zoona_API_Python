@@ -34,7 +34,10 @@ class VehicleInfo(models.Model):
     engine = models.CharField(db_column='engine', max_length=200, blank=True)
     engine_group = models.CharField(db_column='engine_group', max_length=200, blank=True)
     cylinder = models.CharField(db_column='cylinder', max_length=200, blank=True)
+    state = models.CharField(db_column='state',max_length=100,blank=True)
     Transmission = models.CharField(db_column='Transmission', max_length=10, choices=STATUS, blank=True)
+    smoke_pvc = models.CharField(db_column='smoke_pvc',max_length=100,blank=True)
+    tailpipe = models.CharField(db_column='tailpipe',max_length=100,blank=True)
     customer_id = models.ForeignKey(CustomerInfo, db_column='customer_id', null=True, on_delete=models.PROTECT)
     created_date = models.DateTimeField(db_column='created_date', blank=True, null=True, auto_now_add=True)
 
@@ -47,3 +50,9 @@ class TermsItems(models.Model):
     terms_text = models.CharField(db_column="terms_text", blank=True,null=True,max_length=1000)
     term = models.ForeignKey(TermCondition,db_column="term", null=True, on_delete=models.PROTECT)
     customer = models.ForeignKey(CustomerInfo,db_column="customer", null=True, on_delete=models.PROTECT)
+
+class SmogTest(models.Model):
+    smog = models.CharField(db_column='smog',max_length=100,blank=True)
+    type = models.CharField(db_column='type',max_length=100,blank=True)
+    desc = models.CharField(db_column='desc',max_length=300,blank=True)
+    vehicle_id = models.ForeignKey(VehicleInfo,db_column="vehicle_id", null=True, on_delete=models.PROTECT)

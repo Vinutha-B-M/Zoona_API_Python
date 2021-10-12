@@ -9,8 +9,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
-from .serializers import CustomerInfoSerializer, VehicleInfoSerializer, TestDetailsSerializer,TermsItemSerializer
-from .models import CustomerInfo, VehicleInfo, TestDetails,TermsItems
+from .serializers import CustomerInfoSerializer, VehicleInfoSerializer, TestDetailsSerializer,TermsItemSerializer,SmogTestSerializer
+from .models import CustomerInfo, SmogTest, VehicleInfo, TestDetails,TermsItems
 from service.models import TermCondition
 from users.models import UserInfo, UserType
 from rest_framework import viewsets, status
@@ -279,12 +279,21 @@ def customer_info_clientwise(user_obj, cust3,page_no,items_per_page):
 # .........................END-Customer-Info-Function.......................................
 # .........................Vehicle-Info-Function.......................................
 
-def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page):
+def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,cust4):
     if page_no == -1:
         vehicle_data = []
         for k in cust2:
             vehicle = {}
             customer_id = []
+            test=0
+            smog_list=[]
+            for x in cust4:
+                    temp_list={}
+                    if x.vehicle_id==k:
+                       temp_list['smog']=x.smog
+                       temp_list['type']=x.type
+                       temp_list['desc']=x.desc
+                       smog_list.append(temp_list)
             for i in customer_obj:
                 list = {}
                 list_term = []
@@ -318,6 +327,9 @@ def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page):
                     vehicle['cylinder'] = k.cylinder
                     vehicle['Transmission'] = k.Transmission
                     vehicle['brand_model'] = k.brand_model
+                    vehicle['smoke_pvc']=k.smoke_pvc
+                    vehicle['tailpipe']=k.tailpipe
+                    vehicle['smog_test']=smog_list
                     list_cust['id'] = i.id
                     list_cust['selected_date'] = i.selected_date
                     list_cust['company_name'] = i.company_name
@@ -414,6 +426,8 @@ def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page):
                     vehicle['cylinder'] = k.cylinder
                     vehicle['Transmission'] = k.Transmission
                     vehicle['brand_model'] = k.brand_model
+                    vehicle['smoke_pvc']=k.smoke_pvc
+                    vehicle['tailpipe']=k.tailpipe
                     list_cust['id'] = i.id
                     list_cust['selected_date'] = i.selected_date
                     list_cust['company_name'] = i.company_name
@@ -454,7 +468,8 @@ class Vehicle_List(APIView):
         customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
         cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj).order_by('id')
         cust3 = TermsItems.objects.filter(customer__in=customer_obj)
-        vehicle_data = vehicle_info_clientwise(cust2, cust3, customer_obj,page_no,items_per_page)
+        cust4 = SmogTest.objects.filter(vehicle_id__in=cust2)
+        vehicle_data = vehicle_info_clientwise(cust2, cust3, customer_obj,page_no,items_per_page,cust4)
         myJson = {"status": "1","vehicle_info":vehicle_data}
         return JsonResponse(myJson)
 
@@ -494,6 +509,10 @@ class add_Vehicle_List(APIView):
         customer_id = data['customer_id']
         Transmission = data['Transmission']
         engine_group = data['engine_group']
+        smog_test = data['smog_test']
+        state=data['state']
+        tailpipe=data['tailpipe']
+        smoke_pvc=data['smoke_pvc']
         customer_obj = CustomerInfo.objects.get(id=customer_id)
         user = UserInfo.objects.get(id=customer_obj.user_id.id).id
         user_obj = UserInfo.objects.get(id=user)
@@ -506,10 +525,16 @@ class add_Vehicle_List(APIView):
                 create = VehicleInfo.objects.create(customer_id=customer_obj, year=year, brand=brand,
                                                     brand_model=brand_model,
                                                     odo_meter=odo_meter, lic_plate=lic_plate, gvwr=gvwr, vin=vin,
-                                                    engine=engine,
+                                                    engine=engine,state=state,tailpipe=tailpipe,smoke_pvc=smoke_pvc,
                                                     cylinder=cylinder, Transmission=Transmission,
                                                     engine_group=engine_group)
                 serializer = VehicleInfoSerializer(create)
+                vehicle_obj = VehicleInfo.objects.get(id=create.id)
+                for i in smog_test:
+                    smog = i['smog']
+                    type = i['type']
+                    desc = i['desc']
+                    SmogTest.objects.create(smog=smog, type=type,desc=desc, vehicle_id=vehicle_obj) 
                 myJson = {"status": "1", "data": serializer.data}
                 return JsonResponse(myJson)
         else:
@@ -517,6 +542,26 @@ class add_Vehicle_List(APIView):
             return JsonResponse(myJson)
 # .........................END-Vehicle-Insert......................................
 # .........................Vehicle-Info-Update......................................
+def smogtest_update(vehicle_id,smogtest):
+    vehicle_obj = VehicleInfo.objects.get(id=vehicle_id)
+    for i in smogtest:
+        smog = i['smog']
+        type = i['type']
+        desc = i['desc']
+        if SmogTest.objects.filter(smog=smog, vehicle_id=vehicle_obj):
+            SmogTest.objects.filter(smog=smog).update(type=type,desc=desc)
+        else:
+            SmogTest.objects.create(smog=smog, type=type,desc=desc, vehicle_id=vehicle_obj)
+
+    updated_list = SmogTest.objects.filter(vehicle_id=vehicle_obj).values_list('smog', flat=True)
+    for i in updated_list:
+        dt = 0
+        for j in smogtest:
+            if j['smog'] == i:
+                dt = dt + 1
+        if dt == 0:
+            SmogTest.objects.filter(smog=i).delete()
+
 
 class update_vehicle_list(APIView):
     def post(self, request):
@@ -533,6 +578,10 @@ class update_vehicle_list(APIView):
         vehicle_id = data['id']
         Transmission = data['Transmission']
         engine_group = data['engine_group']
+        smog_test = data['smog_test']
+        state = data['state']
+        tailpipe=data['tailpipe']
+        smoke_pvc=data['smoke_pvc']
         vehicle = VehicleInfo.objects.get(id=vehicle_id)
         customer = CustomerInfo.objects.get(id=vehicle.customer_id.id).id
         if VehicleInfo.objects.filter(id=vehicle_id).exists():
@@ -540,15 +589,17 @@ class update_vehicle_list(APIView):
             user = UserInfo.objects.get(id=customer_obj.user_id.id).id
             user_obj = UserInfo.objects.get(id=user)
             customer_obj_list = CustomerInfo.objects.filter(user_id=user_obj).values_list('id')
+            
             if CustomerInfo.objects.filter(user_id=user,id=customer).exists():
                 if VehicleInfo.objects.filter(customer_id=customer_obj,vin=vin,id=vehicle_id).exists():
                     VehicleInfo.objects.filter(id=vehicle_id).update(year=year, brand=brand, brand_model=brand_model,
                                                                      odo_meter=odo_meter, lic_plate=lic_plate, gvwr=gvwr,
-                                                                     vin=vin, engine=engine,
+                                                                     vin=vin, engine=engine,tailpipe=tailpipe,smoke_pvc=smoke_pvc,
                                                                      cylinder=cylinder, Transmission=Transmission,
-                                                                     engine_group=engine_group)
+                                                                     engine_group=engine_group,state=state)
                     create = VehicleInfo.objects.get(id=vehicle_id)
                     serializer = VehicleInfoSerializer(create)
+                    smogtest_update(vehicle_id,smog_test)
                     myJson = {"status": "1", "data": serializer.data}
                     return JsonResponse(myJson)
                 elif VehicleInfo.objects.filter(customer_id__in=customer_obj_list,vin=vin).exists():
@@ -557,12 +608,13 @@ class update_vehicle_list(APIView):
                 else:
                     VehicleInfo.objects.filter(id=vehicle_id).update(year=year, brand=brand, brand_model=brand_model,
                                                                      odo_meter=odo_meter, lic_plate=lic_plate,
-                                                                     gvwr=gvwr,
+                                                                     gvwr=gvwr,state=state,tailpipe=tailpipe,smoke_pvc=smoke_pvc,
                                                                      vin=vin, engine=engine,
                                                                      cylinder=cylinder, Transmission=Transmission,
                                                                      engine_group=engine_group)
                     create = VehicleInfo.objects.get(id=vehicle_id)
                     serializer = VehicleInfoSerializer(create)
+                    smogtest_update(vehicle_id,smog_test)
                     myJson = {"status": "1", "data": serializer.data}
                     return JsonResponse(myJson)
         else:
