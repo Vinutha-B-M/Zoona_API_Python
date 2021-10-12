@@ -393,6 +393,14 @@ def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,cus
         for k in cust2:
             vehicle = {}
             customer_id = []
+            smog_list=[]
+            for x in cust4:
+                    temp_list={}
+                    if x.vehicle_id==k:
+                       temp_list['smog']=x.smog
+                       temp_list['type']=x.type
+                       temp_list['desc']=x.desc
+                       smog_list.append(temp_list)
             for i in customer_obj:
                 list = {}
                 list_term = []
@@ -428,6 +436,7 @@ def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,cus
                     vehicle['brand_model'] = k.brand_model
                     vehicle['smoke_pvc']=k.smoke_pvc
                     vehicle['tailpipe']=k.tailpipe
+                    vehicle['smog_test']=smog_list
                     list_cust['id'] = i.id
                     list_cust['selected_date'] = i.selected_date
                     list_cust['company_name'] = i.company_name

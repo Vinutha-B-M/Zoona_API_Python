@@ -8,6 +8,7 @@ urlpatterns = [
     path('taxes/', views.taxes.as_view(), name="taxes"),
     path('discounts/', views.discounts.as_view(), name="discounts"),
     path('services/', views.services.as_view(), name="services"),
+    path('rearange_services/', views.rearange_services.as_view(), name="rearange_services"),
     path('defaults/', views.defaults.as_view(), name="defaults"),
     path('add_receipt_content/', views.add_receipt_content.as_view(), name="add_receipt_content"),
     path('add_taxes/', views.add_taxes.as_view(), name="add_taxes"),

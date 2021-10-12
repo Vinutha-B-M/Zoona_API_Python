@@ -428,6 +428,8 @@ class order_list(APIView):
         myJson = {"status": "1", "data": serializer.data}
         return JsonResponse(myJson)
 
+
+
 # ...............................END-Invoice-List......................................
 
 # ...............................Invoice-List-Pagination-Number......................................

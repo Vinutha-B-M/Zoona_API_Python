@@ -1,3 +1,4 @@
+from typing import Sequence
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -290,6 +291,24 @@ class services(APIView):
     #     myJson = {"status": "0", "message": "Login expired"}
     #     return JsonResponse(myJson)
 
+class rearange_services(APIView):
+    def post(self, request):
+        data = request.data
+        list = data['list']
+        count=0
+        for i in list:
+            count=count+1
+            session=i['client']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        for i in list:
+            ServicesList.objects.filter(id=i['id']).update(sequence=count)
+            count=count-1
+        content = ServicesList.objects.filter(client=user_obj).order_by('sequence')    
+        serializer = ServiceListSerializer(content, many=True)
+        myJson = {"status": "1", "data": serializer.data}
+        return JsonResponse(myJson)
+    
 
 class delete_services(APIView):
     def post(self, request):
