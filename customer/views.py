@@ -780,12 +780,20 @@ class customers_filter(APIView):
 # .........................End-Customer-Search......................................
 
 # .........................Vehicle-Search-Function......................................
-def vehicle_filter_clientwise(cust2, cust3,customer_obj,page_no,items_per_page):
+def vehicle_filter_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,cust4):
     if page_no == -1:
         vehicle_data = []
         for k in cust2:
             vehicle = {}
             customer_id = []
+            smog_list=[]
+            for x in cust4:
+                    temp_list={}
+                    if x.vehicle_id==k:
+                       temp_list['smog']=x.smog
+                       temp_list['type']=x.type
+                       temp_list['desc']=x.desc
+                       smog_list.append(temp_list)
             for i in customer_obj:
                 list = {}
                 list_term = []
@@ -819,6 +827,9 @@ def vehicle_filter_clientwise(cust2, cust3,customer_obj,page_no,items_per_page):
                     vehicle['cylinder'] = k.cylinder
                     vehicle['Transmission'] = k.Transmission
                     vehicle['brand_model'] = k.brand_model
+                    vehicle['smoke_pvc']=k.smoke_pvc
+                    vehicle['tailpipe']=k.tailpipe
+                    vehicle['smog_test']=smog_list
                     list_cust['id'] = i.id
                     list_cust['selected_date'] = i.selected_date
                     list_cust['company_name'] = i.company_name
@@ -882,6 +893,14 @@ def vehicle_filter_clientwise(cust2, cust3,customer_obj,page_no,items_per_page):
         for k in cust2:
             vehicle = {}
             customer_id = []
+            smog_list=[]
+            for x in cust4:
+                    temp_list={}
+                    if x.vehicle_id==k:
+                       temp_list['smog']=x.smog
+                       temp_list['type']=x.type
+                       temp_list['desc']=x.desc
+                       smog_list.append(temp_list)
             for i in customer_obj:
                 list = {}
                 list_term = []
@@ -915,6 +934,9 @@ def vehicle_filter_clientwise(cust2, cust3,customer_obj,page_no,items_per_page):
                     vehicle['cylinder'] = k.cylinder
                     vehicle['Transmission'] = k.Transmission
                     vehicle['brand_model'] = k.brand_model
+                    vehicle['smoke_pvc']=k.smoke_pvc
+                    vehicle['tailpipe']=k.tailpipe
+                    vehicle['smog_test']=smog_list
                     list_cust['id'] = i.id
                     list_cust['selected_date'] = i.selected_date
                     list_cust['company_name'] = i.company_name
@@ -957,7 +979,8 @@ class vehicle_filter(APIView):
                                            Q(brand__istartswith=keyword) |  Q(year__istartswith=keyword) | Q(vin__istartswith=keyword) ,
                                            customer_id__in=customer_obj).order_by('id')
         cust3 = TermsItems.objects.filter(customer__in=customer_obj)
-        vehicle_data = vehicle_filter_clientwise(cust2, cust3, customer_obj,page_no,items_per_page)
+        cust4 = SmogTest.objects.filter(vehicle_id__in=cust2)
+        vehicle_data = vehicle_filter_clientwise(cust2, cust3, customer_obj,page_no,items_per_page,cust4)
         myJson = {"status": "1", "vehicle_info": vehicle_data}
         return JsonResponse(myJson)
 
