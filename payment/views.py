@@ -411,7 +411,6 @@ def order_data_list(cust3,cust5,cust6):
         vehicle={}
         smog_list=[]
         for j in cust5:
-        
             temp_list={}
             if j.vehicle_id.id==i.Vehicle.id:
                 temp_list['smog']=j.smog
@@ -597,6 +596,87 @@ class total_sales(APIView):
 # ...............................END-Invoice-List-Count-With-Completed-Or-Without Completed..................
 
 # ...............................Single-Invoice......................................
+def order_data_list_new(cust2,cust5,cust6):
+        
+        list_data=[]
+
+        list={}
+        customer={}
+        vehicle={}
+        smog_list=[]
+        for j in cust5:
+            temp_list={}
+            if j.vehicle_id.id==cust2.Vehicle.id:
+                temp_list['smog']=j.smog
+                temp_list['type']=j.type
+                temp_list['desc']=j.desc
+                smog_list.append(temp_list)
+        list_term=[]
+        for j in cust6:
+            list_2 = {}
+            if j.customer_id == cust2.Vehicle.customer_id.id:
+                list_2['term_id'] = j.term.id
+                list_2['term_text'] = j.terms_text
+                list_term.append(list_2)
+        list['id']=cust2.id
+        list['invoice_id']=cust2.invoice_id
+        list['status']=cust2.status
+        list['final_amount']=cust2.final_amount
+        list['card_amount']=cust2.card_amount
+        list['tax_offered']=cust2.tax_offered
+        list['amount_tendered']=cust2.amount_tendered
+        list['changed_given']=cust2.changed_given
+        list['discount_offered']=cust2.discount_offered
+        list['payment_mode']=cust2.payment_mode
+        list['created_date']=cust2.created_date
+        list['additional_comments']=cust2.additional_comments
+        list['test_results']=cust2.test_results
+        list['inception_performed']=cust2.inception_performed
+        list['lf']=cust2.lf
+        list['rf']=cust2.rf
+        list['lr']=cust2.lr
+        list['rr']=cust2.rr
+        list['inception_declined']=cust2.inception_declined
+        list['reasons']=cust2.reasons
+        list['initials']=cust2.initials
+        list['fly_fees']=cust2.fly_fees
+        list['fly_discount']=cust2.fly_discount
+        vehicle['id']=cust2.Vehicle.id
+        vehicle['year']=cust2.Vehicle.year
+        vehicle['brand']=cust2.Vehicle.brand
+        vehicle['odo_meter']=cust2.Vehicle.odo_meter
+        vehicle['vin']=cust2.Vehicle.vin
+        vehicle['lic_plate']=cust2.Vehicle.lic_plate
+        vehicle['gvwr']=cust2.Vehicle.gvwr
+        vehicle['engine']=cust2.Vehicle.engine
+        vehicle['engine_group']=cust2.Vehicle.engine_group
+        vehicle['cylinder']=cust2.Vehicle.cylinder
+        vehicle['Transmission']=cust2.Vehicle.Transmission
+        vehicle['brand_model']=cust2.Vehicle.brand_model
+        vehicle['state']=cust2.Vehicle.state
+        vehicle['smoke_pvc']=cust2.Vehicle.smoke_pvc
+        vehicle['tailpipe']=cust2.Vehicle.tailpipe
+        vehicle['smog_test']=smog_list
+        list['Vehicle']=vehicle
+        customer['id'] = cust2.Vehicle.customer_id.id
+        customer['selected_date'] = cust2.Vehicle.customer_id.selected_date
+        customer['company_name'] =cust2.Vehicle.customer_id.company_name
+        customer['full_name'] = cust2.Vehicle.customer_id.full_name
+        customer['email_id'] = cust2.Vehicle.customer_id.email_id
+        customer['address'] = cust2.Vehicle.customer_id.address
+        customer['address_2'] = cust2.Vehicle.customer_id.address_2
+        customer['city'] = cust2.Vehicle.customer_id.city
+        customer['state'] = cust2.Vehicle.customer_id.state
+        customer['phone_number'] = cust2.Vehicle.customer_id.phone_number
+        customer['estimate_amount'] = cust2.Vehicle.customer_id.estimate_amount
+        customer['postal_code'] = cust2.Vehicle.customer_id.postal_code
+        customer['created_date'] = cust2.Vehicle.customer_id.created_date
+        customer['user_id'] = cust2.Vehicle.customer_id.user_id.id
+        customer['Terms']=list_term
+        list['Vehicle']['customer_id']=customer
+        list_data.append(list)
+
+        return list_data   
 class order_invoice(APIView):
     def post(self, request):
         data = request.data
@@ -618,15 +698,18 @@ class order_invoice(APIView):
         serializer6 = TestTypeItemSerializer(cust7, many=True)
         cust8 = MustHaveItem.objects.filter(Payment=cust2)
         serializer7 = MustHaveItemSerializer(cust8, many=True)
+        cust11 = TermsItems.objects.filter(customer=cut)
+        cust12 = SmogTest.objects.filter(vehicle_id=veh)
+        data_list=order_data_list_new(cust2,cust12,cust11)
         if CashDiscount.objects.filter(client=user_obj).exists():
             cust9 = CashDiscount.objects.get(client=user_obj)
             serializer8 = CashDiscountSerializer(cust9)
-            myJson = {"status": "1", "Invoice": serializer2.data, "Service" : serializer.data, "Fees":serializer3.data,
+            myJson = {"status": "1", "Invoice": data_list, "Service" : serializer.data, "Fees":serializer3.data,
                   "Taxes": serializer4.data, "Discounts" : serializer5.data,"test_type": serializer6.data,
                   "must":serializer7.data, "Cash_discount" : serializer8.data}
             return JsonResponse(myJson)
         else:
-            myJson = {"status": "1", "Invoice": serializer2.data, "Service": serializer.data, "Fees": serializer3.data,
+            myJson = {"status": "1", "Invoice": data_list, "Service": serializer.data, "Fees": serializer3.data,
                       "Taxes": serializer4.data, "Discounts": serializer5.data, "test_type": serializer6.data,
                       "must": serializer7.data, "Cash_discount": ""}
             return JsonResponse(myJson)
