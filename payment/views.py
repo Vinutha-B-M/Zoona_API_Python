@@ -1244,59 +1244,88 @@ def yearwisedata(cust2,user_obj):
                 discount = discount + j.discount_offered
                 fly_discount = fly_discount+j.fly_discount
                 fly_fees = fly_fees+j.fly_fees
-        # fees_data = []
-        # for z in cust41:
-        #     fees_amount = 0
-        #     for k in cust4:
-        #         if k.fees_item.id == z.id:
-        #             fees = fees + int(k.amount)
-        #             fees_amount = fees_amount + int(k.amount)
-        #
-        #     if fees_amount == 0:
-        #         single = {}
-        #         single['Fees_name'] = z.fees_name
-        #         single['amount'] = 0
-        #         fees_data.append(single)
-        #     else:
-        #         single = {}
-        #         single['Fees_name'] = z.fees_name
-        #         single['amount'] = fees_amount
-        #         fees_data.append(single)
-        # tax_data = []
-        # for z in cust51:
-        #     tax_amount = 0
-        #     for k in cust5:
-        #         if k.tax_item.id == z.id:
-        #             tax_item = tax_item + int(k.amount)
-        #             tax_amount = tax_amount + int(k.amount)
-        #
-        #     if tax_amount == 0:
-        #         single = {}
-        #         single['Tax_name'] = z.tax_name
-        #         single['amount'] = 0
-        #         tax_data.append(single)
-        #     else:
-        #         single = {}
-        #         single['Tax_name'] = z.tax_name
-        #         single['amount'] = tax_amount
-        #         tax_data.append(single)
-        # discount_data = []
-        # for z in cust61:
-        #     discount_item_amount = 0
-        #     for k in cust6:
-        #         if k.discount_item.id == z.id:
-        #             discount_item = discount_item + int(k.amount)
-        #             discount_item_amount = discount_item_amount + int(k.amount)
-        #     if discount_item_amount == 0:
-        #         single = {}
-        #         single['Discount_name'] = z.offer_name
-        #         single['amount'] = 0
-        #         discount_data.append(single)
-        #     else:
-        #         single = {}
-        #         single['Discount_name'] = z.offer_name
-        #         single['amount'] = discount_item_amount
-        #         discount_data.append(single)
+        fees_data=[]
+      
+        for z in cust41:
+            fees_amount =0
+            for k in cust4:
+                if k.fees_item.id == z.id:
+                    name_list = k.amount.split()
+                    if name_list[0][0]=='$':
+                        temp = k.amount[1:]
+                        fees = round(fees+float(temp),2)
+                        fees_amount = round(fees_amount+float(temp),2)
+                    else:
+                        temp = k.amount[:-1]
+                        final_amount=PaymentEntry.objects.get(id=k.Payment.id).final_amount
+                        fees = round(fees+round((final_amount*float(temp))/100,2),2)
+                        fees_amount =round (fees_amount+round((final_amount*float(temp))/100,2),2)    
+                    single={}
+                    single['Fees_name']=k.fees_name
+                    single['amount']=fees_amount
+            
+        
+            if fees_amount == 0:
+                single = {}
+                single['Fees_name'] = z.fees_name
+                single['amount'] = 0
+                fees_data.append(single)
+            else:
+                fees_data.append(single)    
+        tax_data = []
+        for z in cust51:
+            tax_amount = 0
+            for k in cust5:
+                if k.tax_item.id == z.id:
+                    name_list = k.amount.split()
+                    if name_list[0][0]=='$':
+                        temp = k.amount[1:]
+                        tax_item = round(tax_item+float(temp),2)
+                        tax_amount = round(tax_amount+float(temp),2)
+                    else:
+                        temp = k.amount[:-1]
+                        final_amount=PaymentEntry.objects.get(id=k.Payment.id).final_amount
+                        fees = round(fees+round((final_amount*float(temp))/100,2),2)
+                        tax_amount =round (tax_amount+round((final_amount*float(temp))/100,2),2) 
+                    single = {}
+                    single['Tax_name'] = k.tax_name
+                    single['amount'] = tax_amount
+                 
+            
+            if tax_amount == 0:
+                single = {}
+                single['Tax_name'] = z.tax_name
+                single['amount'] = 0
+                tax_data.append(single)
+            else:
+                tax_data.append(single)
+
+        discount_data = []
+        for z in cust61 :
+            discount_item_amount=0
+            for k in cust6:
+                if k.discount_item.id == z.id:
+                    name_list = k.amount.split()
+                    if name_list[0][0]=='$':
+                        temp = k.amount[1:]
+                        discount_item = round(discount_item+float(temp),2)
+                        discount_item_amount = round(discount_item_amount+float(temp),2)
+                    else:
+                        temp = k.amount[:-1]
+                        final_amount=PaymentEntry.objects.get(id=k.Payment.id).final_amount
+                        discount_item = round(discount_item+round((final_amount*float(temp))/100,2),2)
+                        discount_item_amount =round (discount_item_amount+round((final_amount*float(temp))/100,2),2)
+                    single = {}
+                    single['Discount_name'] = k.offer_name
+                    single['amount'] =discount_item_amount
+                        
+            if discount_item_amount == 0:
+                single = {}
+                single['Discount_name'] = z.offer_name
+                single['amount'] = 0
+                discount_data.append(single)
+            else:
+                discount_data.append(single)
 
         stats['gross_amount'] = round( total,2)
         stats['cash_amount'] = round( total2,2)
@@ -1305,12 +1334,44 @@ def yearwisedata(cust2,user_obj):
         stats['cash_discount']=round(discount,2)
         stats['fly_fees']=round(fly_fees,2)
         stats['fly_discount']=round(fly_discount,2)
-        # stats['Fees_Amount'] = fees
-        # stats['Fees_individual'] = fees_data
-        # stats['Tax_individual'] = tax_data
-        # stats['Discount_individual'] = discount_data
+        stats['Fees_Amount'] = round(fees,2)
+        stats['Fees_individual'] = fees_data
+        stats['Tax_individual'] = tax_data
+        stats['Discount_individual'] = discount_data
         year_wise_stats.append(stats)
-
+    else:
+        
+        stats = {}
+        fees_data = []
+        for z in cust41:
+                single = {}
+                single['Fees_name'] = z.fees_name
+                single['amount'] = 0
+                fees_data.append(single)
+        tax_data = []
+        for z in cust51:
+                single = {}
+                single['Tax_name'] = z.tax_name
+                single['amount'] = 0
+                tax_data.append(single)
+        discount_data = []
+        for z in cust61:
+                single = {}
+                single['Discount_name'] = z.offer_name
+                single['amount'] = 0
+                discount_data.append(single)
+        stats['Gross_Sales'] = 0
+        stats['Cash_Amount'] = 0
+        stats['Card_Amount'] = 0
+        stats['Tax_Amount'] = 0
+        stats['Discount_Amount'] = 0
+        stats['fly_discount']=0
+        stats['fly_fees']=0
+        stats['Fees_Amount'] = 0
+        stats['Fees_individual'] = fees_data
+        stats['Tax_individual'] = tax_data
+        stats['Discount_individual'] = discount_data
+        year_wise_stats.append(stats)
     return year_wise_stats
 
 
@@ -1547,59 +1608,88 @@ def filterwisedata(cust3,user_obj):
                     discount = discount + j.discount_offered
                     fly_discount = fly_discount+j.fly_discount
                     fly_fees = fly_fees+j.fly_fees
-            # fees_data = []
-            # for z in cust41:
-            #     fees_amount = 0
-            #     for k in cust4:
-            #         if k.fees_item.id == z.id:
-            #             fees = fees + int(k.amount)
-            #             fees_amount = fees_amount + int(k.amount)
-            #
-            #     if fees_amount == 0:
-            #         single = {}
-            #         single['Fees_name'] = z.fees_name
-            #         single['amount'] = 0
-            #         fees_data.append(single)
-            #     else:
-            #         single = {}
-            #         single['Fees_name'] = z.fees_name
-            #         single['amount'] = fees_amount
-            #         fees_data.append(single)
-            # tax_data = []
-            # for z in cust51:
-            #     tax_amount = 0
-            #     for k in cust5:
-            #         if k.tax_item.id == z.id:
-            #             tax_item = tax_item + int(k.amount)
-            #             tax_amount = tax_amount + int(k.amount)
-            #
-            #     if tax_amount == 0:
-            #         single = {}
-            #         single['Tax_name'] = z.tax_name
-            #         single['amount'] = 0
-            #         tax_data.append(single)
-            #     else:
-            #         single = {}
-            #         single['Tax_name'] = z.tax_name
-            #         single['amount'] = tax_amount
-            #         tax_data.append(single)
-            # discount_data = []
-            # for z in cust61:
-            #     discount_item_amount = 0
-            #     for k in cust6:
-            #         if k.discount_item.id == z.id:
-            #             discount_item = discount_item + int(k.amount)
-            #             discount_item_amount = discount_item_amount + int(k.amount)
-            #     if discount_item_amount == 0:
-            #         single = {}
-            #         single['Discount_name'] = z.offer_name
-            #         single['amount'] = 0
-            #         discount_data.append(single)
-            #     else:
-            #         single = {}
-            #         single['Discount_name'] = z.offer_name
-            #         single['amount'] = discount_item_amount
-            #         discount_data.append(single)
+            fees_data=[]
+      
+            for z in cust41:
+                fees_amount =0
+                for k in cust4:
+                    if k.fees_item.id == z.id:
+                        name_list = k.amount.split()
+                        if name_list[0][0]=='$':
+                            temp = k.amount[1:]
+                            fees = round(fees+float(temp),2)
+                            fees_amount = round(fees_amount+float(temp),2)
+                        else:
+                            temp = k.amount[:-1]
+                            final_amount=PaymentEntry.objects.get(id=k.Payment.id).final_amount
+                            fees = round(fees+round((final_amount*float(temp))/100,2),2)
+                            fees_amount =round (fees_amount+round((final_amount*float(temp))/100,2),2)    
+                        single={}
+                        single['Fees_name']=k.fees_name
+                        single['amount']=fees_amount
+                
+            
+                if fees_amount == 0:
+                    single = {}
+                    single['Fees_name'] = z.fees_name
+                    single['amount'] = 0
+                    fees_data.append(single)
+                else:
+                    fees_data.append(single)    
+            tax_data = []
+            for z in cust51:
+                tax_amount = 0
+                for k in cust5:
+                    if k.tax_item.id == z.id:
+                        name_list = k.amount.split()
+                        if name_list[0][0]=='$':
+                            temp = k.amount[1:]
+                            tax_item = round(tax_item+float(temp),2)
+                            tax_amount = round(tax_amount+float(temp),2)
+                        else:
+                            temp = k.amount[:-1]
+                            final_amount=PaymentEntry.objects.get(id=k.Payment.id).final_amount
+                            fees = round(fees+round((final_amount*float(temp))/100,2),2)
+                            tax_amount =round (tax_amount+round((final_amount*float(temp))/100,2),2) 
+                        single = {}
+                        single['Tax_name'] = k.tax_name
+                        single['amount'] = tax_amount
+                    
+                
+                if tax_amount == 0:
+                    single = {}
+                    single['Tax_name'] = z.tax_name
+                    single['amount'] = 0
+                    tax_data.append(single)
+                else:
+                    tax_data.append(single)
+
+            discount_data = []
+            for z in cust61 :
+                discount_item_amount=0
+                for k in cust6:
+                    if k.discount_item.id == z.id:
+                        name_list = k.amount.split()
+                        if name_list[0][0]=='$':
+                            temp = k.amount[1:]
+                            discount_item = round(discount_item+float(temp),2)
+                            discount_item_amount = round(discount_item_amount+float(temp),2)
+                        else:
+                            temp = k.amount[:-1]
+                            final_amount=PaymentEntry.objects.get(id=k.Payment.id).final_amount
+                            discount_item = round(discount_item+round((final_amount*float(temp))/100,2),2)
+                            discount_item_amount =round (discount_item_amount+round((final_amount*float(temp))/100,2),2)
+                        single = {}
+                        single['Discount_name'] = k.offer_name
+                        single['amount'] =discount_item_amount
+                            
+                if discount_item_amount == 0:
+                    single = {}
+                    single['Discount_name'] = z.offer_name
+                    single['amount'] = 0
+                    discount_data.append(single)
+                else:
+                    discount_data.append(single)
             stats['Gross_Sales'] = round( total,2)
             stats['Cash_Amount'] = round( total2,2)
             stats['Card_Amount'] = round( total - total2,2)
@@ -1607,11 +1697,44 @@ def filterwisedata(cust3,user_obj):
             stats['Discount_Amount'] = round( discount,2)
             stats['fly_discount']=round(fly_discount,2)
             stats['fly_fees']=round(fly_fees,2)
-            # stats['Fees_Amount'] = fees
-            # stats['Fees_individual'] = fees_data
-            # stats['Tax_individual'] = tax_data
-            # stats['Discount_individual'] = discount_data
+            stats['Fees_Amount'] = round(fees,2)
+            stats['Fees_individual'] = fees_data
+            stats['Tax_individual'] = tax_data
+            stats['Discount_individual'] = discount_data
             month_wise_stats.append(stats)
+        else:
+        
+            stats = {}
+            fees_data = []
+            for z in cust41:
+                    single = {}
+                    single['Fees_name'] = z.fees_name
+                    single['amount'] = 0
+                    fees_data.append(single)
+            tax_data = []
+            for z in cust51:
+                    single = {}
+                    single['Tax_name'] = z.tax_name
+                    single['amount'] = 0
+                    tax_data.append(single)
+            discount_data = []
+            for z in cust61:
+                    single = {}
+                    single['Discount_name'] = z.offer_name
+                    single['amount'] = 0
+                    discount_data.append(single)
+            stats['Gross_Sales'] = 0
+            stats['Cash_Amount'] = 0
+            stats['Card_Amount'] = 0
+            stats['Tax_Amount'] = 0
+            stats['Discount_Amount'] = 0
+            stats['fly_discount']=0
+            stats['fly_fees']=0
+            stats['Fees_Amount'] = 0
+            stats['Fees_individual'] = fees_data
+            stats['Tax_individual'] = tax_data
+            stats['Discount_individual'] = discount_data
+            month_wise_stats.append(stats)    
         return month_wise_stats
 
 
@@ -1760,6 +1883,7 @@ def Daily_data(session):
     cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), created_date__day__gte=now.day,
                                         created_date__day__lte=now.day,created_date__month__lte=now.month,
                                         created_date__month__gte=now.month,Vehicle__in=cust2)
+
     cust4 = FeesItem.objects.filter(created_date__day__gte=now.day,created_date__day__lte=now.day,created_date__month__lte=now.month,
                                     created_date__month__gte=now.month,Payment__in=cust3)
     cust5 = TaxItem.objects.filter(created_date__day__gte=now.day, created_date__day__lte=now.day,
@@ -1781,6 +1905,7 @@ def Daily_data(session):
     discount_item =0.0
     fly_fees=0.0
     fly_discount=0.0
+    order_count=cust3.count()
     if cust3.count() != 0:
         stats = {}
         for j in cust3:
@@ -1797,58 +1922,88 @@ def Daily_data(session):
                 discount = discount + j.discount_offered
                 fly_discount = fly_discount+j.fly_discount
                 fly_fees = fly_fees+j.fly_fees
-        # fees_data=[]
-        # for z in cust41:
-        #     fees_amount =0
-        #     for k in cust4:
-        #         if k.fees_item.id == z.id:
-        #             name_list = k.amount.split()
-        #             if name_list[0][0]=='$':
-        #                 temp = k.amount[1:]
-        #                 fees = fees+int(temp)
-        #                 fees_amount = fees_amount+int(temp)
-        #                 single={}
-        #                 single['Fees_name']=k.fees_name
-        #                 single['amount']=temp
-        #                 fees_data.append(single)
-        #
-        #     if fees_amount == 0:
-        #         single = {}
-        #         single['Fees_name'] = z.fees_name
-        #         single['amount'] = 0
-        #         fees_data.append(single)
-        # tax_data = []
-        # for z in cust51:
-        #     tax_amount = 0
-        #     for k in cust5:
-        #         if k.tax_item.id == z.id:
-        #             tax_item = tax_item + int(k.amount)
-        #             tax_amount = tax_amount + int(k.amount)
-        #             single = {}
-        #             single['Tax_name'] = k.tax_name
-        #             single['amount'] = k.amount
-        #             tax_data.append(single)
-        #     if tax_amount == 0:
-        #         single = {}
-        #         single['Tax_name'] = z.tax_name
-        #         single['amount'] = 0
-        #         tax_data.append(single)
-        # discount_data = []
-        # for z in cust61 :
-        #     discount_item_amount=0
-        #     for k in cust6:
-        #         if k.discount_item.id == z.id:
-        #             discount_item = discount_item + int(k.amount)
-        #             discount_item_amount = discount_item_amount + int(k.amount)
-        #             single = {}
-        #             single['Discount_name'] = k.offer_name
-        #             single['amount'] = k.amount
-        #             discount_data.append(single)
-        #     if discount_item_amount == 0:
-        #         single = {}
-        #         single['Discount_name'] = z.offer_name
-        #         single['amount'] = 0
-        #         discount_data.append(single)
+        fees_data=[]
+      
+        for z in cust41:
+            fees_amount =0
+            for k in cust4:
+                if k.fees_item.id == z.id:
+                    name_list = k.amount.split()
+                    if name_list[0][0]=='$':
+                        temp = k.amount[1:]
+                        fees = round(fees+float(temp),2)
+                        fees_amount = round(fees_amount+float(temp),2)
+                    else:
+                        temp = k.amount[:-1]
+                        final_amount=PaymentEntry.objects.get(id=k.Payment.id).final_amount
+                        fees = round(fees+round((final_amount*float(temp))/100,2),2)
+                        fees_amount =round (fees_amount+round((final_amount*float(temp))/100,2),2)    
+                    single={}
+                    single['Fees_name']=k.fees_name
+                    single['amount']=fees_amount
+            
+        
+            if fees_amount == 0:
+                single = {}
+                single['Fees_name'] = z.fees_name
+                single['amount'] = 0
+                fees_data.append(single)
+            else:
+                fees_data.append(single)    
+        tax_data = []
+        for z in cust51:
+            tax_amount = 0
+            for k in cust5:
+                if k.tax_item.id == z.id:
+                    name_list = k.amount.split()
+                    if name_list[0][0]=='$':
+                        temp = k.amount[1:]
+                        tax_item = round(tax_item+float(temp),2)
+                        tax_amount = round(tax_amount+float(temp),2)
+                    else:
+                        temp = k.amount[:-1]
+                        final_amount=PaymentEntry.objects.get(id=k.Payment.id).final_amount
+                        fees = round(fees+round((final_amount*float(temp))/100,2),2)
+                        tax_amount =round (tax_amount+round((final_amount*float(temp))/100,2),2) 
+                    single = {}
+                    single['Tax_name'] = k.tax_name
+                    single['amount'] = tax_amount
+                 
+            
+            if tax_amount == 0:
+                single = {}
+                single['Tax_name'] = z.tax_name
+                single['amount'] = 0
+                tax_data.append(single)
+            else:
+                tax_data.append(single)
+
+        discount_data = []
+        for z in cust61 :
+            discount_item_amount=0
+            for k in cust6:
+                if k.discount_item.id == z.id:
+                    name_list = k.amount.split()
+                    if name_list[0][0]=='$':
+                        temp = k.amount[1:]
+                        discount_item = round(discount_item+float(temp),2)
+                        discount_item_amount = round(discount_item_amount+float(temp),2)
+                    else:
+                        temp = k.amount[:-1]
+                        final_amount=PaymentEntry.objects.get(id=k.Payment.id).final_amount
+                        discount_item = round(discount_item+round((final_amount*float(temp))/100,2),2)
+                        discount_item_amount =round (discount_item_amount+round((final_amount*float(temp))/100,2),2)
+                    single = {}
+                    single['Discount_name'] = k.offer_name
+                    single['amount'] =discount_item_amount
+                    
+            if discount_item_amount == 0:
+                single = {}
+                single['Discount_name'] = z.offer_name
+                single['amount'] = 0
+                discount_data.append(single)
+            else:
+                discount_data.append(single)    
         stats['Date'] = str(now.day) + '-' + str(now.month) + '-' + '2021'
         stats['Gross_Sales'] = round(total, 2)
         stats['Cash_Amount'] = round(total2, 2)
@@ -1857,31 +2012,32 @@ def Daily_data(session):
         stats['Discount_Amount'] = round(discount, 2)
         stats['fly_discount']=round(fly_discount,2)
         stats['fly_fees']=round(fly_fees,2)
-        # stats['Fees_Amount'] = round(fees,2)
-        # stats['Fees_individual'] = fees_data
-        # stats['Tax_individual'] = tax_data
-        # stats['Discount_individual'] = discount_data
+        stats['Fees_Amount'] = round(fees,2)
+        stats['Fees_individual'] = fees_data
+        stats['Tax_individual'] = tax_data
+        stats['Discount_individual'] = discount_data
+        stats['order_count']=order_count
         day_stats.append(stats)
     else:
         stats = {}
-        # fees_data = []
-        # for z in cust41:
-        #         single = {}
-        #         single['Fees_name'] = z.fees_name
-        #         single['amount'] = 0
-        #         fees_data.append(single)
-        # tax_data = []
-        # for z in cust51:
-        #         single = {}
-        #         single['Tax_name'] = z.tax_name
-        #         single['amount'] = 0
-        #         tax_data.append(single)
-        # discount_data = []
-        # for z in cust61:
-        #         single = {}
-        #         single['Discount_name'] = z.offer_name
-        #         single['amount'] = 0
-        #         discount_data.append(single)
+        fees_data = []
+        for z in cust41:
+                single = {}
+                single['Fees_name'] = z.fees_name
+                single['amount'] = 0
+                fees_data.append(single)
+        tax_data = []
+        for z in cust51:
+                single = {}
+                single['Tax_name'] = z.tax_name
+                single['amount'] = 0
+                tax_data.append(single)
+        discount_data = []
+        for z in cust61:
+                single = {}
+                single['Discount_name'] = z.offer_name
+                single['amount'] = 0
+                discount_data.append(single)
         stats['Date'] = str(now.day) + '-' + str(now.month) + '-' + '2021'
         stats['Gross_Sales'] = 0
         stats['Cash_Amount'] = 0
@@ -1890,10 +2046,11 @@ def Daily_data(session):
         stats['Discount_Amount'] = 0
         stats['fly_discount']=0
         stats['fly_fees']=0
-        # stats['Fees_Amount'] = 0
-        # stats['Fees_individual'] = fees_data
-        # stats['Tax_individual'] = tax_data
-        # stats['Discount_individual'] = discount_data
+        stats['Fees_Amount'] = 0
+        stats['Fees_individual'] = fees_data
+        stats['Tax_individual'] = tax_data
+        stats['Discount_individual'] = discount_data
+        stats['order_count']=order_count
         day_stats.append(stats)
     myJson = {"status": "1", "data": day_stats}
     return myJson
@@ -2139,7 +2296,7 @@ def day_list_week(now):
             list.append(data)
     if day == 1:
         if (month - 1) % 2 == 0:
-            print("hi")
+           
             data = {}
             data['date'] = 31
             data['month'] = month - 1
@@ -2238,6 +2395,7 @@ def weekly_data(session):
         discount_item = 0
         fly_discount=0.0
         fly_fees=0.0
+        order_count=cust3.count()
         if cust3.count() != 0:
             stats = {}
             for j in cust3:
@@ -2254,55 +2412,89 @@ def weekly_data(session):
                     discount = discount + j.discount_offered
                     fly_discount = fly_discount+j.fly_discount
                     fly_fees = fly_fees+j.fly_fees
-            # fees_data = []
-            # for z in cust41:
-            #     fees_amount = 0
-            #     for k in cust4:
-            #         if k.fees_item.id == z.id:
-            #             fees = fees + int(k.amount)
-            #             fees_amount = fees_amount + int(k.amount)
-            #             single = {}
-            #             single['Fees_name'] = k.fees_name
-            #             single['amount'] = k.amount
-            #             fees_data.append(single)
-            #
-            #     if fees_amount == 0:
-            #         single = {}
-            #         single['Fees_name'] = z.fees_name
-            #         single['amount'] = 0
-            #         fees_data.append(single)
-            # tax_data = []
-            # for z in cust51:
-            #     tax_amount = 0
-            #     for k in cust5:
-            #         if k.tax_item.id == z.id:
-            #             tax_item = tax_item + int(k.amount)
-            #             tax_amount = tax_amount + int(k.amount)
-            #             single = {}
-            #             single['Tax_name'] = k.tax_name
-            #             single['amount'] = k.amount
-            #             tax_data.append(single)
-            #     if tax_amount == 0:
-            #         single = {}
-            #         single['Tax_name'] = z.tax_name
-            #         single['amount'] = 0
-            #         tax_data.append(single)
-            # discount_data = []
-            # for z in cust61:
-            #     discount_item_amount = 0
-            #     for k in cust6:
-            #         if k.discount_item.id == z.id:
-            #             discount_item = discount_item + int(k.amount)
-            #             discount_item_amount = discount_item_amount + int(k.amount)
-            #             single = {}
-            #             single['Discount_name'] = k.offer_name
-            #             single['amount'] = k.amount
-            #             discount_data.append(single)
-            #     if discount_item_amount == 0:
-            #         single = {}
-            #         single['Discount_name'] = z.offer_name
-            #         single['amount'] = 0
-            #         discount_data.append(single)
+                    
+            fees_data=[]
+        
+            for z in cust41:
+                fees_amount =0
+                for k in cust4:
+                    if k.fees_item.id == z.id:
+                        name_list = k.amount.split()
+                        if name_list[0][0]=='$':
+                            temp = k.amount[1:]
+                            fees = round(fees+float(temp),2)
+                            fees_amount = round(fees_amount+float(temp),2)
+                        else:
+                            temp = k.amount[:-1]
+                            final_amount=PaymentEntry.objects.get(id=k.Payment.id).final_amount
+                            fees = round(fees+round((final_amount*float(temp))/100,2),2)
+                            fees_amount =round (fees_amount+round((final_amount*float(temp))/100,2),2)    
+                        single={}
+                        single['Fees_name']=k.fees_name
+                        single['amount']=fees_amount
+                
+            
+                if fees_amount == 0:
+                    single = {}
+                    single['Fees_name'] = z.fees_name
+                    single['amount'] = 0
+                    fees_data.append(single)
+                else:
+                    fees_data.append(single)    
+            tax_data = []
+            for z in cust51:
+                tax_amount = 0
+                for k in cust5:
+                    if k.tax_item.id == z.id:
+                        name_list = k.amount.split()
+                        if name_list[0][0]=='$':
+                            temp = k.amount[1:]
+                            tax_item = round(tax_item+float(temp),2)
+                            tax_amount = round(tax_amount+float(temp),2)
+                        else:
+                            temp = k.amount[:-1]
+                            final_amount=PaymentEntry.objects.get(id=k.Payment.id).final_amount
+                            fees = round(fees+round((final_amount*float(temp))/100,2),2)
+                            tax_amount =round (tax_amount+round((final_amount*float(temp))/100,2),2) 
+                        single = {}
+                        single['Tax_name'] = k.tax_name
+                        single['amount'] = tax_amount
+                    
+                
+                if tax_amount == 0:
+                    single = {}
+                    single['Tax_name'] = z.tax_name
+                    single['amount'] = 0
+                    tax_data.append(single)
+                else:
+                    tax_data.append(single)
+
+            discount_data = []
+            for z in cust61 :
+                discount_item_amount=0
+                for k in cust6:
+                    if k.discount_item.id == z.id:
+                        name_list = k.amount.split()
+                        if name_list[0][0]=='$':
+                            temp = k.amount[1:]
+                            discount_item = round(discount_item+float(temp),2)
+                            discount_item_amount = round(discount_item_amount+float(temp),2)
+                        else:
+                            temp = k.amount[:-1]
+                            final_amount=PaymentEntry.objects.get(id=k.Payment.id).final_amount
+                            discount_item = round(discount_item+round((final_amount*float(temp))/100,2),2)
+                            discount_item_amount =round (discount_item_amount+round((final_amount*float(temp))/100,2),2)
+                        single = {}
+                        single['Discount_name'] = k.offer_name
+                        single['amount'] =discount_item_amount
+                            
+                if discount_item_amount == 0:
+                    single = {}
+                    single['Discount_name'] = z.offer_name
+                    single['amount'] = 0
+                    discount_data.append(single)
+                else:
+                    discount_data.append(single)
             stats['Date'] = str(i['date']) + '-' + str(i['month']) + '-' + '2021'
             stats['Gross_Sales'] = round(total, 2)
             stats['Cash_Amount'] = round(total2, 2)
@@ -2311,31 +2503,32 @@ def weekly_data(session):
             stats['Discount_Amount'] = round(discount, 2)
             stats['fly_discount']=round(fly_discount,2)
             stats['fly_fees']=round(fly_fees,2)
-            # stats['Fees_Amount'] = round(fees,2)
-            # stats['Fees_individual'] = fees_data
-            # stats['Tax_individual'] = tax_data
-            # stats['Discount_individual'] = discount_data
+            stats['Fees_Amount'] = round(fees,2)
+            stats['Fees_individual'] = fees_data
+            stats['Tax_individual'] = tax_data
+            stats['Discount_individual'] = discount_data
+            stats['order_count']=order_count
             day_stats.append(stats)
         else:
             stats = {}
-            # fees_data = []
-            # for z in cust41:
-            #     single = {}
-            #     single['Fees_name'] = z.fees_name
-            #     single['amount'] = 0
-            #     fees_data.append(single)
-            # tax_data = []
-            # for z in cust51:
-            #     single = {}
-            #     single['Tax_name'] = z.tax_name
-            #     single['amount'] = 0
-            #     tax_data.append(single)
-            # discount_data = []
-            # for z in cust61:
-            #     single = {}
-            #     single['Discount_name'] = z.offer_name
-            #     single['amount'] = 0
-            #     discount_data.append(single)
+            fees_data = []
+            for z in cust41:
+                single = {}
+                single['Fees_name'] = z.fees_name
+                single['amount'] = 0
+                fees_data.append(single)
+            tax_data = []
+            for z in cust51:
+                single = {}
+                single['Tax_name'] = z.tax_name
+                single['amount'] = 0
+                tax_data.append(single)
+            discount_data = []
+            for z in cust61:
+                single = {}
+                single['Discount_name'] = z.offer_name
+                single['amount'] = 0
+                discount_data.append(single)
             stats['Date'] = str(i['date']) + '-' + str(i['month']) + '-' + '2021'
             stats['Gross_Sales'] = 0
             stats['Cash_Amount'] = 0
@@ -2344,10 +2537,11 @@ def weekly_data(session):
             stats['Discount_Amount'] = 0
             stats['fly_discount']=0
             stats['fly_fees']=0
-            # stats['Fees_Amount'] =0
-            # stats['Fees_individual'] = fees_data
-            # stats['Tax_individual'] = tax_data
-            # stats['Discount_individual'] = discount_data
+            stats['Fees_Amount'] =0
+            stats['Fees_individual'] = fees_data
+            stats['Tax_individual'] = tax_data
+            stats['Discount_individual'] = discount_data
+            stats['order_count']=order_count
             day_stats.append(stats)
 
     myJson = {"status": "1", "data": day_stats}
@@ -2363,7 +2557,7 @@ class weekly(APIView):
 
 
 def day_list_month(now):
-    day = 8
+    day = now.day
     month = now.month
     year = now.year
     list = []
@@ -2428,6 +2622,7 @@ def monthly_data(session):
         discount_item = 0
         fly_discount=0.0
         fly_fees=0.0
+        order_count=cust3.count()
         if cust3.count() != 0:
             stats = {}
             for j in cust3:
@@ -2444,55 +2639,88 @@ def monthly_data(session):
                     discount = discount + j.discount_offered
                     fly_discount = fly_discount+j.fly_discount
                     fly_fees = fly_fees+j.fly_fees
-            # fees_data = []
-            # for z in cust41:
-            #     fees_amount = 0
-            #     for k in cust4:
-            #         if k.fees_item.id == z.id:
-            #             fees = fees + int(k.amount)
-            #             fees_amount = fees_amount + int(k.amount)
-            #             single = {}
-            #             single['Fees_name'] = k.fees_name
-            #             single['amount'] = k.amount
-            #             fees_data.append(single)
-            #
-            #     if fees_amount == 0:
-            #         single = {}
-            #         single['Fees_name'] = z.fees_name
-            #         single['amount'] = 0
-            #         fees_data.append(single)
-            # tax_data = []
-            # for z in cust51:
-            #     tax_amount = 0
-            #     for k in cust5:
-            #         if k.tax_item.id == z.id:
-            #             tax_item = tax_item + int(k.amount)
-            #             tax_amount = tax_amount + int(k.amount)
-            #             single = {}
-            #             single['Tax_name'] = k.tax_name
-            #             single['amount'] = k.amount
-            #             tax_data.append(single)
-            #     if tax_amount == 0:
-            #         single = {}
-            #         single['Tax_name'] = z.tax_name
-            #         single['amount'] = 0
-            #         tax_data.append(single)
-            # discount_data = []
-            # for z in cust61:
-            #     discount_item_amount = 0
-            #     for k in cust6:
-            #         if k.discount_item.id == z.id:
-            #             discount_item = discount_item + int(k.amount)
-            #             discount_item_amount = discount_item_amount + int(k.amount)
-            #             single = {}
-            #             single['Discount_name'] = k.offer_name
-            #             single['amount'] = k.amount
-            #             discount_data.append(single)
-            #     if discount_item_amount == 0:
-            #         single = {}
-            #         single['Discount_name'] = z.offer_name
-            #         single['amount'] = 0
-            #         discount_data.append(single)
+            fees_data=[]
+      
+            for z in cust41:
+                fees_amount =0
+                for k in cust4:
+                    if k.fees_item.id == z.id:
+                        name_list = k.amount.split()
+                        if name_list[0][0]=='$':
+                            temp = k.amount[1:]
+                            fees = round(fees+float(temp),2)
+                            fees_amount = round(fees_amount+float(temp),2)
+                        else:
+                            temp = k.amount[:-1]
+                            final_amount=PaymentEntry.objects.get(id=k.Payment.id).final_amount
+                            fees = round(fees+round((final_amount*float(temp))/100,2),2)
+                            fees_amount =round (fees_amount+round((final_amount*float(temp))/100,2),2)    
+                        single={}
+                        single['Fees_name']=k.fees_name
+                        single['amount']=fees_amount
+                
+            
+                if fees_amount == 0:
+                    single = {}
+                    single['Fees_name'] = z.fees_name
+                    single['amount'] = 0
+                    fees_data.append(single)
+                else:
+                    fees_data.append(single)    
+            tax_data = []
+            for z in cust51:
+                tax_amount = 0
+                for k in cust5:
+                    if k.tax_item.id == z.id:
+                        name_list = k.amount.split()
+                        if name_list[0][0]=='$':
+                            temp = k.amount[1:]
+                            tax_item = round(tax_item+float(temp),2)
+                            tax_amount = round(tax_amount+float(temp),2)
+                        else:
+                            temp = k.amount[:-1]
+                            final_amount=PaymentEntry.objects.get(id=k.Payment.id).final_amount
+                            fees = round(fees+round((final_amount*float(temp))/100,2),2)
+                            tax_amount =round (tax_amount+round((final_amount*float(temp))/100,2),2) 
+                        single = {}
+                        single['Tax_name'] = k.tax_name
+                        single['amount'] = tax_amount
+                    
+                
+                if tax_amount == 0:
+                    single = {}
+                    single['Tax_name'] = z.tax_name
+                    single['amount'] = 0
+                    tax_data.append(single)
+                else:
+                    tax_data.append(single)
+
+            discount_data = []
+            for z in cust61 :
+                discount_item_amount=0
+                for k in cust6:
+                    if k.discount_item.id == z.id:
+                        name_list = k.amount.split()
+                        if name_list[0][0]=='$':
+                            temp = k.amount[1:]
+                            discount_item = round(discount_item+float(temp),2)
+                            discount_item_amount = round(discount_item_amount+float(temp),2)
+                        else:
+                            temp = k.amount[:-1]
+                            final_amount=PaymentEntry.objects.get(id=k.Payment.id).final_amount
+                            discount_item = round(discount_item+round((final_amount*float(temp))/100,2),2)
+                            discount_item_amount =round (discount_item_amount+round((final_amount*float(temp))/100,2),2)
+                        single = {}
+                        single['Discount_name'] = k.offer_name
+                        single['amount'] =discount_item_amount
+                            
+                if discount_item_amount == 0:
+                    single = {}
+                    single['Discount_name'] = z.offer_name
+                    single['amount'] = 0
+                    discount_data.append(single)
+                else:
+                    discount_data.append(single)
             stats['Date'] = str(i['date']) + '-' + str(i['month']) + '-' + '2021'
             stats['Gross_Sales'] = round(total, 2)
             stats['Cash_Amount'] = round(total2, 2)
@@ -2501,31 +2729,32 @@ def monthly_data(session):
             stats['Discount_Amount'] = round(discount, 2)
             stats['fly_discount']=round(fly_discount,2)
             stats['fly_fees']=round(fly_fees,2)
-            # stats['Fees_Amount'] = round(fees,2)
-            # stats['Fees_individual'] = fees_data
-            # stats['Tax_individual'] = tax_data
-            # stats['Discount_individual'] = discount_data
+            stats['Fees_Amount'] = round(fees,2)
+            stats['Fees_individual'] = fees_data
+            stats['Tax_individual'] = tax_data
+            stats['Discount_individual'] = discount_data
+            stats['order_count']=order_count
             day_stats.append(stats)
         else:
             stats = {}
-            # fees_data = []
-            # for z in cust41:
-            #     single = {}
-            #     single['Fees_name'] = z.fees_name
-            #     single['amount'] = 0
-            #     fees_data.append(single)
-            # tax_data = []
-            # for z in cust51:
-            #     single = {}
-            #     single['Tax_name'] = z.tax_name
-            #     single['amount'] = 0
-            #     tax_data.append(single)
-            # discount_data = []
-            # for z in cust61:
-            #     single = {}
-            #     single['Discount_name'] = z.offer_name
-            #     single['amount'] = 0
-            #     discount_data.append(single)
+            fees_data = []
+            for z in cust41:
+                single = {}
+                single['Fees_name'] = z.fees_name
+                single['amount'] = 0
+                fees_data.append(single)
+            tax_data = []
+            for z in cust51:
+                single = {}
+                single['Tax_name'] = z.tax_name
+                single['amount'] = 0
+                tax_data.append(single)
+            discount_data = []
+            for z in cust61:
+                single = {}
+                single['Discount_name'] = z.offer_name
+                single['amount'] = 0
+                discount_data.append(single)
             stats['Date'] = str(i['date']) + '-' + str(i['month']) + '-' + '2021'
             stats['Gross_Sales'] = 0
             stats['Cash_Amount'] = 0
@@ -2534,10 +2763,11 @@ def monthly_data(session):
             stats['Discount_Amount'] = 0
             stats['fly_discount']=0
             stats['fly_fees']=0
-            # stats['Fees_Amount'] = 0
-            # stats['Fees_individual']=fees_data
-            # stats['Tax_individual'] = tax_data
-            # stats['Discount_individual'] = discount_data
+            stats['Fees_Amount'] = 0
+            stats['Fees_individual']=fees_data
+            stats['Tax_individual'] = tax_data
+            stats['Discount_individual'] = discount_data
+            stats['order_count']=order_count
             day_stats.append(stats)
 
     myJson = {"status": "1", "data": day_stats}
@@ -2558,7 +2788,7 @@ class test(APIView):
         temp = data['temp']
         if temp:
             zen = data['zen']
-            print(zen)
+            
 
         myJson = {'status':1, "data":temp}
         return JsonResponse(myJson, safe=False)
