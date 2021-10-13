@@ -15,7 +15,7 @@ from django.db.models.functions import (
 from django.db.models import Avg, Count, Min, Sum
 from django.db.models import Q
 import datetime
-from customer.models import CustomerInfo, VehicleInfo, TestDetails,SmogTest
+from customer.models import CustomerInfo, VehicleInfo, TestDetails,SmogTest,TermsItems
 from users.models import UserType, UserInfo
 from .models import PaymentEntry, InvoiceItem,TaxItem,FeesItem,DiscountItem,TestTypeItem,MustHaveItem,SquareDevice,\
     SquareTerminalCheckout,FortisPayCredentials
@@ -403,6 +403,89 @@ class payment_validate(APIView):
 # ...............................END-Invoice-Validate-After-Payment......................................
 
 # ...............................Invoice-List......................................
+def order_data_list(cust3,cust5,cust6):
+    list_data=[]
+    for i in cust3:
+        list={}
+        customer={}
+        vehicle={}
+        smog_list=[]
+        for j in cust5:
+        
+            temp_list={}
+            if j.vehicle_id.id==i.Vehicle.id:
+                temp_list['smog']=j.smog
+                temp_list['type']=j.type
+                temp_list['desc']=j.desc
+                smog_list.append(temp_list)
+        list_term=[]
+        for j in cust6:
+            list_2 = {}
+            if j.customer_id == i.Vehicle.customer_id.id:
+                list_2['term_id'] = j.term.id
+                list_2['term_text'] = j.terms_text
+                list_term.append(list_2)
+        list['id']=i.id
+        list['invoice_id']=i.invoice_id
+        list['status']=i.status
+        list['final_amount']=i.final_amount
+        list['card_amount']=i.card_amount
+        list['tax_offered']=i.tax_offered
+        list['amount_tendered']=i.amount_tendered
+        list['changed_given']=i.changed_given
+        list['discount_offered']=i.discount_offered
+        list['payment_mode']=i.payment_mode
+        list['created_date']=i.created_date
+        list['additional_comments']=i.additional_comments
+        list['test_results']=i.test_results
+        list['inception_performed']=i.inception_performed
+        list['lf']=i.lf
+        list['rf']=i.rf
+        list['lr']=i.lr
+        list['rr']=i.rr
+        list['inception_declined']=i.inception_declined
+        list['reasons']=i.reasons
+        list['initials']=i.initials
+        list['fly_fees']=i.fly_fees
+        list['fly_discount']=i.fly_discount
+        vehicle['id']=i.Vehicle.id
+        vehicle['year']=i.Vehicle.year
+        vehicle['brand']=i.Vehicle.brand
+        vehicle['odo_meter']=i.Vehicle.odo_meter
+        vehicle['vin']=i.Vehicle.vin
+        vehicle['lic_plate']=i.Vehicle.lic_plate
+        vehicle['gvwr']=i.Vehicle.gvwr
+        vehicle['engine']=i.Vehicle.engine
+        vehicle['engine_group']=i.Vehicle.engine_group
+        vehicle['cylinder']=i.Vehicle.cylinder
+        vehicle['Transmission']=i.Vehicle.Transmission
+        vehicle['brand_model']=i.Vehicle.brand_model
+        vehicle['state']=i.Vehicle.state
+        vehicle['smoke_pvc']=i.Vehicle.smoke_pvc
+        vehicle['tailpipe']=i.Vehicle.tailpipe
+        vehicle['smog_test']=smog_list
+        list['Vehicle']=vehicle
+        customer['id'] = i.Vehicle.customer_id.id
+        customer['selected_date'] = i.Vehicle.customer_id.selected_date
+        customer['company_name'] =i.Vehicle.customer_id.company_name
+        customer['full_name'] = i.Vehicle.customer_id.full_name
+        customer['email_id'] = i.Vehicle.customer_id.email_id
+        customer['address'] = i.Vehicle.customer_id.address
+        customer['address_2'] = i.Vehicle.customer_id.address_2
+        customer['city'] = i.Vehicle.customer_id.city
+        customer['state'] = i.Vehicle.customer_id.state
+        customer['phone_number'] = i.Vehicle.customer_id.phone_number
+        customer['estimate_amount'] = i.Vehicle.customer_id.estimate_amount
+        customer['postal_code'] = i.Vehicle.customer_id.postal_code
+        customer['created_date'] = i.Vehicle.customer_id.created_date
+        customer['user_id'] = i.Vehicle.customer_id.user_id.id
+        customer['Terms']=list_term
+        list['Vehicle']['customer_id']=customer
+        list_data.append(list)
+
+    return list_data  
+      
+
 class order_list(APIView):
     def post(self, request):
         data = request.data
@@ -413,6 +496,7 @@ class order_list(APIView):
         cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
         cust5 = SmogTest.objects.filter(vehicle_id__in=cust2)
         cust3 = PaymentEntry.objects.filter(Vehicle__in=cust2).order_by('-invoice_id')
+        cust6 = TermsItems.objects.filter(customer__in=customer_obj)
         if SquareCredential.objects.filter(client=user_obj).exists():
             token = SquareCredential.objects.get(client=user_obj).accees_token
             checkout_id = SquareTerminalCheckout.objects.filter(payment__in=cust3)
@@ -424,8 +508,8 @@ class order_list(APIView):
                 status = json_response['checkout']['status']
                 PaymentEntry.objects.filter(id=i.payment.id).update(status=status)
         serializer = PaymentEntrySerializer(cust3, many=True)
-        
-        myJson = {"status": "1", "data": serializer.data}
+        order_data=order_data_list(cust3,cust5,cust6)
+        myJson = {"status": "1", "data": order_data}
         return JsonResponse(myJson)
 
 
