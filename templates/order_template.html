@@ -87,7 +87,7 @@
         }
         td.zy{
             border: none;
-           
+            padding: 10px;
                     }
         td.d{
         font-weight:bold;
@@ -130,40 +130,46 @@
             <table class="header-content">
                 <tbody>
                     <tr>
-                        <th rowspan="4" style="width:100px;text-align:left;margin:0 15px 0 0"><img src="{% static 'images/amazon_pay_logo.jpg' %}" alt=""  ></th>
-                        <td class="a">Goalsr</td>
+                        <th rowspan="4" style="width:100px;text-align:left;margin:0 15px 0 0"><img src="https://autopos.zunaco.com/auto-api/images/{{company.image_name}}" alt=""  ></th>
+                        <td class="a">{{user_obj.company_name}}</td>
                       </tr>
                       <tr>
-                        <td class="a">Bangalore</td>
+                        <td class="a">{{company.address}}</td>
                       </tr>
                       <tr>
                           <td class="a">Phone : 9513172737</td>
                       </tr>
                       <tr>
-                          <td class="a">Email Id : thulasidass@goalsr.com</td>
+                          <td class="a">Email Id : {{company.email}}</td>
                       </tr>
                 </tbody>
             </table>
         </div>
+        <table class="table">
+            <tr>
+                <td class="zz" style="width: 100%;"></td>
+            </tr>
+        </table>
         <div class="invoice-head">
             <table class="table">
                    <thead>
                       <tr class="b">
                             <td style="width:500px">To</td>
-                            <td>Invoice No: 092821036</td>
+                            <td>Invoice No: {{invoice.invoice_id}}</td>
                       </tr>
                    </thead>
                     <tbody>
                         <tr>
-                            <td style="width: 500px;">Murugesh</td>
-                            <td>Date: 09-29-2021</td>
+                            
+                            <td style="width: 500px;">{{invoice.Vehicle.customer_id.full_name}}</td>
+                            <td>Date: {{date}}</td>
                         </tr>
                         <tr>
-                            <td style="width: 500px;">murugesh@goalsr.com</td>
-                            <td>Time: 21 PM</td>
+                            <td style="width: 500px;">{{invoice.Vehicle.customer_id.email_id | safe}}</td>
+                            <td>Time: {{time}}</td>
                         </tr>
                         <tr>
-                            <td style="width: 500px;">9087654365</td>
+                            <td style="width: 500px;">{{invoice.Vehicle.customer_id.phone_number}}</td>
                         </tr>
                         <tr>
                             <td style="width: 500px;"></td>
@@ -182,33 +188,33 @@
 
             <tr class="f">
                 <td class="d">Brand Name</td>
-                <td class="e">HONDA</td>
+                <td class="e">{{invoice.Vehicle.brand}}</td>
                 <td class="d">Year</td>
-                <td class="e">2010</td>
+                <td class="e">{{invoice.Vehicle.year}}</td>
             </tr>
               <tr class="f">
                 <td class="d">Brand Model</td>
-                <td class="e">HONDA</td>
+                <td class="e">{{invoice.Vehicle.brand_model}}</td>
                 <td class="d">VIN</td>
-                <td class="e">2010</td>
+                <td class="e">{{invoice.Vehicle.vin}}</td>
             </tr>
               <tr class="f">
                 <td class="d">Engine</td>
-                <td class="e">HONDA</td>
+                <td class="e">{{invoice.Vehicle.engine}}</td>
                 <td class="d">L.I.C Plate</td>
-                <td class="e">2010</td>
+                <td class="e">{{invoice.Vehicle.lic_plate}}</td>
             </tr>
               <tr class="f">
                 <td class="d">Engine Group</td>
-                <td class="e">HONDA</td>
+                <td class="e">{{invoice.Vehicle.engine_group}}</td>
                 <td class="d">G.W.R</td>
-                <td class="e">2010</td>
+                <td class="e">{{invoice.Vehicle.gvwr}}</td>
             </tr>
               <tr class="f">
                 <td class="y">Transmission</td>
-                <td class="z">HONDA</td>
+                <td class="z">{{invoice.Vehicle.Transmission}}</td>
                 <td class="y">Odometer</td>
-                <td class="z">2010</td>
+                <td class="z">{{invoice.Vehicle.odo_meter}}</td>
             </tr>
         </table>
         <table class="table">
@@ -217,11 +223,13 @@
             </tr>
         </table>
         <table class="table">
+            {% for i in service %}
             <tr>
                 <td class="zy" style="width: 100px;">1</td>
-                <td class="zy" style="width: 400px;">Overall Service</th>
-                <td class="zy">$20.69</td>
+                <td class="zy" style="width: 415px;">{{i.service_name}}</th>
+                <td class="zy">${{i.amount}}</td>
             </tr>
+            {% endfor %}
         </table>
         <table class="table">
             <tr>
@@ -229,10 +237,20 @@
             </tr>
         </table>
         <table class="table">
+            {% for i in musthave %}
             <tr>
-                <td class="zz" style="width: 100px;">HEP</td>
-                <td class="zz">OS</td>
+               
+                <td class="zz" style="width: 100px;">{{i.must_have_name}}</td>
+              
+             </tr>
+             {% endfor %}
+             {% for i in testtype %}
+             <tr>
+                
+                <td class="zz">{{i.test_type_name}}</td>
+                
             </tr>
+            {% endfor %}
         </table>
         <table class="table">
             <tr>
@@ -272,21 +290,40 @@
         </table>
         <table class="table">
             <tr>
-                <td class="zz" style="width: 310px;"></td>
+                <td class="zz" style="width: 310px;">{{i}}</td>
                 <td class="zz" style="font-weight: bold;" >Grand-Total</td>
-                <td class="zz" >$150</th>
+                {% if invoice.payment_mode == 'Cash' %}
+                <td class="zz" >${{invoice.final_amount}}</th>
+                {% else %}
+                <td class="zz" >${{invoice.card_amount}}</th>
+                {% endif %} 
                 
             </tr>
             <tr>
                 <td  class="zz" style="width: 310px;"></td>
                 <td class="zz" style="font-weight: bold;" >Paid</td>
-                <td class="zz">$10</th>
+                {% if invoice.payment_mode == 'Cash' %}
+                <td class="zz" >${{invoice.amount_tendered}}</th>
+                {% else %}
+                <td class="zz" >${{invoice.card_amount}}</th>
+                {% endif %}
                 
             </tr>
+            {% if invoice.payment_mode == 'Cash' %}
+            <tr>
+                <td class="zz" style="width: 310px;"></td>
+                <td class="zz" style="font-weight: bold;">Change</td>
+                <td class="zz">${{invoice.changed_given}}</td>
+            </tr>
+            {% endif %}
             <tr>
                 <td class="zz" style="width: 310px;"></td>
                 <td class="zz" style="font-weight: bold;"  >Payment Mode</td>
+                {% if invoice.payment_mode == 'Cash' %}
                 <td class="zz" >Cash</th>
+                {% else %}
+                <td class="zz" >Card</th>
+                {% endif %}    
                 
             </tr>
         </table>
@@ -297,7 +334,7 @@
         </table>
         <table class="table">
             <tr>
-                <td class="zz" style="text-align: center;"> Thank You !</td>
+                <td class="zz" style="text-align: center;">{{company.footer_note}}</td>
             </tr>
         </table>
         <table class="table">
@@ -312,9 +349,15 @@
                 <td class="zz" style="font-weight:bold;padding-bottom: 10px;">THIS SMOG TEST-ONLY STATION CANNOT PERFORM ANY DIAGNOSTICS, ADJUSTMENTS OR REPAIRS.</td>
             </tr>
             <tr>
-                <td class="zz" style="width: 20px;">1</td>
-                <td class="zz">Terms And Conditions Accept Every Thing Issues And The Maintaince</td>
+                <td class="zz"></td>
+                <td class="zz"></td>
             </tr>
+            {% for i in terms %}
+            <tr>
+                <td class="zz" style="width: 20px;">1</td>
+                <td class="zz">{{i.terms_text}}</td>
+            </tr>
+            {% endfor %}
         </table>
         <table class="table">
             <tr>

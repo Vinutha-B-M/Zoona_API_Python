@@ -1,4 +1,5 @@
 from os.path import split
+from re import U
 
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
@@ -19,7 +20,7 @@ from customer.models import CustomerInfo, VehicleInfo, TestDetails,SmogTest,Term
 from users.models import UserType, UserInfo
 from .models import PaymentEntry, InvoiceItem,TaxItem,FeesItem,DiscountItem,TestTypeItem,MustHaveItem,SquareDevice,\
     SquareTerminalCheckout,FortisPayCredentials
-from service.models import ServicesList,Taxes,Discounts,Fees,TestType,MustHave,CashDiscount,SquareCredential
+from service.models import ServicesList,Taxes,Discounts,Fees,TestType,MustHave,CashDiscount,SquareCredential,ReceiptContent
 from .serializers import PaymentEntrySerializer, InvoiceItemSerializer,FeesItemSerializer,TaxItemSerializer,\
     DiscountItemSerializer,TestTypeItemSerializer,MustHaveItemSerializer,FortisPaySerializer
 from customer.serializers import CustomerInfoSerializer, VehicleInfoSerializer,SmogTestSerializer
@@ -1813,13 +1814,36 @@ class filter_services(APIView):
 
 
 def send_pdf(session):
+    cust2 = PaymentEntry.objects.get(id=session)
+    date=cust2.created_date.strftime("%m-%d-%Y")
+    time=cust2.created_date.strftime("%H:%M")
+    veh = VehicleInfo.objects.get(id=cust2.Vehicle.id)
+    cut = CustomerInfo.objects.get(id=veh.customer_id.id)
+    user_obj = UserInfo.objects.get(id=cut.user_id.id)
+    company = ReceiptContent.objects.get(client=user_obj)
+    cust3 = InvoiceItem.objects.filter(Payment=cust2)
+    cust4 = FeesItem.objects.filter(Payment=cust2)
+    cust5 = TaxItem.objects.filter(Payment=cust2)
+    cust6 = DiscountItem.objects.filter(Payment=cust2)
+    cust7 = TestTypeItem.objects.filter(Payment=cust2)
+    cust8 = MustHaveItem.objects.filter(Payment=cust2)
+    cust11 = TermsItems.objects.filter(customer=cut)
+    cust12 = SmogTest.objects.filter(vehicle_id=veh)
     template = get_template('order_template.html')
     context = {
-        "billno": '1',
-        "billdate": '1',
-        "patientname": '1',
-        "totalbill": '1',
-        "billprocedure": '1',
+        "company": company,
+        "user_obj": user_obj,
+        "invoice": cust2,
+        "testtype": cust7,
+        "musthave": cust8,
+        "service": cust3,
+        "sub-total": 1,
+        "discount": '1',
+        "tax": '1',
+        "fees": "1",
+        "terms":cust11,
+        "date":date,
+        "time":time,
     }
 
     html = template.render(context)
