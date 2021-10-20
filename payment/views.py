@@ -395,9 +395,10 @@ class payment_validate(APIView):
         payment_mode = data['mode']
         amount_tendered = data['amount_tendered']
         changed_given = data['changed_given']
+        transaction_id =  data['transaction_id']
         payment_obj = PaymentEntry.objects.filter(id=id).update(status=status, payment_mode=payment_mode,
                                                                 changed_given=changed_given,
-                                                                amount_tendered=amount_tendered)
+                                                                amount_tendered=amount_tendered,transaction_id=transaction_id)
         myJson = {"status": "1", "data": id}
         return JsonResponse(myJson)
 
@@ -789,18 +790,33 @@ class datewise_customer_list(APIView):
 
 # ...............................Delete-Customer..............................................
 
-class delete_customer(APIView):
+class delete_vehicle(APIView):
     def post(self,request):
         data = request.data
         session = data['vehicle_id']
         vehicle_obj=VehicleInfo.objects.get(id=session)
         if PaymentEntry.objects.filter(Vehicle=vehicle_obj).exists():
-            myJson = {"status": "0", "data": "Order_Exist"}
+            myJson = {"status": "0", "data": "Order Exist For this Vehicle"}
             return JsonResponse(myJson)
         else:
+            SmogTest.objects.filter(vehicle_id=vehicle_obj).delete()
             VehicleInfo.objects.filter(id=session).delete()
-            myJson = {"status": "1", "data": "Deleted"}
+            myJson = {"status": "1", "data": "Vehicle Deleted"}
             return JsonResponse(myJson)
+
+class delete_customer(APIView):
+    def post(self,request):
+        data = request.data
+        session = data['customer_id']
+        customer_obj=CustomerInfo.objects.get(id=session)
+        if VehicleInfo.objects.filter(customer_id=customer_obj).exists():
+            myJson = {"status": "0", "data": "Vehicle Exist "}
+            return JsonResponse(myJson)
+        else:
+            CustomerInfo.objects.filter(id=session).delete()
+            myJson = {"status": "1", "data": "Customer Deleted"}
+            return JsonResponse(myJson)
+
 
 # ...............................END-Delete-Customer..............................................
 

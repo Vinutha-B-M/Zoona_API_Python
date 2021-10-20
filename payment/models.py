@@ -46,6 +46,7 @@ class PaymentEntry(models.Model):
     inception_declined = models.BooleanField(db_column='inception_declined',default=False)
     reasons = models.CharField(db_column='Reasons', max_length=30,blank=True)
     initials = models.CharField(db_column='Initials', max_length=30, blank=True)
+    transaction_id = models.CharField(db_column='transaction_id',max_length=100,blank=True)
     created_date = models.DateTimeField(db_column='created_date', blank=True, null=True, auto_now_add=True)
     modified_date = models.DateTimeField(db_column='modified_date', blank=True, null=True, auto_now_add=True)
 
