@@ -9,6 +9,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
+
+
 from .serializers import CustomerInfoSerializer, VehicleInfoSerializer, TestDetailsSerializer,TermsItemSerializer,SmogTestSerializer
 from .models import CustomerInfo, SmogTest, VehicleInfo, TestDetails,TermsItems
 from service.models import TermCondition
@@ -158,6 +160,51 @@ class update_customer_list(APIView):
         return JsonResponse(myJson)
 
 # .........................END-Customer-Update-Info.......................................
+# ..............................Terms_update.................................
+def customer_terms(i,term):
+    list_term = []
+    customer_data = []
+    for j in term:
+        list_2 = {}
+        list_2['term_id'] = j.term.id
+        list_2['term_text'] = j.terms_text
+        list_term.append(list_2)
+    list = {}
+    list['id'] = i.id
+    list['selected_date'] = i.selected_date
+    list['company_name'] = i.company_name
+    list['full_name'] = i.full_name
+    list['email_id'] = i.email_id
+    list['address'] = i.address
+    list['address_2'] = i.address_2
+    list['city'] = i.city
+    list['state'] = i.state
+    list['phone_number'] = i.phone_number
+    list['estimate_amount'] = i.estimate_amount
+    list['postal_code'] = i.postal_code
+    list['created_date'] = i.created_date
+    list['user_id'] = i.user_id.id
+    list['Terms'] = list_term        
+    customer_data.append(list)
+
+    return customer_data
+
+class update_terms(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['customer_id']
+        terms_item = data['terms_item']
+        customer_exist=CustomerInfo.objects.get(id=session)
+        none_response=term_item_updation(customer_exist,terms_item)
+        term=TermsItems.objects.filter(customer=session)
+        create=CustomerInfo.objects.get(id=session)
+        serializer = CustomerInfoSerializer(create)
+        data = customer_terms(create,term)
+        myJson = {"status": "1", "data": data}
+        return JsonResponse(myJson)
+
+# ..............................END-Terms_update.................................
+
 # .........................Customer-Info-Function.......................................
 
 def customer_info_clientwise(user_obj, cust3,page_no,items_per_page):

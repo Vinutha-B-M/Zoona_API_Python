@@ -18,5 +18,5 @@ urlpatterns = [
     path('vehicle_info/', views.vehicle_info.as_view(), name="vehicle_info"),
     path('customers_filter/', views.customers_filter.as_view(), name="customers_filter"),
     path('vehicle_filter/', views.vehicle_filter.as_view(), name="vehicle_filter"),
-
+    path('terms_update/', views.update_terms.as_view(), name="terms_update"),
 ]
