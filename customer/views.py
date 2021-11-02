@@ -81,7 +81,8 @@ class add_Customer_List(APIView):
         state = data['state']
         phone_number = data['phone_number']
         estimate_amount = data['estimate_amount']
-        estimate_amount = format(estimate_amount, '.2f')
+        # estimate_amount = format(estimate_amount, '.3f')
+        # print(estimate_amount)
         postal_code = data['postal_code']
         selected_date = data['selected_date']
         terms_item = data['terms_item']
@@ -144,7 +145,6 @@ class update_customer_list(APIView):
         state = data['state']
         phone_number = data['phone_number']
         estimate_amount = data['estimate_amount']
-        estimate_amount = format(estimate_amount, '.2f')
         postal_code = data['postal_code']
         selected_date = data['selected_date']
         terms_item = data['terms_item']
