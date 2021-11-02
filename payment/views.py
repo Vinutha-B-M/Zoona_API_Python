@@ -36,6 +36,7 @@ from io import BytesIO
 from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
+
 # ..............................invoice_generic_entry..............................
 class generic_tables(APIView):
     def get(self,request):
