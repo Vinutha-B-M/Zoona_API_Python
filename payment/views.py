@@ -54,13 +54,19 @@ class payment_entry(APIView):
     def post(self, request):
         data = request.data
         final_amount = data['final_amount']
+        final_amount = format(final_amount,'.2f')
         card_amount = data['card_amount']
+        card_amount = format(card_amount,'.2f')
         tax_offered = data['tax_offered']
+        tax_offered = format(tax_offered,'.2f')
         discount_offered = data['discount_offered']
+        discount_offered = format(discount_offered,'.2f')
         status = data['status']
         vehicle = data['Vehicle_id']
         fly_fees= data['fly_fees']
+        fly_fees = format(fly_fees,'.2f')
         fly_discount = data['fly_discount']
+        fly_discount = format(fly_discount,'.2f')
         payment_mode = 'Other'
         amount_tendered = 0
         changed_given = 0
@@ -331,13 +337,19 @@ class update_payment_entry(APIView):
         data = request.data
         payment_id = data['id']
         final_amount = data['final_amount']
+        final_amount = format(final_amount,'.2f')
         card_amount = data['card_amount']
+        card_amount = format(card_amount,'.2f')
         tax_offered = data['tax_offered']
+        tax_offered = format(tax_offered,'.2f')
         discount_offered = data['discount_offered']
+        discount_offered = format(discount_offered,'.2f')
         status = data['status']
         payment_mode = 'Other'
         fly_fees= data['fly_fees']
+        fly_fees = format(fly_fees,'.2f')
         fly_discount = data['fly_discount']
+        fly_discount = format(fly_discount,'.2f')
         amount_tendered = 0
         changed_given = 0
         service_item = data['service_item']
@@ -393,7 +405,9 @@ class payment_validate(APIView):
         status = data['status']
         payment_mode = data['mode']
         amount_tendered = data['amount_tendered']
+        amount_tendered = format(amount_tendered,'.2f')
         changed_given = data['changed_given']
+        changed_given = format(changed_given,'.2f')
         transaction_id =  data['transaction_id']
         payment_obj = PaymentEntry.objects.filter(id=id).update(status=status, payment_mode=payment_mode,
                                                                 changed_given=changed_given,

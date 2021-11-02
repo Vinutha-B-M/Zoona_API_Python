@@ -9,8 +9,6 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
-
-
 from .serializers import CustomerInfoSerializer, VehicleInfoSerializer, TestDetailsSerializer,TermsItemSerializer,SmogTestSerializer
 from .models import CustomerInfo, SmogTest, VehicleInfo, TestDetails,TermsItems
 from service.models import TermCondition
@@ -83,11 +81,13 @@ class add_Customer_List(APIView):
         state = data['state']
         phone_number = data['phone_number']
         estimate_amount = data['estimate_amount']
+        estimate_amount = format(estimate_amount, '.2f')
         postal_code = data['postal_code']
         selected_date = data['selected_date']
         terms_item = data['terms_item']
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+       
         if CustomerInfo.objects.filter(phone_number=phone_number,user_id=user_obj).exists():
             myJson = {"status": "0", "data": "Phone Number Exits"}
             return JsonResponse(myJson)
@@ -144,6 +144,7 @@ class update_customer_list(APIView):
         state = data['state']
         phone_number = data['phone_number']
         estimate_amount = data['estimate_amount']
+        estimate_amount = format(estimate_amount, '.2f')
         postal_code = data['postal_code']
         selected_date = data['selected_date']
         terms_item = data['terms_item']
