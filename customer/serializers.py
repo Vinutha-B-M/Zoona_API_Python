@@ -28,6 +28,7 @@ class VehicleInfoSerializer(serializers.ModelSerializer):
             'Transmission',
             'brand_model',
             'state',
+            'status',
             'tailpipe',
             'smoke_pvc',
             'customer_id',

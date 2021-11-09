@@ -1,4 +1,5 @@
 from django.db import models
+from rest_framework import status
 from users.models import UserInfo
 from service.models import TermCondition
 
@@ -11,6 +12,7 @@ class CustomerInfo(models.Model):
     address_2 = models.CharField(db_column='address_2', max_length=200, blank=True)
     city = models.CharField(db_column='city', max_length=200, blank=True)
     state = models.CharField(db_column='state', max_length=200, blank=True)
+    status = models.CharField(db_column='status',default='Active',blank=True,max_length=100)
     phone_number = models.CharField(db_column='phone_number', max_length=200, blank=True)
     estimate_amount = models.FloatField(db_column='estimate_amount', blank=True, max_length=100, null=True)
     postal_code = models.CharField(db_column='postal_code', max_length=200, blank=True)
@@ -35,6 +37,7 @@ class VehicleInfo(models.Model):
     engine_group = models.CharField(db_column='engine_group', max_length=200, blank=True)
     cylinder = models.CharField(db_column='cylinder', max_length=200, blank=True)
     state = models.CharField(db_column='state',max_length=100,blank=True)
+    status = models.CharField(db_column='status',default='Active',blank=True,max_length=100)
     Transmission = models.CharField(db_column='Transmission', max_length=10, choices=STATUS, blank=True)
     smoke_pvc = models.CharField(db_column='smoke_pvc',max_length=100,blank=True)
     tailpipe = models.CharField(db_column='tailpipe',max_length=100,blank=True)

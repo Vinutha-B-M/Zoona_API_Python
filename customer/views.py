@@ -129,6 +129,27 @@ def term_item_updation(customer_exist, terms_item):
                 TermsItems.objects.filter(term=i,customer=customer_exist).delete()
 
 # .........................END-Terms-Update-Function.......................................
+# .....................status-changed......................
+class status_changed_customer(APIView):
+    def post(self,request):
+        data=request.data
+        customer_id = data['customer_id']
+        status = data['status']
+        VehicleInfo.objects.filter(customer_id=customer_id).update(status=status)
+        CustomerInfo.objects.filter(id=customer_id).update(status=status)
+        myJson = {"status": "1", "data": "status Changed"}
+        return JsonResponse(myJson)
+
+class status_changed_vehicle(APIView):
+    def post(self,request):
+        data=request.data
+        vehicle_id = data['vehicle_id']
+        status = data['status']
+        VehicleInfo.objects.filter(id=vehicle_id).update(status=status)
+        myJson = {"status": "1", "data": "status Changed"}
+        return JsonResponse(myJson)
+
+# .....................status-changed-end..................
 # .........................Customer-Update-Info.......................................
 
 class update_customer_list(APIView):
@@ -179,6 +200,7 @@ def customer_terms(i,term):
     list['address_2'] = i.address_2
     list['city'] = i.city
     list['state'] = i.state
+    list['status'] = i.status
     list['phone_number'] = i.phone_number
     list['estimate_amount'] = i.estimate_amount
     list['postal_code'] = i.postal_code
@@ -209,7 +231,7 @@ class update_terms(APIView):
 
 def customer_info_clientwise(user_obj, cust3,page_no,items_per_page):
     if page_no == -1:
-        customer_obj = CustomerInfo.objects.filter(user_id=user_obj,).order_by('id')
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj).order_by('id')
         customer_data = []
         for i in customer_obj:
             list = {}
@@ -233,6 +255,7 @@ def customer_info_clientwise(user_obj, cust3,page_no,items_per_page):
             list['address_2'] = i.address_2
             list['city'] = i.city
             list['state'] = i.state
+            list['status'] = i.status
             list['phone_number'] = i.phone_number
             list['estimate_amount'] = i.estimate_amount
             list['postal_code'] = i.postal_code
@@ -307,6 +330,7 @@ def customer_info_clientwise(user_obj, cust3,page_no,items_per_page):
             list['address_2'] = i.address_2
             list['city'] = i.city
             list['state'] = i.state
+            list['status'] = i.status
             list['phone_number'] = i.phone_number
             list['estimate_amount'] = i.estimate_amount
             list['postal_code'] = i.postal_code
@@ -387,6 +411,7 @@ def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,cus
                     list_cust['address_2'] = i.address_2
                     list_cust['city'] = i.city
                     list_cust['state'] = i.state
+                    list_cust['status']=i.status
                     list_cust['phone_number'] = i.phone_number
                     list_cust['estimate_amount'] = i.estimate_amount
                     list_cust['postal_code'] = i.postal_code
@@ -495,6 +520,7 @@ def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,cus
                     list_cust['address_2'] = i.address_2
                     list_cust['city'] = i.city
                     list_cust['state'] = i.state
+                    list_cust['status']=i.status
                     list_cust['phone_number'] = i.phone_number
                     list_cust['estimate_amount'] = i.estimate_amount
                     list_cust['postal_code'] = i.postal_code
@@ -713,6 +739,7 @@ def customer_filter_clientwise(user_obj, cust3,keyword,page_no,items_per_page):
             list['address_2'] = i.address_2
             list['city'] = i.city
             list['state'] = i.state
+            list['status']=i.status
             list['phone_number'] = i.phone_number
             list['estimate_amount'] = i.estimate_amount
             list['postal_code'] = i.postal_code
@@ -793,6 +820,7 @@ def customer_filter_clientwise(user_obj, cust3,keyword,page_no,items_per_page):
             list['address_2'] = i.address_2
             list['city'] = i.city
             list['state'] = i.state
+            list['status']=i.status
             list['phone_number'] = i.phone_number
             list['estimate_amount'] = i.estimate_amount
             list['postal_code'] = i.postal_code

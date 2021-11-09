@@ -19,4 +19,6 @@ urlpatterns = [
     path('customers_filter/', views.customers_filter.as_view(), name="customers_filter"),
     path('vehicle_filter/', views.vehicle_filter.as_view(), name="vehicle_filter"),
     path('terms_update/', views.update_terms.as_view(), name="terms_update"),
+    path('update_customer_status/', views.status_changed_customer.as_view(), name="update_customer_status"),
+    path('update_vehicle_status/', views.status_changed_vehicle.as_view(), name="update_vehicle_status"),
 ]
