@@ -399,6 +399,7 @@ def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,cus
                     vehicle['Transmission'] = k.Transmission
                     vehicle['brand_model'] = k.brand_model
                     vehicle['state']=k.state
+                    vehicle['status']=k.status
                     vehicle['smoke_pvc']=k.smoke_pvc
                     vehicle['tailpipe']=k.tailpipe
                     vehicle['smog_test']=smog_list
@@ -508,6 +509,7 @@ def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,cus
                     vehicle['Transmission'] = k.Transmission
                     vehicle['brand_model'] = k.brand_model
                     vehicle['state']=k.state
+                    vehicle['status']=k.status
                     vehicle['smoke_pvc']=k.smoke_pvc
                     vehicle['tailpipe']=k.tailpipe
                     vehicle['smog_test']=smog_list
@@ -905,6 +907,7 @@ def vehicle_filter_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,c
                     vehicle['Transmission'] = k.Transmission
                     vehicle['brand_model'] = k.brand_model
                     vehicle['state']=k.state
+                    vehicle['status']=k.status
                     vehicle['smoke_pvc']=k.smoke_pvc
                     vehicle['tailpipe']=k.tailpipe
                     vehicle['smog_test']=smog_list
@@ -1013,6 +1016,7 @@ def vehicle_filter_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,c
                     vehicle['Transmission'] = k.Transmission
                     vehicle['brand_model'] = k.brand_model
                     vehicle['state']=k.state
+                    vehicle['status']=k.status
                     vehicle['smoke_pvc']=k.smoke_pvc
                     vehicle['tailpipe']=k.tailpipe
                     vehicle['smog_test']=smog_list
