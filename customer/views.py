@@ -1124,7 +1124,7 @@ class vehicle_info(APIView):
                     json_response = response.json()
                     return JsonResponse(json_response, safe=False)
         except:
-            myJson = {"status": "0", "message":"error" }
+            myJson = {"status": "0", "message":error }
             return JsonResponse(myJson)  
 
 # .........................END-Vehicle-Info-Thrid-Party_API......................................
