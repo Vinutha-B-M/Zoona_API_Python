@@ -1,3 +1,4 @@
+from copy import error
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 # Create your views here.
@@ -171,11 +172,12 @@ class update_customer_list(APIView):
         customer_exist=CustomerInfo.objects.get(id=session)
         CustomerInfo.objects.filter(id=session).update(company_name=company_name, full_name=full_name,estimate_amount=estimate_amount,
                                                              email_id=email_id,address=address, postal_code=postal_code,
-                                                             selected_date=selected_date,
+                                                             selected_date=selected_date,status='Active',
                                                              phone_number=phone_number, address_2=address_2, city=city,
                                                              state=state)
         none_response=term_item_updation(customer_exist,terms_item)
         create=CustomerInfo.objects.get(id=session)
+        # VehicleInfo.objects.filter(customer_id=create).update(status='Active')
         serializer = CustomerInfoSerializer(create)
         myJson = {"status": "1", "data": serializer.data}
         return JsonResponse(myJson)
@@ -231,7 +233,7 @@ class update_terms(APIView):
 
 def customer_info_clientwise(user_obj, cust3,page_no,items_per_page):
     if page_no == -1:
-        customer_obj = CustomerInfo.objects.filter(user_id=user_obj).order_by('id')
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj,status='Active').order_by('id')
         customer_data = []
         for i in customer_obj:
             list = {}
@@ -272,7 +274,7 @@ def customer_info_clientwise(user_obj, cust3,page_no,items_per_page):
         Customers.append(Data)
         return Customers
     else:
-        customer_obj = CustomerInfo.objects.filter(user_id=user_obj).order_by('id')
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj,status='Active').order_by('id')
         items_per_page = items_per_page
         total_count = customer_obj.count()
         pages = 0
@@ -551,8 +553,8 @@ class Vehicle_List(APIView):
         items_per_page = data['items_per_page']
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
-        cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj).order_by('id')
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj,status='Active')
+        cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj,status='Active').order_by('id')
         cust3 = TermsItems.objects.filter(customer__in=customer_obj)
         cust4 = SmogTest.objects.filter(vehicle_id__in=cust2)
         vehicle_data = vehicle_info_clientwise(cust2, cust3, customer_obj,page_no,items_per_page,cust4)
@@ -682,7 +684,7 @@ class update_vehicle_list(APIView):
                                                                      odo_meter=odo_meter, lic_plate=lic_plate, gvwr=gvwr,
                                                                      vin=vin, engine=engine,tailpipe=tailpipe,smoke_pvc=smoke_pvc,
                                                                      cylinder=cylinder, Transmission=Transmission,
-                                                                     engine_group=engine_group,state=state)
+                                                                     engine_group=engine_group,state=state,status='Active')
                     create = VehicleInfo.objects.get(id=vehicle_id)
                     serializer = VehicleInfoSerializer(create)
                     smogtest_update(vehicle_id,smog_test)
@@ -695,7 +697,7 @@ class update_vehicle_list(APIView):
                     VehicleInfo.objects.filter(id=vehicle_id).update(year=year, brand=brand, brand_model=brand_model,
                                                                      odo_meter=odo_meter, lic_plate=lic_plate,
                                                                      gvwr=gvwr,state=state,tailpipe=tailpipe,smoke_pvc=smoke_pvc,
-                                                                     vin=vin, engine=engine,
+                                                                     vin=vin, engine=engine,status='Active',
                                                                      cylinder=cylinder, Transmission=Transmission,
                                                                      engine_group=engine_group)
                     create = VehicleInfo.objects.get(id=vehicle_id)
@@ -852,7 +854,7 @@ class customers_filter(APIView):
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
-        cust3 = TermsItems.objects.filter(customer__in=customer_obj)
+        cust3 = TermsItems.objects.filter(customer__in=customer_obj,status='Active')
         customer_data= customer_filter_clientwise(user_obj,cust3,keyword,page_no,items_per_page)
         myJson = {"status": "1","customer_info":customer_data}
         return JsonResponse(myJson)
@@ -1057,10 +1059,10 @@ class vehicle_filter(APIView):
         keyword = data['keyword']
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj,status='Active')
         cust2 = VehicleInfo.objects.filter(Q(customer_id__phone_number__istartswith=keyword) | Q(customer_id__full_name__istartswith=keyword)|
                                            Q(brand__istartswith=keyword) |  Q(year__istartswith=keyword) | Q(vin__istartswith=keyword) ,
-                                           customer_id__in=customer_obj).order_by('id')
+                                           customer_id__in=customer_obj,status='Active').order_by('id')
         cust3 = TermsItems.objects.filter(customer__in=customer_obj)
         cust4 = SmogTest.objects.filter(vehicle_id__in=cust2)
         vehicle_data = vehicle_filter_clientwise(cust2, cust3, customer_obj,page_no,items_per_page,cust4)
@@ -1096,9 +1098,33 @@ class vehicle_info(APIView):
     def post(self, request):
         data = request.data
         vinField = data['vinField']
-        response = requests.get('https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/' + vinField + '?format=json')
-        # response = requests.get('https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/' + vinField + '?format=json')
-        json_response = response.json()
-        return JsonResponse(json_response, safe=False)
+        user_id = data['user_id']
+        customer = data['customer_id']
+        try:   
+            user_info_obj = UserType.objects.get(id=user_id)
+            user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+            customer_obj = CustomerInfo.objects.filter(user_id=user_obj)      
+            if VehicleInfo.objects.filter(customer_id__in=customer_obj,vin=vinField).exists():
+                    customer=CustomerInfo.objects.get(id=customer)
+                    if VehicleInfo.objects.filter(customer_id=customer,vin=vinField).exists():
+                        create = VehicleInfo.objects.get(vin=vinField,customer_id=customer)
+                        serializer = VehicleInfoSerializer(create)
+                        smog_obj= SmogTest.objects.filter(vehicle_id=create)
+                        serializer2=SmogTestSerializer(smog_obj,many=True)
+                        myJson = {"status": "1", "data": serializer.data,"smog_data":serializer2.data}
+                        return JsonResponse(myJson)
+                    else:
+                        create = VehicleInfo.objects.get(vin=vinField)
+                        serializer = VehicleInfoSerializer(create)
+                        myJson = {"status": "0", "data": serializer.data,"message":"VIN Exists For Other"}
+                        return JsonResponse(myJson)     
+            else:     
+                    response = requests.get('https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/' + vinField + '?format=json')
+                    # response = requests.get('https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/' + vinField + '?format=json')
+                    json_response = response.json()
+                    return JsonResponse(json_response, safe=False)
+        except:
+            myJson = {"status": "0", "message":"error" }
+            return JsonResponse(myJson)  
 
 # .........................END-Vehicle-Info-Thrid-Party_API......................................

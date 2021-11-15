@@ -16,6 +16,7 @@ from django.db.models.functions import (
 from django.db.models import Avg, Count, Min, Sum
 from django.db.models import Q
 import datetime
+from datetime import date, timedelta
 from customer.models import CustomerInfo, VehicleInfo, TestDetails,SmogTest,TermsItems
 from users.models import UserType, UserInfo
 from .models import PaymentEntry, InvoiceItem,TaxItem,FeesItem,DiscountItem,TestTypeItem,MustHaveItem,SquareDevice,\
@@ -800,7 +801,7 @@ class delete_vehicle(APIView):
             return JsonResponse(myJson)
         else:
             SmogTest.objects.filter(vehicle_id=vehicle_obj).delete()
-            VehicleInfo.objects.filter(id=session).delete()
+            VehicleInfo.objects.get(id=session).delete()
             myJson = {"status": "1", "data": "Vehicle Deleted"}
             return JsonResponse(myJson)
 
@@ -809,11 +810,12 @@ class delete_customer(APIView):
         data = request.data
         session = data['customer_id']
         customer_obj=CustomerInfo.objects.get(id=session)
+
         if VehicleInfo.objects.filter(customer_id=customer_obj).exists():
             myJson = {"status": "0", "data": "Vehicle Exist "}
             return JsonResponse(myJson)
         else:
-            CustomerInfo.objects.filter(id=session).delete()
+            CustomerInfo.objects.get(id=session).delete()
             myJson = {"status": "1", "data": "Customer Deleted"}
             return JsonResponse(myJson)
 
@@ -2828,7 +2830,91 @@ class test(APIView):
         temp = data['temp']
         if temp:
             zen = data['zen']
-            
-
         myJson = {'status':1, "data":temp}
         return JsonResponse(myJson, safe=False)
+
+# ..................daily-order....................
+
+class order_daily(APIView):
+    def post(self,request):
+        data = request.data
+        session = data['id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+        cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
+        cust5 = SmogTest.objects.filter(vehicle_id__in=cust2)
+        now = datetime.datetime.now()
+        cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), created_date__day__gte=now.day,
+                                        created_date__day__lte=now.day,created_date__month__lte=now.month,
+                                        created_date__month__gte=now.month,Vehicle__in=cust2).order_by('-invoice_id')
+        cust6 = TermsItems.objects.filter(customer__in=customer_obj)
+        if SquareCredential.objects.filter(client=user_obj).exists():
+            token = SquareCredential.objects.get(client=user_obj).accees_token
+            checkout_id = SquareTerminalCheckout.objects.filter(payment__in=cust3)
+            for i in checkout_id:
+                checkout = requests.get(base_url + '/v2/terminals/checkouts/' + i.checkout_id,
+                                        headers={"Authorization": 'Bearer ' + token,
+                                                 "Content-Type": "application/json", "Square-Version": "2021-07-21"})
+                json_response = checkout.json()
+                status = json_response['checkout']['status']
+                PaymentEntry.objects.filter(id=i.payment.id).update(status=status)
+        order_data=order_data_list(cust3,cust5,cust6)
+        myJson = {"status": "1", "data": order_data}
+        return JsonResponse(myJson)
+
+# ...............................Weekly-Order......................        
+
+class order_weekly(APIView):
+    def post(self,request):
+        data = request.data
+        session = data['id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+        cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
+        cust5 = SmogTest.objects.filter(vehicle_id__in=cust2)
+        now = datetime.datetime.now()   
+        cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), created_date__gte=now-timedelta(days=7),Vehicle__in=cust2).order_by('-invoice_id')
+        cust6 = TermsItems.objects.filter(customer__in=customer_obj)
+        if SquareCredential.objects.filter(client=user_obj).exists():
+            token = SquareCredential.objects.get(client=user_obj).accees_token
+            checkout_id = SquareTerminalCheckout.objects.filter(payment__in=cust3)
+            for i in checkout_id:
+                checkout = requests.get(base_url + '/v2/terminals/checkouts/' + i.checkout_id,
+                                        headers={"Authorization": 'Bearer ' + token,
+                                                 "Content-Type": "application/json", "Square-Version": "2021-07-21"})
+                json_response = checkout.json()
+                status = json_response['checkout']['status']
+                PaymentEntry.objects.filter(id=i.payment.id).update(status=status)
+        order_data=order_data_list(cust3,cust5,cust6)
+        myJson = {"status": "1", "data": order_data}
+        return JsonResponse(myJson)
+
+# ...............................monthly-Order......................        
+
+class order_monthly(APIView):
+    def post(self,request):
+        data = request.data
+        session = data['id']
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+        cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
+        cust5 = SmogTest.objects.filter(vehicle_id__in=cust2)
+        now = datetime.datetime.now()   
+        cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), created_date__gte=now-timedelta(days=30),Vehicle__in=cust2).order_by('-invoice_id')
+        cust6 = TermsItems.objects.filter(customer__in=customer_obj)
+        if SquareCredential.objects.filter(client=user_obj).exists():
+            token = SquareCredential.objects.get(client=user_obj).accees_token
+            checkout_id = SquareTerminalCheckout.objects.filter(payment__in=cust3)
+            for i in checkout_id:
+                checkout = requests.get(base_url + '/v2/terminals/checkouts/' + i.checkout_id,
+                                        headers={"Authorization": 'Bearer ' + token,
+                                                 "Content-Type": "application/json", "Square-Version": "2021-07-21"})
+                json_response = checkout.json()
+                status = json_response['checkout']['status']
+                PaymentEntry.objects.filter(id=i.payment.id).update(status=status)
+        order_data=order_data_list(cust3,cust5,cust6)
+        myJson = {"status": "1", "data": order_data}
+        return JsonResponse(myJson)

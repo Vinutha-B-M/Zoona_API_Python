@@ -61,7 +61,7 @@ class TermsItemSerializer(serializers.ModelSerializer):
         )
 
 class SmogTestSerializer(serializers.ModelSerializer):
-    
+    vehicle_id = VehicleInfoSerializer()
     class Meta:
         model = SmogTest
         fields = (
