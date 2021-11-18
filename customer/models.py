@@ -16,6 +16,7 @@ class CustomerInfo(models.Model):
     phone_number = models.CharField(db_column='phone_number', max_length=200, blank=True)
     estimate_amount = models.FloatField(db_column='estimate_amount', blank=True, max_length=100, null=True)
     postal_code = models.CharField(db_column='postal_code', max_length=200, blank=True)
+    signature = models.FileField(blank=True, null=True)
     created_date = models.DateField(db_column='created_date', blank=True, null=True, auto_now_add=True)
     user_id = models.ForeignKey(UserInfo, db_column='user_id', null=True, on_delete=models.PROTECT)
 

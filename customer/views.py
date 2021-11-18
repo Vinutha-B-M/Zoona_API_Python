@@ -86,6 +86,7 @@ class add_Customer_List(APIView):
         postal_code = data['postal_code']
         selected_date = data['selected_date']
         terms_item = data['terms_item']
+        signature = request.FILES.get('signature')
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
        
@@ -93,10 +94,18 @@ class add_Customer_List(APIView):
             myJson = {"status": "0", "data": "Phone Number Exits"}
             return JsonResponse(myJson)
         else:
-            create = CustomerInfo.objects.create(company_name=company_name, full_name=full_name, email_id=email_id,
+            if signature != None:
+                create = CustomerInfo.objects.create(company_name=company_name, full_name=full_name, email_id=email_id,
                                                  address=address, postal_code=postal_code, selected_date=selected_date,
                                                  phone_number=phone_number, address_2=address_2, city=city, state=state,
                                                  user_id=user_obj,estimate_amount=estimate_amount)
+                create.signature=signature
+                create.save()                                 
+            else:
+                create = CustomerInfo.objects.create(company_name=company_name, full_name=full_name, email_id=email_id,
+                                                 address=address, postal_code=postal_code, selected_date=selected_date,
+                                                 phone_number=phone_number, address_2=address_2, city=city, state=state,
+                                                 user_id=user_obj,estimate_amount=estimate_amount)                                     
             for i in terms_item:
                 tax_id = i['id']
                 term_obj = TermCondition.objects.get(id=tax_id)
@@ -169,12 +178,24 @@ class update_customer_list(APIView):
         postal_code = data['postal_code']
         selected_date = data['selected_date']
         terms_item = data['terms_item']
+        signature = request.FILES.get('signature')
         customer_exist=CustomerInfo.objects.get(id=session)
-        CustomerInfo.objects.filter(id=session).update(company_name=company_name, full_name=full_name,estimate_amount=estimate_amount,
+        if signature != None:
+            CustomerInfo.objects.filter(id=session).update(company_name=company_name, full_name=full_name,estimate_amount=estimate_amount,
                                                              email_id=email_id,address=address, postal_code=postal_code,
                                                              selected_date=selected_date,status='Active',
                                                              phone_number=phone_number, address_2=address_2, city=city,
                                                              state=state)
+
+            customer_exist.signature=signature
+            customer_exist.save()                                                 
+
+        else:
+           CustomerInfo.objects.filter(id=session).update(company_name=company_name, full_name=full_name,estimate_amount=estimate_amount,
+                                                             email_id=email_id,address=address, postal_code=postal_code,
+                                                             selected_date=selected_date,status='Active',
+                                                             phone_number=phone_number, address_2=address_2, city=city,
+                                                             state=state)                                                    
         none_response=term_item_updation(customer_exist,terms_item)
         create=CustomerInfo.objects.get(id=session)
         # VehicleInfo.objects.filter(customer_id=create).update(status='Active')
@@ -206,6 +227,7 @@ def customer_terms(i,term):
     list['phone_number'] = i.phone_number
     list['estimate_amount'] = i.estimate_amount
     list['postal_code'] = i.postal_code
+    list['signature']=str(i.signature)
     list['created_date'] = i.created_date
     list['user_id'] = i.user_id.id
     list['Terms'] = list_term        
@@ -261,6 +283,7 @@ def customer_info_clientwise(user_obj, cust3,page_no,items_per_page):
             list['phone_number'] = i.phone_number
             list['estimate_amount'] = i.estimate_amount
             list['postal_code'] = i.postal_code
+            list['signature']=str(i.signature)
             list['created_date'] = i.created_date
             list['user_id'] = i.user_id.id
             if d != 0:
@@ -336,6 +359,7 @@ def customer_info_clientwise(user_obj, cust3,page_no,items_per_page):
             list['phone_number'] = i.phone_number
             list['estimate_amount'] = i.estimate_amount
             list['postal_code'] = i.postal_code
+            list['signature']=str(i.signature)
             list['created_date'] = i.created_date
             list['user_id'] = i.user_id.id
             if d != 0:
@@ -418,6 +442,7 @@ def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,cus
                     list_cust['phone_number'] = i.phone_number
                     list_cust['estimate_amount'] = i.estimate_amount
                     list_cust['postal_code'] = i.postal_code
+                    list_cust['signature']=str(i.signature)
                     list_cust['created_date'] = i.created_date
                     list_cust['user_id'] = i.user_id.id
                     vehicle['customer_id'] = list_cust
@@ -527,7 +552,8 @@ def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,cus
                     list_cust['status']=i.status
                     list_cust['phone_number'] = i.phone_number
                     list_cust['estimate_amount'] = i.estimate_amount
-                    list_cust['postal_code'] = i.postal_code
+                    list_cust['postal_code'] = i.postal_code 
+                    list_cust['signature']=str(i.signature)
                     list_cust['created_date'] = i.created_date
                     list_cust['user_id'] = i.user_id.id
                     vehicle['customer_id'] = list_cust
@@ -747,6 +773,7 @@ def customer_filter_clientwise(user_obj, cust3,keyword,page_no,items_per_page):
             list['phone_number'] = i.phone_number
             list['estimate_amount'] = i.estimate_amount
             list['postal_code'] = i.postal_code
+            list['signature']=str(i.signature)
             list['created_date'] = i.created_date
             list['user_id'] = i.user_id.id
             if d != 0:
@@ -828,6 +855,7 @@ def customer_filter_clientwise(user_obj, cust3,keyword,page_no,items_per_page):
             list['phone_number'] = i.phone_number
             list['estimate_amount'] = i.estimate_amount
             list['postal_code'] = i.postal_code
+            list['signature']=str(i.signature)
             list['created_date'] = i.created_date
             list['user_id'] = i.user_id.id
             if d != 0:
@@ -925,6 +953,7 @@ def vehicle_filter_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,c
                     list_cust['phone_number'] = i.phone_number
                     list_cust['estimate_amount'] = i.estimate_amount
                     list_cust['postal_code'] = i.postal_code
+                    list_cust['signature']=str(i.signature)
                     list_cust['created_date'] = i.created_date
                     list_cust['user_id'] = i.user_id.id
                     vehicle['customer_id'] = list_cust
@@ -1034,6 +1063,7 @@ def vehicle_filter_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,c
                     list_cust['phone_number'] = i.phone_number
                     list_cust['estimate_amount'] = i.estimate_amount
                     list_cust['postal_code'] = i.postal_code
+                    list_cust['signature']=str(i.signature)
                     list_cust['created_date'] = i.created_date
                     list_cust['user_id'] = i.user_id.id
                     vehicle['customer_id'] = list_cust
