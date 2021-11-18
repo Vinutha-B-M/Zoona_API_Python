@@ -9,6 +9,7 @@ urlpatterns = [
     path('customer/', views.Customer.as_view(), name="customer"),
     path('add_customer_list/', views.add_Customer_List.as_view(), name="add_customer_list"),
     path('update_customer_list/', views.update_customer_list.as_view(), name="update_customer_list"),
+    path('signature/',views.signature),
     path('fetch_customer_info/', views.fetch_customer_info.as_view(), name="fetch_customer_info"),
     path('vehicle_list/', views.Vehicle_List.as_view(), name="vehicle_list"),
     path('customer_list/', views.customer_list.as_view(), name="customer_list"),

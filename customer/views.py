@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 # Create your views here.
 import datetime
+from django.views.decorators.csrf import csrf_exempt
 import requests
 import json
 from rest_framework.decorators import api_view
@@ -71,6 +72,7 @@ class add_Customer_List(APIView):
         # session = request.session.get("user_id")
         # if session:
         data = request.data
+    
         session = data['id']
         company_name = data['company_name']
         full_name = data['full_name']
@@ -86,7 +88,7 @@ class add_Customer_List(APIView):
         postal_code = data['postal_code']
         selected_date = data['selected_date']
         terms_item = data['terms_item']
-        signature = request.FILES.get('signature')
+        # signature = request.FILES.get('signature')
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
        
@@ -94,18 +96,12 @@ class add_Customer_List(APIView):
             myJson = {"status": "0", "data": "Phone Number Exits"}
             return JsonResponse(myJson)
         else:
-            if signature != None:
-                create = CustomerInfo.objects.create(company_name=company_name, full_name=full_name, email_id=email_id,
+            
+            create = CustomerInfo.objects.create(company_name=company_name, full_name=full_name, email_id=email_id,
                                                  address=address, postal_code=postal_code, selected_date=selected_date,
                                                  phone_number=phone_number, address_2=address_2, city=city, state=state,
                                                  user_id=user_obj,estimate_amount=estimate_amount)
-                create.signature=signature
-                create.save()                                 
-            else:
-                create = CustomerInfo.objects.create(company_name=company_name, full_name=full_name, email_id=email_id,
-                                                 address=address, postal_code=postal_code, selected_date=selected_date,
-                                                 phone_number=phone_number, address_2=address_2, city=city, state=state,
-                                                 user_id=user_obj,estimate_amount=estimate_amount)                                     
+                                            
             for i in terms_item:
                 tax_id = i['id']
                 term_obj = TermCondition.objects.get(id=tax_id)
@@ -116,6 +112,19 @@ class add_Customer_List(APIView):
             return JsonResponse(myJson)
 
 # .........................END-Customer-Insert.......................................
+@csrf_exempt
+def signature(request):
+         if request.method == 'POST':
+            session = request.POST['customer_id']
+            signature = request.FILES.get('signature')
+            create=CustomerInfo.objects.get(id=session)
+            if signature != None:
+                    create.signature=signature
+                    create.save()                                 
+            serializer = CustomerInfoSerializer(create)
+            myJson = {"status": "1", "data": serializer.data}
+            return JsonResponse(myJson)        
+
 # .........................Terms-Update-Function.......................................
 
 def term_item_updation(customer_exist, terms_item):
@@ -178,20 +187,9 @@ class update_customer_list(APIView):
         postal_code = data['postal_code']
         selected_date = data['selected_date']
         terms_item = data['terms_item']
-        signature = request.FILES.get('signature')
+        # signature = request.FILES.get('signature')
         customer_exist=CustomerInfo.objects.get(id=session)
-        if signature != None:
-            CustomerInfo.objects.filter(id=session).update(company_name=company_name, full_name=full_name,estimate_amount=estimate_amount,
-                                                             email_id=email_id,address=address, postal_code=postal_code,
-                                                             selected_date=selected_date,status='Active',
-                                                             phone_number=phone_number, address_2=address_2, city=city,
-                                                             state=state)
-
-            customer_exist.signature=signature
-            customer_exist.save()                                                 
-
-        else:
-           CustomerInfo.objects.filter(id=session).update(company_name=company_name, full_name=full_name,estimate_amount=estimate_amount,
+        CustomerInfo.objects.filter(id=session).update(company_name=company_name, full_name=full_name,estimate_amount=estimate_amount,
                                                              email_id=email_id,address=address, postal_code=postal_code,
                                                              selected_date=selected_date,status='Active',
                                                              phone_number=phone_number, address_2=address_2, city=city,
