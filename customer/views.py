@@ -168,7 +168,7 @@ class status_changed_vehicle(APIView):
         myJson = {"status": "1", "data": "status Changed"}
         return JsonResponse(myJson)
 
-# .....................status-changed-end..................
+# .....................status-changed-end.............................................
 # .........................Customer-Update-Info.......................................
 
 class update_customer_list(APIView):
@@ -225,7 +225,10 @@ def customer_terms(i,term):
     list['phone_number'] = i.phone_number
     list['estimate_amount'] = i.estimate_amount
     list['postal_code'] = i.postal_code
-    list['signature']='/images/'+str(i.signature)
+    if i.signature == '':
+        list['signature']=str(i.signature)
+    else:    
+        list['signature']='/images/'+str(i.signature)
     list['created_date'] = i.created_date
     list['user_id'] = i.user_id.id
     list['Terms'] = list_term        
@@ -281,7 +284,10 @@ def customer_info_clientwise(user_obj, cust3,page_no,items_per_page):
             list['phone_number'] = i.phone_number
             list['estimate_amount'] = i.estimate_amount
             list['postal_code'] = i.postal_code
-            list['signature']='/images/'+str(i.signature)
+            if i.signature == '':
+                list['signature']=str(i.signature)
+            else:    
+                list['signature']='/images/'+str(i.signature)
             list['created_date'] = i.created_date
             list['user_id'] = i.user_id.id
             if d != 0:
@@ -357,7 +363,10 @@ def customer_info_clientwise(user_obj, cust3,page_no,items_per_page):
             list['phone_number'] = i.phone_number
             list['estimate_amount'] = i.estimate_amount
             list['postal_code'] = i.postal_code
-            list['signature']='/images/'+str(i.signature)
+            if i.signature == '':
+                list['signature']=str(i.signature)
+            else:    
+                list['signature']='/images/'+str(i.signature)
             list['created_date'] = i.created_date
             list['user_id'] = i.user_id.id
             if d != 0:
@@ -440,7 +449,10 @@ def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,cus
                     list_cust['phone_number'] = i.phone_number
                     list_cust['estimate_amount'] = i.estimate_amount
                     list_cust['postal_code'] = i.postal_code
-                    list_cust['signature']='/images/'+str(i.signature)
+                    if i.signature == '':
+                        list_cust['signature']=str(i.signature)
+                    else:    
+                        list_cust['signature']='/images/'+str(i.signature)
                     list_cust['created_date'] = i.created_date
                     list_cust['user_id'] = i.user_id.id
                     vehicle['customer_id'] = list_cust
@@ -551,7 +563,10 @@ def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,cus
                     list_cust['phone_number'] = i.phone_number
                     list_cust['estimate_amount'] = i.estimate_amount
                     list_cust['postal_code'] = i.postal_code 
-                    list_cust['signature']='/images/'+str(i.signature)
+                    if i.signature == '':
+                        list_cust['signature']=str(i.signature)
+                    else:    
+                        list_cust['signature']='/images/'+str(i.signature)
                     list_cust['created_date'] = i.created_date
                     list_cust['user_id'] = i.user_id.id
                     vehicle['customer_id'] = list_cust
@@ -771,7 +786,10 @@ def customer_filter_clientwise(user_obj, cust3,keyword,page_no,items_per_page):
             list['phone_number'] = i.phone_number
             list['estimate_amount'] = i.estimate_amount
             list['postal_code'] = i.postal_code
-            list['signature']='/images/'+str(i.signature)
+            if i.signature == '':
+                list['signature']=str(i.signature)
+            else:    
+                list['signature']='/images/'+str(i.signature)
             list['created_date'] = i.created_date
             list['user_id'] = i.user_id.id
             if d != 0:
@@ -853,7 +871,10 @@ def customer_filter_clientwise(user_obj, cust3,keyword,page_no,items_per_page):
             list['phone_number'] = i.phone_number
             list['estimate_amount'] = i.estimate_amount
             list['postal_code'] = i.postal_code
-            list['signature']='/images/'+str(i.signature)
+            if i.signature == '':
+                list['signature']=str(i.signature)
+            else:    
+                list['signature']='/images/'+str(i.signature)
             list['created_date'] = i.created_date
             list['user_id'] = i.user_id.id
             if d != 0:
@@ -951,7 +972,10 @@ def vehicle_filter_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,c
                     list_cust['phone_number'] = i.phone_number
                     list_cust['estimate_amount'] = i.estimate_amount
                     list_cust['postal_code'] = i.postal_code
-                    list_cust['signature']='/images/'+str(i.signature)
+                    if i.signature == '':
+                        list_cust['signature']=str(i.signature)
+                    else:    
+                        list_cust['signature']='/images/'+str(i.signature)
                     list_cust['created_date'] = i.created_date
                     list_cust['user_id'] = i.user_id.id
                     vehicle['customer_id'] = list_cust
@@ -1061,7 +1085,10 @@ def vehicle_filter_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,c
                     list_cust['phone_number'] = i.phone_number
                     list_cust['estimate_amount'] = i.estimate_amount
                     list_cust['postal_code'] = i.postal_code
-                    list_cust['signature']='/images/'+str(i.signature)
+                    if i.signature == '':
+                        list_cust['signature']=str(i.signature)
+                    else:    
+                        list_cust['signature']='/images/'+str(i.signature)
                     list_cust['created_date'] = i.created_date
                     list_cust['user_id'] = i.user_id.id
                     vehicle['customer_id'] = list_cust

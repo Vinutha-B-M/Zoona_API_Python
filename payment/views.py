@@ -479,7 +479,10 @@ def order_data_list(cust3,cust5,cust6):
         customer['phone_number'] = i.Vehicle.customer_id.phone_number
         customer['estimate_amount'] = i.Vehicle.customer_id.estimate_amount
         customer['postal_code'] = i.Vehicle.customer_id.postal_code
-        customer['signature']='/images/'+str(i.Vehicle.customer_id.signature )
+        if i.Vehicle.customer_id.signature == '':
+            customer['signature']=str(i.Vehicle.customer_id.signature )
+        else:
+            customer['signature']='/images/'+str(i.Vehicle.customer_id.signature )    
         customer['created_date'] = i.Vehicle.customer_id.created_date
         customer['user_id'] = i.Vehicle.customer_id.user_id.id
         customer['Terms']=list_term
@@ -674,7 +677,10 @@ def order_data_list_new(cust2,cust5,cust6):
         customer['phone_number'] = cust2.Vehicle.customer_id.phone_number
         customer['estimate_amount'] = cust2.Vehicle.customer_id.estimate_amount
         customer['postal_code'] = cust2.Vehicle.customer_id.postal_code
-        customer['signature']='/images/'+str(cust2.Vehicle.customer_id.signature )
+        if cust2.Vehicle.customer_id.signature == '':
+            customer['signature']=str(cust2.Vehicle.customer_id.signature )
+        else:
+            customer['signature']='/images/'+str(cust2.Vehicle.customer_id.signature )   
         customer['created_date'] = cust2.Vehicle.customer_id.created_date
         customer['user_id'] = cust2.Vehicle.customer_id.user_id.id
         customer['Terms']=list_term
