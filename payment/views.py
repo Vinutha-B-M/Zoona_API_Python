@@ -2853,7 +2853,7 @@ class order_daily(APIView):
         cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
         cust5 = SmogTest.objects.filter(vehicle_id__in=cust2)
         now = datetime.datetime.now()
-        cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), created_date__day__gte=now.day,
+        cust3 = PaymentEntry.objects.filter(created_date__day__gte=now.day,
                                         created_date__day__lte=now.day,created_date__month__lte=now.month,
                                         created_date__month__gte=now.month,Vehicle__in=cust2).order_by('-invoice_id')
         cust6 = TermsItems.objects.filter(customer__in=customer_obj)
@@ -2883,7 +2883,7 @@ class order_weekly(APIView):
         cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
         cust5 = SmogTest.objects.filter(vehicle_id__in=cust2)
         now = datetime.datetime.now()   
-        cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), created_date__gte=now-timedelta(days=7),Vehicle__in=cust2).order_by('-invoice_id')
+        cust3 = PaymentEntry.objects.filter(created_date__gte=now-timedelta(days=7),Vehicle__in=cust2).order_by('-invoice_id')
         cust6 = TermsItems.objects.filter(customer__in=customer_obj)
         if SquareCredential.objects.filter(client=user_obj).exists():
             token = SquareCredential.objects.get(client=user_obj).accees_token
@@ -2911,7 +2911,7 @@ class order_monthly(APIView):
         cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
         cust5 = SmogTest.objects.filter(vehicle_id__in=cust2)
         now = datetime.datetime.now()   
-        cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), created_date__gte=now-timedelta(days=30),Vehicle__in=cust2).order_by('-invoice_id')
+        cust3 = PaymentEntry.objects.filter(created_date__gte=now-timedelta(days=30),Vehicle__in=cust2).order_by('-invoice_id')
         cust6 = TermsItems.objects.filter(customer__in=customer_obj)
         if SquareCredential.objects.filter(client=user_obj).exists():
             token = SquareCredential.objects.get(client=user_obj).accees_token
