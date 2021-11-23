@@ -196,7 +196,7 @@ class update_customer_list(APIView):
                                                              state=state)                                                    
         none_response=term_item_updation(customer_exist,terms_item)
         create=CustomerInfo.objects.get(id=session)
-        # VehicleInfo.objects.filter(customer_id=create).update(status='Active')
+        VehicleInfo.objects.filter(customer_id=create).update(status='Active')
         serializer = CustomerInfoSerializer(create)
         myJson = {"status": "1", "data": serializer.data}
         return JsonResponse(myJson)
