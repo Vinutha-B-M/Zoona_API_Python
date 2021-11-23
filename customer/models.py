@@ -39,6 +39,7 @@ class VehicleInfo(models.Model):
     cylinder = models.CharField(db_column='cylinder', max_length=200, blank=True)
     state = models.CharField(db_column='state',max_length=100,blank=True)
     status = models.CharField(db_column='status',default='Active',blank=True,max_length=100)
+    deleted_form=models.CharField(db_column='deleted_form',default='Active',blank=True,max_length=100)
     Transmission = models.CharField(db_column='Transmission', max_length=10, choices=STATUS, blank=True)
     smoke_pvc = models.CharField(db_column='smoke_pvc',max_length=100,blank=True)
     tailpipe = models.CharField(db_column='tailpipe',max_length=100,blank=True)

@@ -164,7 +164,7 @@ class status_changed_vehicle(APIView):
         data=request.data
         vehicle_id = data['vehicle_id']
         status = data['status']
-        VehicleInfo.objects.filter(id=vehicle_id).update(status=status)
+        VehicleInfo.objects.filter(id=vehicle_id).update(status=status,deleted_form='Inactive')
         myJson = {"status": "1", "data": "status Changed"}
         return JsonResponse(myJson)
 
@@ -593,7 +593,7 @@ class Vehicle_List(APIView):
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         customer_obj = CustomerInfo.objects.filter(user_id=user_obj,status='Active')
-        cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj,status='Active').order_by('id')
+        cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj,status='Active',deleted_form='Active').order_by('id')
         cust3 = TermsItems.objects.filter(customer__in=customer_obj)
         cust4 = SmogTest.objects.filter(vehicle_id__in=cust2)
         vehicle_data = vehicle_info_clientwise(cust2, cust3, customer_obj,page_no,items_per_page,cust4)
@@ -723,7 +723,7 @@ class update_vehicle_list(APIView):
                                                                      odo_meter=odo_meter, lic_plate=lic_plate, gvwr=gvwr,
                                                                      vin=vin, engine=engine,tailpipe=tailpipe,smoke_pvc=smoke_pvc,
                                                                      cylinder=cylinder, Transmission=Transmission,
-                                                                     engine_group=engine_group,state=state,status='Active')
+                                                                     engine_group=engine_group,state=state,status='Active',deleted_form='Active')
                     create = VehicleInfo.objects.get(id=vehicle_id)
                     serializer = VehicleInfoSerializer(create)
                     smogtest_update(vehicle_id,smog_test)
@@ -736,7 +736,7 @@ class update_vehicle_list(APIView):
                     VehicleInfo.objects.filter(id=vehicle_id).update(year=year, brand=brand, brand_model=brand_model,
                                                                      odo_meter=odo_meter, lic_plate=lic_plate,
                                                                      gvwr=gvwr,state=state,tailpipe=tailpipe,smoke_pvc=smoke_pvc,
-                                                                     vin=vin, engine=engine,status='Active',
+                                                                     vin=vin, engine=engine,status='Active',deleted_form='Active',
                                                                      cylinder=cylinder, Transmission=Transmission,
                                                                      engine_group=engine_group)
                     create = VehicleInfo.objects.get(id=vehicle_id)
@@ -1117,7 +1117,7 @@ class vehicle_filter(APIView):
         customer_obj = CustomerInfo.objects.filter(user_id=user_obj,status='Active')
         cust2 = VehicleInfo.objects.filter(Q(customer_id__phone_number__istartswith=keyword) | Q(customer_id__full_name__istartswith=keyword)|
                                            Q(brand__istartswith=keyword) |  Q(year__istartswith=keyword) | Q(vin__istartswith=keyword) ,
-                                           customer_id__in=customer_obj,status='Active').order_by('id')
+                                           customer_id__in=customer_obj,status='Active',deleted_form='Active').order_by('id')
         cust3 = TermsItems.objects.filter(customer__in=customer_obj)
         cust4 = SmogTest.objects.filter(vehicle_id__in=cust2)
         vehicle_data = vehicle_filter_clientwise(cust2, cust3, customer_obj,page_no,items_per_page,cust4)
