@@ -29,10 +29,10 @@ class VehicleInfoSerializer(serializers.ModelSerializer):
             'brand_model',
             'state',
             'status',
+            'vehicle_signature',
             'tailpipe',
             'smoke_pvc',
             'customer_id',
-            
         )
 
 

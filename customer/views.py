@@ -125,6 +125,20 @@ def signature(request):
             myJson = {"status": "1", "data": serializer.data}
             return JsonResponse(myJson)        
 
+@csrf_exempt
+def vehicle_signature(request):
+         if request.method == 'POST':
+            session = request.POST['vehicle_id']
+            signature = request.FILES.get('vehicle_signature')
+            create=VehicleInfo.objects.get(id=session)
+            if signature != None:
+                    create.vehicle_signature=signature
+                    create.save()                                 
+            serializer = VehicleInfoSerializer(create)
+            myJson = {"status": "1", "data": serializer.data}
+            return JsonResponse(myJson)        
+
+
 # .........................Terms-Update-Function.......................................
 
 def term_item_updation(customer_exist, terms_item):
@@ -433,6 +447,10 @@ def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,cus
                     vehicle['brand_model'] = k.brand_model
                     vehicle['state']=k.state
                     vehicle['status']=k.status
+                    if k.vehicle_signature == '':
+                        vehicle['vehicle_signature']=str(k.vehicle_signature)
+                    else:    
+                        vehicle['vehicle_signature']='/images/'+str(k.vehicle_signature)
                     vehicle['smoke_pvc']=k.smoke_pvc
                     vehicle['tailpipe']=k.tailpipe
                     vehicle['smog_test']=smog_list
@@ -547,6 +565,10 @@ def vehicle_info_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,cus
                     vehicle['brand_model'] = k.brand_model
                     vehicle['state']=k.state
                     vehicle['status']=k.status
+                    if k.vehicle_signature == '':
+                        vehicle['vehicle_signature']=str(k.vehicle_signature)
+                    else:    
+                        vehicle['vehicle_signature']='/images/'+str(k.vehicle_signature)
                     vehicle['smoke_pvc']=k.smoke_pvc
                     vehicle['tailpipe']=k.tailpipe
                     vehicle['smog_test']=smog_list
@@ -957,6 +979,10 @@ def vehicle_filter_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,c
                     vehicle['brand_model'] = k.brand_model
                     vehicle['state']=k.state
                     vehicle['status']=k.status
+                    if k.vehicle_signature == '':
+                        vehicle['vehicle_signature']=str(k.vehicle_signature)
+                    else:    
+                        vehicle['vehicle_signature']='/images/'+str(k.vehicle_signature)
                     vehicle['smoke_pvc']=k.smoke_pvc
                     vehicle['tailpipe']=k.tailpipe
                     vehicle['smog_test']=smog_list
@@ -1070,6 +1096,10 @@ def vehicle_filter_clientwise(cust2, cust3,customer_obj,page_no,items_per_page,c
                     vehicle['brand_model'] = k.brand_model
                     vehicle['state']=k.state
                     vehicle['status']=k.status
+                    if k.vehicle_signature == '':
+                        vehicle['vehicle_signature']=str(k.vehicle_signature)
+                    else:    
+                        vehicle['vehicle_signature']='/images/'+str(k.vehicle_signature)
                     vehicle['smoke_pvc']=k.smoke_pvc
                     vehicle['tailpipe']=k.tailpipe
                     vehicle['smog_test']=smog_list
