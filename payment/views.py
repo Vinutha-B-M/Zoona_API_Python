@@ -463,10 +463,10 @@ def order_data_list(cust3,cust5,cust6):
         vehicle['Transmission']=i.Vehicle.Transmission
         vehicle['brand_model']=i.Vehicle.brand_model
         vehicle['state']=i.Vehicle.state
-        if i.vehicle_signature == '':
-            vehicle['vehicle_signature']=str(i.vehicle_signature)
+        if i.Vehicle.vehicle_signature == '':
+            vehicle['vehicle_signature']=str(i.Vehicle.vehicle_signature)
         else:    
-            vehicle['vehicle_signature']='/images/'+str(i.vehicle_signature)
+            vehicle['vehicle_signature']='/images/'+str(i.Vehicle.vehicle_signature)
         vehicle['smoke_pvc']=i.Vehicle.smoke_pvc
         vehicle['tailpipe']=i.Vehicle.tailpipe
         vehicle['smog_test']=smog_list
@@ -665,7 +665,7 @@ def order_data_list_new(cust2,cust5,cust6):
         vehicle['Transmission']=cust2.Vehicle.Transmission
         vehicle['brand_model']=cust2.Vehicle.brand_model
         vehicle['state']=cust2.Vehicle.state
-        if cust2.Vehicle.customer_id.signature == '':
+        if cust2.Vehicle.vehicle_signature == '':
             vehicle['vehicle_signature']=str(cust2.Vehicle.vehicle_signature)
         else:
             vehicle['vehicle_signature']='/images/'+str(cust2.Vehicle.vehicle_signature)  
