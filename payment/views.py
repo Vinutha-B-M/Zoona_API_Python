@@ -16,6 +16,7 @@ from django.db.models.functions import (
 from django.db.models import Avg, Count, Min, Sum
 from django.db.models import Q
 import datetime
+from django.utils import timezone
 # from datetime import date, timedelta
 from customer.models import CustomerInfo, VehicleInfo, TestDetails,SmogTest,TermsItems
 from users.models import UserType, UserInfo
@@ -2848,9 +2849,10 @@ class test(APIView):
         data=request.data
         final_amount = data['final_amount']
         now = datetime.datetime.now()
-        list = day_list_week(now)
-        print(list[0]['date'])
-        print(list[-1])
+        list = timezone.now()
+        print(now)
+        print(list)
+      
 
         myJson = {'status':1, "data":final_amount}
         return JsonResponse(myJson, safe=False)
