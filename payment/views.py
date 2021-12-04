@@ -177,7 +177,7 @@ class payment_entry(APIView):
                 must_id = i['id']
                 must_obj = MustHave.objects.get(id=must_id)
                 must_name = MustHave.objects.get(id=must_id).must_have_name
-                MustHaveItem.objects.create(must_have_item=must_obj, must_have_name=must_name,Payment=payment_obj)
+                MustHaveItem.objects.create(must_have_item=must_obj, must_have_name=must_name,Payment=payment_obj)       
         serializer = PaymentEntrySerializer(payment_obj)
         myJson = {"status": "1", "data": serializer.data}
         return JsonResponse(myJson)

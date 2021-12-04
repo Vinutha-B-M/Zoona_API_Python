@@ -922,8 +922,8 @@ class customers_filter(APIView):
         keyword= data['keyword']
         user_info_obj = UserType.objects.get(id=session)
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
-        cust3 = TermsItems.objects.filter(customer__in=customer_obj,status='Active')
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj,status='Active')
+        cust3 = TermsItems.objects.filter(customer__in=customer_obj)
         customer_data= customer_filter_clientwise(user_obj,cust3,keyword,page_no,items_per_page)
         myJson = {"status": "1","customer_info":customer_data}
         return JsonResponse(myJson)
