@@ -16,7 +16,7 @@ from django.db.models.functions import (
 from django.db.models import Avg, Count, Min, Sum
 from django.db.models import Q
 import datetime
-from datetime import date, timedelta
+# from datetime import date, timedelta
 from customer.models import CustomerInfo, VehicleInfo, TestDetails,SmogTest,TermsItems
 from users.models import UserType, UserInfo
 from .models import PaymentEntry, InvoiceItem,TaxItem,FeesItem,DiscountItem,TestTypeItem,MustHaveItem,SquareDevice,\
@@ -102,6 +102,7 @@ class payment_entry(APIView):
             count=0
         count = count+1
         now = datetime.datetime.now()
+       
         year=now.year%100
         if count<= 9 :
             if now.day <= 9:
@@ -773,8 +774,10 @@ class datewise_order_list(APIView):
         customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
         cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
         cust3 = PaymentEntry.objects.filter(Q(status ='Completed') | Q(status='COMPLETED'),created_date__date__range=(datetime.date(year,month,date), datetime.date(last_year,last_month,last_date)), Vehicle__in=cust2).order_by('-invoice_id')
-        serializer = PaymentEntrySerializer(cust3, many=True)
-        myJson = {"status": "1", "data":serializer.data}
+        cust5 = SmogTest.objects.filter(vehicle_id__in=cust2)
+        cust6 = TermsItems.objects.filter(customer__in=customer_obj)
+        order_data=order_data_list(cust3,cust5,cust6)
+        myJson = {"status": "1", "data": order_data}
         return JsonResponse(myJson)
 
 # ...............................END-Date-Wise-Invoice-List......................................
@@ -2843,10 +2846,13 @@ class monthly(APIView):
 class test(APIView):
     def post(self,request):
         data=request.data
-        temp = data['temp']
-        if temp:
-            zen = data['zen']
-        myJson = {'status':1, "data":temp}
+        final_amount = data['final_amount']
+        now = datetime.datetime.now()
+        list = day_list_week(now)
+        print(list[0]['date'])
+        print(list[-1])
+
+        myJson = {'status':1, "data":final_amount}
         return JsonResponse(myJson, safe=False)
 
 # ..................daily-order....................
@@ -2891,7 +2897,14 @@ class order_weekly(APIView):
         cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
         cust5 = SmogTest.objects.filter(vehicle_id__in=cust2)
         now = datetime.datetime.now()   
-        cust3 = PaymentEntry.objects.filter(created_date__gte=now-timedelta(days=7),Vehicle__in=cust2).order_by('-invoice_id')
+        list = day_list_week(now)
+        day=list[-1]['date']
+        month=list[-1]['month']
+        day_next=list[0]['date']
+        month_next=list[0]['month']
+        year=2021
+        cust3 = PaymentEntry.objects.filter(created_date__date__range=(datetime.date(year,month,day), datetime.date(year,month_next,day_next)), Vehicle__in=cust2).order_by('-invoice_id')
+        # cust3 = PaymentEntry.objects.filter(created_date__gte=now-timedelta(days=7),Vehicle__in=cust2).order_by('-invoice_id')
         cust6 = TermsItems.objects.filter(customer__in=customer_obj)
         if SquareCredential.objects.filter(client=user_obj).exists():
             token = SquareCredential.objects.get(client=user_obj).accees_token
@@ -2918,8 +2931,15 @@ class order_monthly(APIView):
         customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
         cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
         cust5 = SmogTest.objects.filter(vehicle_id__in=cust2)
-        now = datetime.datetime.now()   
-        cust3 = PaymentEntry.objects.filter(created_date__gte=now-timedelta(days=30),Vehicle__in=cust2).order_by('-invoice_id')
+        now = datetime.datetime.now()
+        list = day_list_month(now)
+        day=list[-1]['date']
+        month=list[-1]['month']
+        day_next=list[0]['date']
+        month_next=list[0]['month']
+        year=2021
+        cust3 = PaymentEntry.objects.filter(created_date__date__range=(datetime.date(year,month,day), datetime.date(year,month_next,day_next)), Vehicle__in=cust2).order_by('-invoice_id')
+        # cust3 = PaymentEntry.objects.filter(created_date__gte=now-timedelta(days=30),Vehicle__in=cust2).order_by('-invoice_id')
         cust6 = TermsItems.objects.filter(customer__in=customer_obj)
         if SquareCredential.objects.filter(client=user_obj).exists():
             token = SquareCredential.objects.get(client=user_obj).accees_token
