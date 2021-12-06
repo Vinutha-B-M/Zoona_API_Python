@@ -781,6 +781,32 @@ class datewise_order_list(APIView):
         myJson = {"status": "1", "data": order_data}
         return JsonResponse(myJson)
 
+
+class custom_order_list(APIView):
+    def post(self, request):
+        data = request.data
+        session = data['id']
+        first = data['first_date']
+        last = data['last_date']
+        year,month,date =first.split('-')
+        year=int(year)
+        month=int(month)
+        date=int(date)
+        last_year, last_month, last_date = last.split('-')
+        last_year = int(last_year)
+        last_month = int(last_month)
+        last_date = int(last_date)
+        user_info_obj = UserType.objects.get(id=session)
+        user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
+        customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
+        cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
+        cust3 = PaymentEntry.objects.filter(created_date__date__range=(datetime.date(year,month,date), datetime.date(last_year,last_month,last_date)), Vehicle__in=cust2).order_by('-invoice_id')
+        cust5 = SmogTest.objects.filter(vehicle_id__in=cust2)
+        cust6 = TermsItems.objects.filter(customer__in=customer_obj)
+        order_data=order_data_list(cust3,cust5,cust6)
+        myJson = {"status": "1", "data": order_data}
+        return JsonResponse(myJson)
+
 # ...............................END-Date-Wise-Invoice-List......................................
 
 # ...............................Date-Wise-Customer-List......................................

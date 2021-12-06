@@ -11,6 +11,7 @@ urlpatterns = [
     path('order_list_page/', views.order_list_page.as_view(), name="order_list_page"),
     path('confirm_list/', views.confirm_list.as_view(), name="confirm_list"),
     path('datewise_order_list/', views.datewise_order_list.as_view(), name="datewise_order_list"),
+    path('custom_order_list/', views.custom_order_list.as_view(), name="datewise_order_list"),
     path('datewise_customer_list/', views.datewise_customer_list.as_view(), name="datewise_customer_list"),
     path('delete_vehicle/', views.delete_vehicle.as_view(), name="delete_vehicle"),
     path('delete_customer/', views.delete_customer.as_view(), name="delete_customer"),
