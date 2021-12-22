@@ -440,6 +440,7 @@ def order_data_list(cust3,cust5,cust6):
         list['discount_offered']=format(i.discount_offered, '.2f')
         list['payment_mode']=i.payment_mode
         list['created_date']=i.created_date
+        list['Transaction_ID']=i.transaction_id
         list['additional_comments']=i.additional_comments
         list['test_results']=i.test_results
         list['inception_performed']=i.inception_performed
@@ -1278,6 +1279,9 @@ def yearwisedata(cust2,user_obj):
     year_wise_stats = []
     cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'),
                                                 Vehicle__in=cust2)
+    total_test = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'),
+                                                Vehicle__in=cust2).count()
+                                                                                         
     cust4 = FeesItem.objects.filter(Payment__in=cust3)
     cust5 = TaxItem.objects.filter(Payment__in=cust3)
     cust6 = DiscountItem.objects.filter(Payment__in=cust3)
@@ -1356,7 +1360,7 @@ def yearwisedata(cust2,user_obj):
                     single['Tax_name'] = k.tax_name
                     single['amount'] = tax_amount
                  
-            
+    
             if tax_amount == 0:
                 single = {}
                 single['Tax_name'] = z.tax_name
@@ -1403,6 +1407,7 @@ def yearwisedata(cust2,user_obj):
         stats['Fees_individual'] = fees_data
         stats['Tax_individual'] = tax_data
         stats['Discount_individual'] = discount_data
+        stats['average_per_visit']=round(total/total_test,2)
         year_wise_stats.append(stats)
     else:
         
@@ -1436,6 +1441,7 @@ def yearwisedata(cust2,user_obj):
         stats['Fees_individual'] = fees_data
         stats['Tax_individual'] = tax_data
         stats['Discount_individual'] = discount_data
+        stats['average_per_visit']=0
         year_wise_stats.append(stats)
     return year_wise_stats
 
@@ -1456,7 +1462,7 @@ def yearwiseservices(cust2, user_obj):
                     amount = l.amount + amount
             services['service_name'] = k.service_name
             services['count'] = count
-            services['amount'] = amount
+            services['amount'] = round(amount,2)
             per = round( count*100/cust3.count(),2)
             services['percentage'] = str(per) + '%'
             service_wise_stats.append(services)
@@ -1640,7 +1646,7 @@ class stats_overall(APIView):
         myJson = {"status": "1", "stats_overall":year_wise_data}
         return JsonResponse(myJson, safe=False)
 
-def filterwisedata(cust3,user_obj):
+def filterwisedata(cust3,user_obj,total_test):
         cust4 = FeesItem.objects.filter(Payment__in=cust3)
         cust5 = TaxItem.objects.filter(Payment__in=cust3)
         cust6 = DiscountItem.objects.filter(Payment__in=cust3)
@@ -1766,6 +1772,7 @@ def filterwisedata(cust3,user_obj):
             stats['Fees_individual'] = fees_data
             stats['Tax_individual'] = tax_data
             stats['Discount_individual'] = discount_data
+            stats['average_per_visit']=round(total/total_test,2)
             month_wise_stats.append(stats)
         else:
         
@@ -1799,6 +1806,7 @@ def filterwisedata(cust3,user_obj):
             stats['Fees_individual'] = fees_data
             stats['Tax_individual'] = tax_data
             stats['Discount_individual'] = discount_data
+            stats['average_per_visit']=0
             month_wise_stats.append(stats)    
         return month_wise_stats
 
@@ -1823,7 +1831,9 @@ class stats_filter(APIView):
         cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
         cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'),created_date__date__range=(datetime.date(year,month,date), datetime.date(last_year,last_month,last_date)),
                                             Vehicle__in=cust2)
-        year_wise_data = filterwisedata(cust3,user_obj)
+        total_test=PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'),created_date__date__range=(datetime.date(year,month,date), datetime.date(last_year,last_month,last_date)),
+                                            Vehicle__in=cust2).count()                                
+        year_wise_data = filterwisedata(cust3,user_obj,total_test)
         myJson = {"status": "1", "filter_stats":year_wise_data}
         return JsonResponse(myJson, safe=False)
 
@@ -1843,7 +1853,7 @@ def filterservices(cust3, user_obj):
                     amount = l.amount+amount
             services['service_name'] = k.service_name
             services['count'] = count
-            services['amount'] = amount
+            services['amount'] = round(amount,2)
             per = round(count * 100 / cust3.count(), 2)
             services['percentage'] = str(per) + '%'
             service_wise_stats.append(services)

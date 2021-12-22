@@ -36,10 +36,21 @@ class Customer(APIView):
         cust2 = CustomerInfo.objects.filter(created_date__year=today.year, created_date__month=today.month,
                                             user_id=user_obj)
         cust3 = VehicleInfo.objects.filter(customer_id__in=cust1)
-        payment = PaymentEntry.objects.filter(Vehicle__in=cust3)
+        payment = PaymentEntry.objects.filter(Vehicle__in=cust3).values_list('Vehicle__customer_id__id',flat=True)
+        payment_2 = PaymentEntry.objects.filter(Vehicle__in=cust3).distinct('Vehicle__customer_id__id').values_list('Vehicle__customer_id__id',flat=True)
+        returning=0
+        for i in payment_2:
+            pass_num=0
+            for j in payment:
+                if i==j:
+                    pass_num=pass_num+1
+            if pass_num >= 2:        
+                returning=returning+1
+                pass_num=0
+             
         total_number = cust1.count()
         new_number = cust2.count()
-        customer_count = {"total_count": total_number, "new_count": new_number}
+        customer_count = {"total_count": total_number, "new_count": new_number,'returning_customers':returning}
         # serializer1 = CustomerInfoSerializer(cust1, many=True)
         return JsonResponse(customer_count, safe=False)
 
