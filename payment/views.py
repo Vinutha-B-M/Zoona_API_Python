@@ -1,6 +1,5 @@
 from os.path import split
 from re import U
-
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 # Create your views here.
@@ -779,7 +778,20 @@ class datewise_order_list(APIView):
         cust5 = SmogTest.objects.filter(vehicle_id__in=cust2)
         cust6 = TermsItems.objects.filter(customer__in=customer_obj)
         order_data=order_data_list(cust3,cust5,cust6)
-        myJson = {"status": "1", "data": order_data}
+        today = datetime.datetime.now()
+        new = CustomerInfo.objects.filter(created_date__year=today.year, created_date__month=today.month,
+                                            user_id=user_obj)
+        total_number = customer_obj.count()
+        new_number = new.count()
+        cust4 = cust3.count()
+        total = 0
+        for j in cust3:
+            if j.payment_mode == 'cash':
+                total =round( total + j.final_amount,2)
+            else:
+                total =round( total + j.card_amount,2)
+        sales = {"sales_count": cust4, "total_sales": total,"total_count": total_number, "new_count": new_number,}                                    
+        myJson = {"status": "1", "data": order_data, "counts":sales}
         return JsonResponse(myJson)
 
 

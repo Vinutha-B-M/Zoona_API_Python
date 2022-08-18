@@ -4,6 +4,7 @@ from users.models import UserInfo
 from service.models import TermCondition
 
 class CustomerInfo(models.Model):
+    customer_id=models.CharField(db_column='customer_id',blank=True,max_length=20)
     selected_date = models.DateField(db_column='selected_date', blank=True,null=True, auto_now_add=False)
     company_name = models.CharField(db_column='company_name', max_length=100, blank=True)
     full_name = models.CharField(db_column='full_name', max_length=200, blank=True)
