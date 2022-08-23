@@ -1210,11 +1210,11 @@ class vehicle_info(APIView):
         try:   
             user_info_obj = UserType.objects.get(id=user_id)
             user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
-            customer_obj = CustomerInfo.objects.filter(user_id=user_obj)      
-            if VehicleInfo.objects.filter(customer_id__in=customer_obj,vin=vinField).exists():
+            customer_obj = CustomerInfo.objects.filter(user_id=user_obj,status='Active')      
+            if VehicleInfo.objects.filter(customer_id__in=customer_obj,vin=vinField,status='Active').exists():
                     customer=CustomerInfo.objects.get(id=customer)
-                    if VehicleInfo.objects.filter(customer_id=customer,vin=vinField).exists():
-                        create = VehicleInfo.objects.get(vin=vinField,customer_id=customer)
+                    if VehicleInfo.objects.filter(customer_id=customer,vin=vinField,status='Active').exists():
+                        create = VehicleInfo.objects.get(vin=vinField,customer_id=customer,status='Active')
                         serializer = VehicleInfoSerializer(create)
                         smog_obj= SmogTest.objects.filter(vehicle_id=create)
                         serializer2=SmogTestSerializer(smog_obj,many=True)
@@ -1240,7 +1240,7 @@ class vehicle_info(APIView):
                     json_response = response.json()
                     return JsonResponse(json_response, safe=False)
         except:
-            myJson = {"status": "0", "message":error }
+            myJson = {"status": "0", "message":"error" }
             return JsonResponse(myJson)  
 
 # .........................END-Vehicle-Info-Thrid-Party_API......................................
