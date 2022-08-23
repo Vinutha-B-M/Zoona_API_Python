@@ -1203,11 +1203,11 @@ def home(request):
 class vehicle_info(APIView):
 
     def post(self, request):
-            data = request.data
-            vinField = data['vinField']
-            user_id = data['user_id']
-            customer = data['customer_id']
-        # try:   
+        data = request.data
+        vinField = data['vinField']
+        user_id = data['user_id']
+        customer = data['customer_id']
+        try:   
             user_info_obj = UserType.objects.get(id=user_id)
             user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
             customer_obj = CustomerInfo.objects.filter(user_id=user_obj,status='Active')      
@@ -1239,8 +1239,8 @@ class vehicle_info(APIView):
                     # response = requests.get('https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/' + vinField + '?format=json')
                     json_response = response.json()
                     return JsonResponse(json_response, safe=False)
-        # except:
-        #     myJson = {"status": "0", "message":"error" }
-        #     return JsonResponse(myJson)  
+        except:
+            myJson = {"status": "0", "message":"error" }
+            return JsonResponse(myJson)  
 
 # .........................END-Vehicle-Info-Thrid-Party_API......................................
