@@ -244,6 +244,7 @@ def customer_terms(i,term):
         list_term.append(list_2)
     list = {}
     list['id'] = i.id
+    list['customerId']=i.customer_id
     list['selected_date'] = i.selected_date
     list['company_name'] = i.company_name
     list['full_name'] = i.full_name
@@ -758,10 +759,10 @@ class update_vehicle_list(APIView):
             customer_obj = CustomerInfo.objects.get(id=customer)
             user = UserInfo.objects.get(id=customer_obj.user_id.id).id
             user_obj = UserInfo.objects.get(id=user)
-            customer_obj_list = CustomerInfo.objects.filter(user_id=user_obj).values_list('id')
+            customer_obj_list = CustomerInfo.objects.filter(user_id=user_obj,status="Active").values_list('id')
             
             if CustomerInfo.objects.filter(user_id=user,id=customer).exists():
-                if VehicleInfo.objects.filter(customer_id=customer_obj,vin=vin,id=vehicle_id).exists():
+                if VehicleInfo.objects.filter(customer_id=customer_obj,vin=vin,id=vehicle_id,status="Active").exists():
                     VehicleInfo.objects.filter(id=vehicle_id).update(year=year, brand=brand, brand_model=brand_model,
                                                                      odo_meter=odo_meter, lic_plate=lic_plate, gvwr=gvwr,
                                                                      vin=vin, engine=engine,tailpipe=tailpipe,smoke_pvc=smoke_pvc,
@@ -772,7 +773,7 @@ class update_vehicle_list(APIView):
                     smogtest_update(vehicle_id,smog_test)
                     myJson = {"status": "1", "data": serializer.data}
                     return JsonResponse(myJson)
-                elif VehicleInfo.objects.filter(customer_id__in=customer_obj_list,vin=vin).exists():
+                elif VehicleInfo.objects.filter(customer_id__in=customer_obj_list,vin=vin,status="Active").exists():
                     myJson = {"status": "0", "data": "VIN Exists"}
                     return JsonResponse(myJson)
                 else:
