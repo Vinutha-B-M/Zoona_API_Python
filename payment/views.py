@@ -781,7 +781,7 @@ class datewise_order_list(APIView):
         today = datetime.datetime.now()
         new = CustomerInfo.objects.filter(created_date__year=today.year, created_date__month=today.month,
                                             user_id=user_obj)
-        total_number = customer_obj.count()
+        total_number = CustomerInfo.objects.filter(user_id=user_obj,created_date__date__range=(datetime.date(year,month,date), datetime.date(last_year,last_month,last_date))).count()
         new_number = new.count()
         cust4 = cust3.count()
         total = 0
