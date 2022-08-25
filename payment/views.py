@@ -778,11 +778,8 @@ class datewise_order_list(APIView):
         cust5 = SmogTest.objects.filter(vehicle_id__in=cust2)
         cust6 = TermsItems.objects.filter(customer__in=customer_obj)
         order_data=order_data_list(cust3,cust5,cust6)
-        today = datetime.datetime.now()
-        new = CustomerInfo.objects.filter(created_date__year=today.year, created_date__month=today.month,
-                                            user_id=user_obj)
-        total_number = CustomerInfo.objects.filter(user_id=user_obj,created_date__range=(first, last)).count()
-        new_number = new.count()
+        new = CustomerInfo.objects.filter(user_id=user_obj,created_date__range=(first, last)).count()
+        total_number = CustomerInfo.objects.filter(user_id=user_obj).count()
         cust4 = cust3.count()
         total = 0
         for j in cust3:
@@ -790,7 +787,7 @@ class datewise_order_list(APIView):
                 total =round( total + j.final_amount,2)
             else:
                 total =round( total + j.card_amount,2)
-        sales = {"sales_count": cust4, "total_sales": total,"total_count": total_number, "new_count": new_number,}                                    
+        sales = {"sales_count": cust4, "total_sales": total,"total_count": total_number, "new_count": new}                                    
         myJson = {"status": "1", "data": order_data, "counts":sales}
         return JsonResponse(myJson)
 
