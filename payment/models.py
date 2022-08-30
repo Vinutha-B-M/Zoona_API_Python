@@ -47,6 +47,7 @@ class PaymentEntry(models.Model):
     reasons = models.CharField(db_column='Reasons', max_length=30,blank=True)
     initials = models.CharField(db_column='Initials', max_length=30, blank=True)
     transaction_id = models.CharField(db_column='transaction_id',max_length=100,blank=True)
+    signature = models.FileField(blank=True)
     created_date = models.DateTimeField(db_column='created_date', blank=True, null=True, auto_now_add=True)
     modified_date = models.DateTimeField(db_column='modified_date', blank=True, null=True, auto_now_add=True)
 
