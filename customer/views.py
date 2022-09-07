@@ -706,7 +706,7 @@ class add_Vehicle_List(APIView):
                     type = i['type']
                     desc = i['desc']
                     SmogTest.objects.create(smog=smog, type=type,desc=desc, vehicle_id=vehicle_obj) 
-                myJson = {"status": "1", "data": "success"}
+                myJson = {"status": "1", "data":serializer.data}
                 return JsonResponse(myJson)
         else:
             myJson = {"status": "0", "data":"login_error"}
