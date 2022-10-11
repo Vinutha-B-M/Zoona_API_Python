@@ -824,11 +824,19 @@ class custom_order_list(APIView):
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
         cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
-        cust3 = PaymentEntry.objects.filter(created_date__date__range=(datetime.date(year,month,date), datetime.date(last_year,last_month,last_date)), Vehicle__in=cust2).order_by('-invoice_id')
+        cust3 = PaymentEntry.objects.filter(created_date__date__range=(Q(status='Completed') | Q(status='COMPLETED'),datetime.date(year,month,date), datetime.date(last_year,last_month,last_date)), Vehicle__in=cust2).order_by('-invoice_id')
         cust5 = SmogTest.objects.filter(vehicle_id__in=cust2)
         cust6 = TermsItems.objects.filter(customer__in=customer_obj)
         order_data=order_data_list(cust3,cust5,cust6)
-        myJson = {"status": "1", "data": order_data}
+        cust3new = VehicleInfo.objects.filter(customer_id__in=customer_obj,created_date__date__range=(datetime.date(year,month,date), datetime.date(last_year,last_month,last_date)))
+        serializer = VehicleInfoSerializer(cust3new, many=True)
+        cust3stats = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'),created_date__date__range=(datetime.date(year,month,date), datetime.date(last_year,last_month,last_date)),
+                                            Vehicle__in=cust2)
+        total_test=PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'),created_date__date__range=(datetime.date(year,month,date), datetime.date(last_year,last_month,last_date)),
+                                            Vehicle__in=cust2).count()                                
+        year_wise_data = filterwisedata(cust3stats,user_obj,total_test)
+        year_wise_servies = filterservices(cust3stats,user_obj)
+        myJson = {"status": "1", "order_data": order_data,"customer_data":serializer.data,"sales_statistics":year_wise_data,"service_statistics":year_wise_servies}
         return JsonResponse(myJson)
 
 # ...............................END-Date-Wise-Invoice-List......................................
@@ -2002,16 +2010,16 @@ def Daily_data(session):
     cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
     now = datetime.datetime.now()
     cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), created_date__day__gte=now.day,
-                                        created_date__day__lte=now.day,created_date__month__lte=now.month,
+                                        created_date__day__lte=now.day,created_date__month__lte=now.month,created_date__year=now.year,
                                         created_date__month__gte=now.month,Vehicle__in=cust2)
 
     cust4 = FeesItem.objects.filter(created_date__day__gte=now.day,created_date__day__lte=now.day,created_date__month__lte=now.month,
-                                    created_date__month__gte=now.month,Payment__in=cust3)
+                                    created_date__month__gte=now.month,created_date__year=now.year,Payment__in=cust3)
     cust5 = TaxItem.objects.filter(created_date__day__gte=now.day, created_date__day__lte=now.day,
-                                    created_date__month__lte=now.month,
+                                    created_date__month__lte=now.month,created_date__year=now.year,
                                     created_date__month__gte=now.month, Payment__in=cust3)
     cust6 = DiscountItem.objects.filter(created_date__day__gte=now.day, created_date__day__lte=now.day,
-                                   created_date__month__lte=now.month,
+                                   created_date__month__lte=now.month,created_date__year=now.year,
                                    created_date__month__gte=now.month, Payment__in=cust3)
     cust41 = Fees.objects.filter(client=user_obj)
     cust51 = Taxes.objects.filter(client=user_obj)
@@ -2125,7 +2133,7 @@ def Daily_data(session):
                 discount_data.append(single)
             else:
                 discount_data.append(single)    
-        stats['Date'] = str(now.day) + '-' + str(now.month) + '-' + '2021'
+        stats['Date'] = str(now.day) + '-' + str(now.month) + '-' + '2022'
         stats['Gross_Sales'] = round(total, 2)
         stats['Cash_Amount'] = round(total2, 2)
         stats['Card_Amount'] = round(total - total2, 2)
@@ -2159,7 +2167,7 @@ def Daily_data(session):
                 single['Discount_name'] = z.offer_name
                 single['amount'] = 0
                 discount_data.append(single)
-        stats['Date'] = str(now.day) + '-' + str(now.month) + '-' + '2021'
+        stats['Date'] = str(now.day) + '-' + str(now.month) + '-' + '2022'
         stats['Gross_Sales'] = 0
         stats['Cash_Amount'] = 0
         stats['Card_Amount'] = 0
@@ -2495,16 +2503,16 @@ def weekly_data(session):
 
         cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'), created_date__day__gte=i['date'],
                                             created_date__day__lte=i['date'],created_date__month__lte=i['month'],
-                                            created_date__month__gte=i['month'],Vehicle__in=cust2)
+                                            created_date__month__gte=i['month'],created_date__year='2022',Vehicle__in=cust2)
 
         cust4 = FeesItem.objects.filter(created_date__day__gte=i['date'], created_date__day__lte=i['date'],
-                                        created_date__month__lte=i['month'],
+                                        created_date__month__lte=i['month'],created_date__year='2022',
                                         created_date__month__gte=i['month'], Payment__in=cust3)
         cust5 = TaxItem.objects.filter(created_date__day__gte=i['date'], created_date__day__lte=i['date'],
-                                        created_date__month__lte=i['month'],
+                                        created_date__month__lte=i['month'],created_date__year='2022',
                                         created_date__month__gte=i['month'], Payment__in=cust3)
         cust6 = DiscountItem.objects.filter(created_date__day__gte=i['date'], created_date__day__lte=i['date'],
-                                        created_date__month__lte=i['month'],
+                                        created_date__month__lte=i['month'],created_date__year='2022',
                                         created_date__month__gte=i['month'], Payment__in=cust3)
 
         total = 0.0
@@ -2616,7 +2624,7 @@ def weekly_data(session):
                     discount_data.append(single)
                 else:
                     discount_data.append(single)
-            stats['Date'] = str(i['date']) + '-' + str(i['month']) + '-' + '2021'
+            stats['Date'] = str(i['date']) + '-' + str(i['month']) + '-' + '2022'
             stats['Gross_Sales'] = round(total, 2)
             stats['Cash_Amount'] = round(total2, 2)
             stats['Card_Amount'] = round(total - total2, 2)
@@ -2650,7 +2658,7 @@ def weekly_data(session):
                 single['Discount_name'] = z.offer_name
                 single['amount'] = 0
                 discount_data.append(single)
-            stats['Date'] = str(i['date']) + '-' + str(i['month']) + '-' + '2021'
+            stats['Date'] = str(i['date']) + '-' + str(i['month']) + '-' + '2022'
             stats['Gross_Sales'] = 0
             stats['Cash_Amount'] = 0
             stats['Card_Amount'] = 0
@@ -2722,17 +2730,17 @@ def monthly_data(session):
     for i in list:
 
         cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'),
-                                            created_date__day__gte=i['date'],
+                                            created_date__day__gte=i['date'],created_date__year='2022',
                                             created_date__day__lte=i['date'], created_date__month__lte=i['month'],
                                             created_date__month__gte=i['month'], Vehicle__in=cust2)
         cust4 = FeesItem.objects.filter(created_date__day__gte=i['date'], created_date__day__lte=i['date'],
-                                        created_date__month__lte=i['month'],
+                                        created_date__month__lte=i['month'],created_date__year='2022',
                                         created_date__month__gte=i['month'], Payment__in=cust3)
         cust5 = TaxItem.objects.filter(created_date__day__gte=i['date'], created_date__day__lte=i['date'],
-                                       created_date__month__lte=i['month'],
+                                       created_date__month__lte=i['month'],created_date__year='2022',
                                        created_date__month__gte=i['month'], Payment__in=cust3)
         cust6 = DiscountItem.objects.filter(created_date__day__gte=i['date'], created_date__day__lte=i['date'],
-                                            created_date__month__lte=i['month'],
+                                            created_date__month__lte=i['month'],created_date__year='2022',
                                             created_date__month__gte=i['month'], Payment__in=cust3)
         total = 0.0
         total2 = 0.0
@@ -2842,7 +2850,7 @@ def monthly_data(session):
                     discount_data.append(single)
                 else:
                     discount_data.append(single)
-            stats['Date'] = str(i['date']) + '-' + str(i['month']) + '-' + '2021'
+            stats['Date'] = str(i['date']) + '-' + str(i['month']) + '-' + '2022'
             stats['Gross_Sales'] = round(total, 2)
             stats['Cash_Amount'] = round(total2, 2)
             stats['Card_Amount'] = round(total - total2, 2)
@@ -2876,7 +2884,7 @@ def monthly_data(session):
                 single['Discount_name'] = z.offer_name
                 single['amount'] = 0
                 discount_data.append(single)
-            stats['Date'] = str(i['date']) + '-' + str(i['month']) + '-' + '2021'
+            stats['Date'] = str(i['date']) + '-' + str(i['month']) + '-' + '2022'
             stats['Gross_Sales'] = 0
             stats['Cash_Amount'] = 0
             stats['Card_Amount'] = 0
@@ -2963,8 +2971,9 @@ class order_weekly(APIView):
         month=list[-1]['month']
         day_next=list[0]['date']
         month_next=list[0]['month']
-        year=2021
+        year=2022
         cust3 = PaymentEntry.objects.filter(created_date__date__range=(datetime.date(year,month,day), datetime.date(year,month_next,day_next)), Vehicle__in=cust2).order_by('-invoice_id')
+        
         # cust3 = PaymentEntry.objects.filter(created_date__gte=now-timedelta(days=7),Vehicle__in=cust2).order_by('-invoice_id')
         cust6 = TermsItems.objects.filter(customer__in=customer_obj)
         if SquareCredential.objects.filter(client=user_obj).exists():
