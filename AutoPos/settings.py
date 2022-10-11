@@ -120,7 +120,8 @@ DATABASES = {
     'default': {
          'ENGINE': 'django.db.backends.postgresql_psycopg2',
          'NAME': 'newautoposdb',
-         'PASSWORD': 'postgres',
+        #  'PASSWORD': 'postgres',
+         'PASSWORD':'fvBVoCriMZK7',
          'USER': 'postgres',
          'HOST': 'localhost',
          'PORT': '5432',
