@@ -824,7 +824,7 @@ class custom_order_list(APIView):
         user_obj = UserInfo.objects.get(id=user_info_obj.userinfo.id)
         customer_obj = CustomerInfo.objects.filter(user_id=user_obj)
         cust2 = VehicleInfo.objects.filter(customer_id__in=customer_obj)
-        cust3 = PaymentEntry.objects.filter(created_date__date__range=(Q(status='Completed') | Q(status='COMPLETED'),datetime.date(year,month,date), datetime.date(last_year,last_month,last_date)), Vehicle__in=cust2).order_by('-invoice_id')
+        cust3 = PaymentEntry.objects.filter(Q(status='Completed') | Q(status='COMPLETED'),created_date__date__range=(datetime.date(year,month,date), datetime.date(last_year,last_month,last_date)), Vehicle__in=cust2).order_by('-invoice_id')
         cust5 = SmogTest.objects.filter(vehicle_id__in=cust2)
         cust6 = TermsItems.objects.filter(customer__in=customer_obj)
         order_data=order_data_list(cust3,cust5,cust6)
