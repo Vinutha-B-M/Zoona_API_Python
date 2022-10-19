@@ -32,6 +32,7 @@ class VehicleInfoSerializer(serializers.ModelSerializer):
             'vehicle_signature',
             'tailpipe',
             'smoke_pvc',
+            'created_date',
             'customer_id',
         )
 
