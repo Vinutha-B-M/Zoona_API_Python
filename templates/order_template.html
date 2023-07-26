@@ -1,0 +1,377 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Sales Report</title>
+    <style type="text/css">
+        @page {
+            size: A4;
+            margin: 1cm;
+        }
+
+        .table {
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 5px;
+            background-color: #fff;
+        }
+
+        .table th,
+        .table td {
+            padding: 5px;
+            vertical-align: top;
+            border-top: 1px solid #000;
+            text-align: left;
+        }
+
+        .table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #000;
+            text-align:left;
+        }
+
+        .table tbody + tbody {
+            border-top: 2px solid #000;
+        }
+
+        .table .table {
+            background-color: #fff;
+        }
+        .header-content td{
+            border:none;
+            padding:0px;
+        }
+        .invoice-head td,th{
+            border: none;
+        }
+        .invoice-head table{
+            margin: 0;
+            margin-top: -0.5rem;
+        }
+         .invoice-head td,th{
+            border: none;
+            padding: 0px;
+        }
+
+        .list-group {
+            display: block;
+            width: 100%;
+            list-style: none;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        .list-group p {
+            width: 100%;
+            height: 20px;
+            line-height: 20px;
+            list-style: none;
+            font-size: 1.1em;
+        }
+        td.a{
+        margin-left:25px;
+        }
+        tr.b{
+        border-top:2px solid #000;
+        padding-top:1rem;
+        }
+        td.c{
+        font-weight:bold;
+        border-bottom:2px solid #000;
+        
+        }
+        td.zz{
+            border: none;
+            padding: 0;
+        }
+        td.zy{
+            border: none;
+            padding: 10px;
+                    }
+        td.d{
+        font-weight:bold;
+        width:250px;
+        padding:5px;
+        border-top:none;
+        border-bottom:1px solid #000;
+        }
+        td.e{
+        width:300px;
+        padding:5px;
+        border-top:none;
+        border-bottom:1px solid #000;
+        }
+        tr.f{
+        padding: 0.51rem 0 0 0;
+        border:none;
+        }
+     
+         td.y{
+        font-weight:bold;
+        width:250px;
+        padding:5px;
+        border-top:none;
+
+        }
+        td.z{
+        width:300px;
+        padding:5px;
+        border-top:none;
+
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <table class="header-content">
+                <tbody>
+                    <tr>
+                        <th rowspan="4" style="width:100px;text-align:left;margin:0 15px 0 0"><img src="https://autopos.zunaco.com/auto-api/images/{{company.image_name}}" alt=""  ></th>
+                        <td class="a">{{user_obj.company_name}}</td>
+                      </tr>
+                      <tr>
+                        <td class="a">{{company.address}}</td>
+                      </tr>
+                      <tr>
+                          <td class="a">Phone : 9513172737</td>
+                      </tr>
+                      <tr>
+                          <td class="a">Email Id : {{company.email}}</td>
+                      </tr>
+                </tbody>
+            </table>
+        </div>
+        <table class="table">
+            <tr>
+                <td class="zz" style="width: 100%;"></td>
+            </tr>
+        </table>
+        <div class="invoice-head">
+            <table class="table">
+                   <thead>
+                      <tr class="b">
+                            <td style="width:500px">To</td>
+                            <td>Invoice No: {{invoice.invoice_id}}</td>
+                      </tr>
+                   </thead>
+                    <tbody>
+                        <tr>
+                            
+                            <td style="width: 500px;">{{invoice.Vehicle.customer_id.full_name}}</td>
+                            <td>Date: {{date}}</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 500px;">{{invoice.Vehicle.customer_id.email_id | safe}}</td>
+                            <td>Time: {{time}}</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 500px;">{{invoice.Vehicle.customer_id.phone_number}}</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 500px;"></td>
+                        </tr>
+                    </tbody>
+                </table>
+        </div>
+        <table class="table">
+            <tbody>
+                <tr>
+                    <td class="c">Vehicle Information</td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="table">
+
+            <tr class="f">
+                <td class="d">Brand Name</td>
+                <td class="e">{{invoice.Vehicle.brand}}</td>
+                <td class="d">Year</td>
+                <td class="e">{{invoice.Vehicle.year}}</td>
+            </tr>
+              <tr class="f">
+                <td class="d">Brand Model</td>
+                <td class="e">{{invoice.Vehicle.brand_model}}</td>
+                <td class="d">VIN</td>
+                <td class="e">{{invoice.Vehicle.vin}}</td>
+            </tr>
+              <tr class="f">
+                <td class="d">Engine</td>
+                <td class="e">{{invoice.Vehicle.engine}}</td>
+                <td class="d">L.I.C Plate</td>
+                <td class="e">{{invoice.Vehicle.lic_plate}}</td>
+            </tr>
+              <tr class="f">
+                <td class="d">Engine Group</td>
+                <td class="e">{{invoice.Vehicle.engine_group}}</td>
+                <td class="d">G.W.R</td>
+                <td class="e">{{invoice.Vehicle.gvwr}}</td>
+            </tr>
+              <tr class="f">
+                <td class="y">Transmission</td>
+                <td class="z">{{invoice.Vehicle.Transmission}}</td>
+                <td class="y">Odometer</td>
+                <td class="z">{{invoice.Vehicle.odo_meter}}</td>
+            </tr>
+        </table>
+        <table class="table">
+            <tr>
+                <td class="c">Service Information</td>
+            </tr>
+        </table>
+        <table class="table">
+            {% for i in service %}
+            <tr>
+                <td class="zy" style="width: 100px;">1</td>
+                <td class="zy" style="width: 415px;">{{i.service_name}}</th>
+                <td class="zy">${{i.amount}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <table class="table">
+            <tr>
+                <td style="width: 100%;"></td>
+            </tr>
+        </table>
+        <table class="table">
+            {% for i in musthave %}
+            <tr>
+               
+                <td class="zz" style="width: 100px;">{{i.must_have_name}}</td>
+              
+             </tr>
+             {% endfor %}
+             {% for i in testtype %}
+             <tr>
+                
+                <td class="zz">{{i.test_type_name}}</td>
+                
+            </tr>
+            {% endfor %}
+        </table>
+        <table class="table">
+            <tr>
+                <td style="width: 100%;"></td>
+            </tr>
+        </table>
+        <table class="table">
+            <tr>
+                <td class="zz" style="width: 310px;"></td>
+                <td class="zz" >Sub-Total</td>
+                <td class="zz" >$100</th>
+                
+            </tr>
+            <tr>
+                <td  class="zz" style="width: 310px;"></td>
+                <td class="zz">tax</td>
+                <td class="zz">$10</th>
+                
+            </tr>
+            <tr>
+                <td class="zz" style="width: 310px;"></td>
+                <td class="zz" >Fees</td>
+                <td class="zz" >$15</th>
+                
+            </tr>
+            <tr>
+                <td class="zz" style="width: 310px;"></td> 
+                <td class="zz" >Discount</td>
+                <td class="zz" >$20</th>
+                
+            </tr>
+        </table>
+        <table class="table">
+            <tr>
+                <td style="width: 100%;"></td>
+            </tr>
+        </table>
+        <table class="table">
+            <tr>
+                <td class="zz" style="width: 310px;">{{i}}</td>
+                <td class="zz" style="font-weight: bold;" >Grand-Total</td>
+                {% if invoice.payment_mode == 'Cash' %}
+                <td class="zz" >${{invoice.final_amount}}</th>
+                {% else %}
+                <td class="zz" >${{invoice.card_amount}}</th>
+                {% endif %} 
+                
+            </tr>
+            <tr>
+                <td  class="zz" style="width: 310px;"></td>
+                <td class="zz" style="font-weight: bold;" >Paid</td>
+                {% if invoice.payment_mode == 'Cash' %}
+                <td class="zz" >${{invoice.amount_tendered}}</th>
+                {% else %}
+                <td class="zz" >${{invoice.card_amount}}</th>
+                {% endif %}
+                
+            </tr>
+            {% if invoice.payment_mode == 'Cash' %}
+            <tr>
+                <td class="zz" style="width: 310px;"></td>
+                <td class="zz" style="font-weight: bold;">Change</td>
+                <td class="zz">${{invoice.changed_given}}</td>
+            </tr>
+            {% endif %}
+            <tr>
+                <td class="zz" style="width: 310px;"></td>
+                <td class="zz" style="font-weight: bold;"  >Payment Mode</td>
+                {% if invoice.payment_mode == 'Cash' %}
+                <td class="zz" >Cash</th>
+                {% else %}
+                <td class="zz" >Card</th>
+                {% endif %}    
+                
+            </tr>
+        </table>
+        <table class="table">
+            <tr>
+                <td style="width: 100%;"></td>
+            </tr>
+        </table>
+        <table class="table">
+            <tr>
+                <td class="zz" style="text-align: center;">{{company.footer_note}}</td>
+            </tr>
+        </table>
+        <table class="table">
+            <tr>
+                <td style="width: 100%;"></td>
+            </tr>
+        </table>
+    
+        <table class="table">
+            <tr>
+                <td class="zz" style="padding-bottom: 10px;"></td>
+                <td class="zz" style="font-weight:bold;padding-bottom: 10px;">THIS SMOG TEST-ONLY STATION CANNOT PERFORM ANY DIAGNOSTICS, ADJUSTMENTS OR REPAIRS.</td>
+            </tr>
+            <tr>
+                <td class="zz"></td>
+                <td class="zz"></td>
+            </tr>
+            {% for i in terms %}
+            <tr>
+                <td class="zz" style="width: 20px;">1</td>
+                <td class="zz">{{i.terms_text}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <table class="table">
+            <tr>
+                <td style="width: 100%;"></td>
+            </tr>
+        </table>
+        <table class="table">
+            <tr>
+                <td class="zz" style="text-align: center;">THIS IS COMPUTURE GENERATED </td>
+            </tr>
+      
+        </table>
+    </div>
+</div>
+
+</body>
+</html>
